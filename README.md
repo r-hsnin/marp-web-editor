@@ -1,0 +1,273 @@
+# Marp Web Editor
+
+**Markdownでプレゼンテーションを作成するための、リアルタイムプレビュー機能を備えたモダンなWebエディタ**
+
+![Next.js](https://img.shields.io/badge/Next.js-15.3.5-black?style=flat-square&logo=next.js)
+![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
+![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue?style=flat-square&logo=typescript)
+![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat-square&logo=tailwind-css)
+![Marp](https://img.shields.io/badge/Marp-CLI-orange?style=flat-square)
+![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+
+---
+
+## ✨ 主な機能
+
+### 📝 エディタ・プレビュー
+
+- **リアルタイムプレビュー** - Markdownを編集すると即座にスライドプレビューが更新
+- **分割画面** - ドラッグでリサイズ可能な分割画面
+- **シンタックスハイライト** - CodeMirror 6によるMarkdown構文強調表示
+- **自動保存と復元** - 編集内容が2秒間隔でLocalStorageに保存し、ページリロード時に保存された内容を復元
+- **ダークモード** - ダークモードに対応
+
+### 🎨 テーマ・カスタマイズ
+
+- **内蔵テーマ** - default、gaia、uncoverの3つのテーマ
+- **UI設定コントロール** - GUIでテーマ、サイズ、ページネーション設定
+- **手動フロントマター対応** - 手動設定時は該当UIをグレーアウト表示
+- **リアルタイム切り替え** - 設定変更が即座にプレビューに反映
+
+### 📤 エクスポート機能
+
+- **HTML** - フルスクリーンプレゼンテーション機能付きHTMLファイル
+- **PDF** - PDFファイル形式でのエクスポート
+- **PPTX** - PowerPoint形式でのエクスポート
+
+### 🔗 共有機能
+
+- **セキュアな共有** - ユニークURLでプレゼンテーションを安全に共有
+- **パスワード保護** - bcryptによる強固なパスワード暗号化
+- **有効期限設定** - 24時間、7日間、30日間から選択可能
+- **アクセス管理** - アクセス数の追跡と期限切れの自動処理
+
+---
+
+## 🚀 クイックスタート
+
+### 前提条件
+
+- Node.js 18.0以上
+- npm または yarn
+
+### インストール
+
+```bash
+# リポジトリをクローン
+git clone <repository-url>
+cd marp-web-editor
+
+# 依存関係をインストール
+npm install
+
+# 環境変数を設定
+copy .env.example .env
+
+# データベースを初期化
+npx prisma generate
+npx prisma db push
+
+# 開発サーバーを起動
+npm run dev
+```
+
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いてアプリケーションを確認してください。
+
+### Dockerを使用した起動
+
+```bash
+# Dockerイメージをビルド
+docker build -f Dockerfile.production -t marp-web-editor .
+
+# コンテナを起動（ポート3000:3000でマッピング）
+docker run -p 3000:3000 marp-web-editor
+```
+
+ブラウザで [http://localhost:3000](http://localhost:3000) を開いてアプリケーションを確認してください。
+
+---
+
+## 🛠️ 技術スタック
+
+### フロントエンド
+
+| 技術             | バージョン | 用途                                       |
+| ---------------- | ---------- | ------------------------------------------ |
+| **Next.js**      | 15.3.5     | App Routerによるフルスタックフレームワーク |
+| **React**        | 19         | ユーザーインターフェース構築               |
+| **TypeScript**   | 5.8.3      | 型安全な開発環境                           |
+| **Tailwind CSS** | 4          | ユーティリティファーストCSS                |
+| **shadcn/ui**    | -          | 高品質UIコンポーネント                     |
+| **CodeMirror 6** | -          | 高機能テキストエディタ                     |
+| **Allotment**    | -          | リサイズ可能な分割画面                     |
+
+### バックエンド・データ
+
+| 技術                    | バージョン | 用途                         |
+| ----------------------- | ---------- | ---------------------------- |
+| **Next.js API Routes**  | -          | サーバーサイドAPI            |
+| **Prisma**              | 6.11.1     | データベースORM              |
+| **SQLite**              | -          | 軽量データベース             |
+| **@marp-team/marp-cli** | 4.2.0      | スライドレンダリングエンジン |
+| **bcrypt**              | 6.0.0      | パスワードハッシュ化         |
+| **nanoid**              | 5.1.5      | ユニークID生成               |
+
+### 開発・ビルドツール
+
+| 技術           | 用途               |
+| -------------- | ------------------ |
+| **ESLint**     | コード品質管理     |
+| **Prettier**   | コードフォーマット |
+| **TypeScript** | 厳格な型チェック   |
+
+---
+
+## 📁 プロジェクト構造
+
+```
+src/
+├── app/                    # Next.js App Router
+│   ├── api/               # APIエンドポイント
+│   │   ├── marp-render/   # プレビューレンダリング
+│   │   ├── marp-export/   # ファイルエクスポート
+│   │   └── share/         # 共有機能
+│   ├── share/[shareId]/   # 共有ページ
+│   └── page.tsx           # ホームページ
+├── components/            # Reactコンポーネント
+│   ├── ui/               # shadcn/uiコンポーネント
+│   ├── layout/           # レイアウトコンポーネント
+│   ├── editor/           # エディタ関連
+│   ├── preview/          # プレビュー関連
+│   └── share/            # 共有機能
+├── lib/                  # ユーティリティ関数
+│   ├── marp/             # Marp機能統合
+│   ├── export/           # エクスポート機能
+│   ├── storage/          # LocalStorage管理
+│   └── error/            # エラーハンドリング
+├── types/                # TypeScript型定義
+└── ...
+```
+
+---
+
+## 🔧 開発コマンド
+
+```bash
+# データベース操作
+npx prisma generate    # Prismaクライアント生成
+npx prisma db push     # スキーマ変更適用
+
+# TypeScript型チェック
+npx tsc --noEmit
+
+# コード品質チェック
+npm run lint
+
+# コードフォーマット
+npm run format
+
+# 開発サーバー起動
+npm run dev
+
+# 本番ビルド
+npm run build
+
+# 本番サーバー起動
+npm start
+```
+
+---
+
+## 📖 使用方法
+
+### 基本的な使い方
+
+1. **エディタでMarkdownを編集** - 左側のエディタでMarp記法を使用してスライドを作成
+2. **リアルタイムプレビュー** - 右側でスライドのプレビューを確認
+3. **テーマ選択** - ヘッダーのテーマセレクターで外観を変更
+4. **エクスポート** - 完成したスライドをHTML、PDF、PPTXで出力
+5. **共有** - Shareボタンでセキュアなリンクでプレゼンテーションを共有
+
+### Marp記法の例
+
+```markdown
+---
+marp: true
+theme: default
+paginate: true
+---
+
+# タイトルスライド
+
+プレゼンテーションの概要
+
+---
+
+## 内容スライド
+
+- ポイント1
+- ポイント2
+- ポイント3
+
+---
+
+<!-- _class: invert -->
+
+# 反転カラースライド
+
+特別な強調スライド
+```
+
+---
+
+## ⚙️ 環境変数
+
+`.env` ファイルを作成し、以下の変数を設定してください：
+
+```env
+# データベース
+DATABASE_URL="file:./dev.db"
+
+# 共有機能用（本番環境）
+NEXT_PUBLIC_BASE_URL="https://your-domain.com"
+
+# セキュリティ（本番環境では必ず変更）
+NEXTAUTH_SECRET="your-secret-key-change-in-production"
+```
+
+詳細な環境変数については `.env.example` を参照してください。
+
+---
+
+## 開発ガイドライン
+
+- **TypeScript厳格モード** - `any`型の使用禁止
+- **コード品質** - ESLint + Prettier による統一フォーマット
+- **型安全性** - 全関数・コンポーネントに適切な型定義
+
+---
+
+## 📄 ライセンス
+
+このプロジェクトはMITライセンスの下で公開されています。詳細は [LICENSE](LICENSE) ファイルを参照してください。
+
+---
+
+## 🙏 謝辞
+
+このプロジェクトは以下の素晴らしいオープンソースプロジェクトによって支えられています。
+
+- [Marp](https://marp.app/) - 素晴らしいMarkdownプレゼンテーションツール
+- [Next.js](https://nextjs.org/) - 優れたReactフレームワーク
+- [Tailwind CSS](https://tailwindcss.com/) - 効率的なCSSフレームワーク
+- [shadcn/ui](https://ui.shadcn.com/) - 美しいUIコンポーネント
+- [CodeMirror](https://codemirror.net/) - 高機能エディタライブラリ
+- [Prisma](https://www.prisma.io/) - 次世代データベースツールキット
+
+---
+
+<div align="center">
+
+**[⬆ トップに戻る](#marp-web-editor)**
+
+</div>
