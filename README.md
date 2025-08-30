@@ -28,6 +28,13 @@
 - **手動フロントマター対応** - 手動設定時は該当UIをグレーアウト表示
 - **リアルタイム切り替え** - 設定変更が即座にプレビューに反映
 
+### 🤖 AI支援機能（OpenAI GPT-4対応）
+
+- **ワンショット修正** - 簡単な指示でスライドを即座に改善
+- **エージェント型チャット** - 対話的なスライド編集支援  
+- **レート制限** - 安全な利用制限（10回/分・15回/分、ratelimit.ts実装）
+- **オプション機能** - OpenAI API Key設定時のみ有効
+
 ### 📤 エクスポート機能
 
 - **HTML** - フルスクリーンプレゼンテーション機能付きHTMLファイル
@@ -54,7 +61,7 @@
 
 ```bash
 # リポジトリをクローン
-git clone <repository-url>
+git clone https://github.com/r-hsnin/marp-web-editor.git
 cd marp-web-editor
 
 # 依存関係をインストール
@@ -100,6 +107,8 @@ docker run -p 3000:3000 marp-web-editor
 | **shadcn/ui**    | -          | 高品質UIコンポーネント                     |
 | **CodeMirror 6** | -          | 高機能テキストエディタ                     |
 | **Allotment**    | -          | リサイズ可能な分割画面                     |
+| **AI SDK**       | 5.0.24     | OpenAI API統合・React対応                  |
+| **Zod**          | 4.1.3      | 型安全なバリデーション                     |
 
 ### バックエンド・データ
 
@@ -128,6 +137,7 @@ docker run -p 3000:3000 marp-web-editor
 src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # APIエンドポイント
+│   │   ├── ai/            # AI機能API
 │   │   ├── marp-render/   # プレビューレンダリング
 │   │   ├── marp-export/   # ファイルエクスポート
 │   │   └── share/         # 共有機能
@@ -138,11 +148,14 @@ src/
 │   ├── layout/           # レイアウトコンポーネント
 │   ├── editor/           # エディタ関連
 │   ├── preview/          # プレビュー関連
+│   ├── ai/               # AI関連UI
 │   └── share/            # 共有機能
 ├── lib/                  # ユーティリティ関数
 │   ├── marp/             # Marp機能統合
 │   ├── export/           # エクスポート機能
 │   ├── storage/          # LocalStorage管理
+│   ├── ai/               # AI処理ロジック
+│   ├── ratelimit.ts      # レート制限実装
 │   └── error/            # エラーハンドリング
 ├── types/                # TypeScript型定義
 └── ...
@@ -187,16 +200,11 @@ npm start
 3. **テーマ選択** - ヘッダーのテーマセレクターで外観を変更
 4. **エクスポート** - 完成したスライドをHTML、PDF、PPTXで出力
 5. **共有** - Shareボタンでセキュアなリンクでプレゼンテーションを共有
+6. **AI支援** - OpenAI API Key設定でAIボタンが表示、スライド改善支援
 
 ### Marp記法の例
 
 ```markdown
----
-marp: true
-theme: default
-paginate: true
----
-
 # タイトルスライド
 
 プレゼンテーションの概要
@@ -231,8 +239,8 @@ DATABASE_URL="file:./dev.db"
 # 共有機能用（本番環境）
 NEXT_PUBLIC_BASE_URL="https://your-domain.com"
 
-# セキュリティ（本番環境では必ず変更）
-NEXTAUTH_SECRET="your-secret-key-change-in-production"
+# AI機能（オプション）
+OPENAI_API_KEY="sk-..."
 ```
 
 詳細な環境変数については `.env.example` を参照してください。
@@ -255,7 +263,7 @@ NEXTAUTH_SECRET="your-secret-key-change-in-production"
 
 ## 🙏 謝辞
 
-このプロジェクトは以下の素晴らしいオープンソースプロジェクトによって支えられています。
+このプロジェクトは以下の素晴らしいプロジェクトによって支えられています。
 
 - [Marp](https://marp.app/) - 素晴らしいMarkdownプレゼンテーションツール
 - [Next.js](https://nextjs.org/) - 優れたReactフレームワーク
@@ -263,6 +271,9 @@ NEXTAUTH_SECRET="your-secret-key-change-in-production"
 - [shadcn/ui](https://ui.shadcn.com/) - 美しいUIコンポーネント
 - [CodeMirror](https://codemirror.net/) - 高機能エディタライブラリ
 - [Prisma](https://www.prisma.io/) - 次世代データベースツールキット
+- [Vercel AI SDK](https://sdk.vercel.ai/) - AI機能統合ライブラリ
+- [OpenAI](https://openai.com/) - 高性能AI言語モデル
+- [Zod](https://zod.dev/) - TypeScript型安全バリデーション
 
 ---
 

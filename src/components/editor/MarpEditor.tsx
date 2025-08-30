@@ -88,6 +88,8 @@ const MarpEditor: React.FC<MarpEditorProps> = React.memo(
                 onHeadingToggle={onHeadingToggle}
                 onTextDecoration={handleTextDecoration}
                 editorRef={editorRef as EditorRef}
+                currentMarkdown={markdown}
+                onMarkdownChange={onMarkdownChange}
               />
             )}
           </div>
