@@ -8,6 +8,7 @@ import {
   TooltipTrigger,
   TooltipProvider,
 } from "@/components/ui/tooltip";
+import { Separator } from "@/components/ui/separator";
 import {
   Bold,
   Italic,
@@ -21,6 +22,7 @@ import {
   LucideIcon,
 } from "lucide-react";
 import ImageUploadButton from "./components/ImageUploadButton";
+import { AIButtons } from "@/components/ai/AIButtons";
 import type { EditorRef } from "@/components/layout/layoutTypes";
 
 // 型定義
@@ -29,6 +31,9 @@ interface ToolbarProps {
   onHeadingToggle?: (level: number) => void;
   onTextDecoration?: (decorationType: string) => void;
   editorRef?: EditorRef; // 画像アップロード差し替え用（任意）
+  // AI機能用の追加プロパティ
+  currentMarkdown?: string;
+  onMarkdownChange?: (markdown: string) => void;
 }
 
 interface ToolbarItem {
@@ -54,6 +59,8 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
   onHeadingToggle,
   onTextDecoration,
   editorRef,
+  currentMarkdown = "",
+  onMarkdownChange,
 }) => {
   const insertText = (text: string): void => {
     if (onInsert) {
@@ -131,6 +138,7 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
   return (
     <TooltipProvider>
       <div className="flex items-center gap-1">
+        {/* 既存のツールバーボタン */}
         {toolbarItems.map((group) =>
           group.items.map((item) => {
             const Icon = item.icon as LucideIcon;
@@ -184,6 +192,17 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
               </Tooltip>
             );
           })
+        )}
+
+        {/* AI機能ボタン */}
+        {onMarkdownChange && (
+          <>
+            <Separator orientation="vertical" className="h-4 mx-1" />
+            <AIButtons
+              currentMarkdown={currentMarkdown}
+              onMarkdownChange={onMarkdownChange}
+            />
+          </>
         )}
       </div>
     </TooltipProvider>
