@@ -63,31 +63,16 @@ const ActionControls: React.FC<ActionControlsWithExportProps> = ({
       {/* 1. Marp Settings Controls - テーマ、ページ数、ヘッダーフッター */}
       <div className="flex items-center gap-2">
         {/* Theme Selector */}
-        <Tooltip>
-          <TooltipTrigger asChild>
-            <div>
-              <ThemeSelector
-                settings={displaySettings}
-                manualSettings={displayManualSettings}
-                manualValues={manualValues}
-                isHydrated={marpIsHydrated}
-                onSettingsChange={handleSettingsChange}
-                isDark={isDark}
-                isThemePopoverOpen={isThemePopoverOpen}
-                setIsThemePopoverOpen={setIsThemePopoverOpen}
-              />
-            </div>
-          </TooltipTrigger>
-          <TooltipContent side="bottom">
-            <p className="text-xs font-medium">
-              {displayManualSettings.theme
-                ? `テーマ: ${
-                    manualValues.theme || displaySettings.theme
-                  } (手動設定が優先されています)`
-                : `テーマ: ${displaySettings.theme}`}
-            </p>
-          </TooltipContent>
-        </Tooltip>
+        <ThemeSelector
+          settings={displaySettings}
+          manualSettings={displayManualSettings}
+          manualValues={manualValues}
+          isHydrated={marpIsHydrated}
+          onSettingsChange={handleSettingsChange}
+          isDark={isDark}
+          isThemePopoverOpen={isThemePopoverOpen}
+          setIsThemePopoverOpen={setIsThemePopoverOpen}
+        />
 
         {/* Paginate Toggle */}
         <Tooltip>

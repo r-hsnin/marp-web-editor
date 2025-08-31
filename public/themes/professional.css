@@ -1,4 +1,4 @@
-/* @theme custom */
+/* @theme professional */
 
 @import "default";
 
@@ -128,7 +128,7 @@ section.columns {
   }
 
   .column-item {
-    font-size: 0.6em;
+    font-size: 0.8em;
 
     img {
       max-height: 50vh;
@@ -163,7 +163,7 @@ section.columns {
    使い方: <!-- _class: text-dense -->
    効果: 文字サイズを大きくして情報密度を上げ、詳細説明や参考資料に最適 */
 section.text-dense {
-  font-size: 1.5em;
+  font-size: 1.4em;
   line-height: 1.6;
 
   h1 {

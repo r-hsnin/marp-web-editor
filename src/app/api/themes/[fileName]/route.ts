@@ -14,10 +14,16 @@ export async function GET(_request: NextRequest, { params }: RouteParams) {
     const { fileName } = await params;
     const css = await getThemeCSS(fileName);
 
+    // 開発環境ではキャッシュ無効、本番環境では短時間キャッシュ
+    const cacheControl =
+      process.env.NODE_ENV === "development"
+        ? "no-cache, no-store, must-revalidate"
+        : "public, max-age=300"; // 5分キャッシュ
+
     return new NextResponse(css, {
       headers: {
         "Content-Type": "text/css",
-        "Cache-Control": "public, max-age=3600", // 1時間キャッシュ
+        "Cache-Control": cacheControl,
       },
     });
   } catch (error) {
