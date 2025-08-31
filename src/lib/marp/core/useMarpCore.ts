@@ -16,7 +16,7 @@ import { PerformanceMonitor } from "./performanceMonitor";
  * marp-coreを使用してMarkdownをHTML+CSSに変換するカスタムフック
  *
  * 機能:
- * - 即座のレンダリング（デバウンス無し）
+ * - 即座のレンダリング
  * - 詳細なエラーハンドリング
  * - パフォーマンス測定
  * - メモリリーク防止
@@ -28,8 +28,16 @@ export const useMarpCore = (
   theme: string = "default",
   settings: Partial<MarpSettings> = {}
 ): MarpResult => {
-  // テーマの検証
-  const validatedTheme = MarpValidator.validateTheme(theme);
+  const [validatedTheme, setValidatedTheme] = useState<string>(theme);
+
+  // テーマの検証（非同期）
+  useEffect(() => {
+    const validateThemeAsync = async () => {
+      const validated = await MarpValidator.validateTheme(theme);
+      setValidatedTheme(validated);
+    };
+    validateThemeAsync();
+  }, [theme]);
 
   // 設定のデフォルト値
   const marpSettings: MarpSettings = useMemo(
@@ -154,9 +162,9 @@ export const useMarpCore = (
       lastMarkdownRef.current = markdownContent;
       lastThemeRef.current = selectedTheme;
       lastSettingsRef.current = { ...marpSettings };
-      renderMarkdown(markdownContent, selectedTheme);
+      renderMarkdown(markdownContent, validatedTheme);
     },
-    [renderMarkdown, marpSettings]
+    [renderMarkdown, marpSettings, validatedTheme]
   );
 
   // Markdownまたはテーマまたは設定が変更された時に即座にレンダリング実行

@@ -45,6 +45,18 @@ async function convertImagePathsToAbsoluteUrls(markdown: string) {
   return processedMarkdown;
 }
 
+/**
+ * Convert CSS url() paths to absolute URLs for marp-cli processing
+ * Converts relative image paths in CSS to absolute URLs
+ */
+function convertThemeCssUrls(cssContent: string, baseUrl: string): string {
+  // Convert various relative path patterns to absolute URLs
+  return cssContent.replace(
+    /url\(["']?(\.\.?\/)?images\/([^"')]+)["']?\)/g,
+    `url("${baseUrl}/images/$2")`
+  );
+}
+
 export async function POST(request: Request) {
   const operationId = nanoid(8);
   const startTime = Date.now();
@@ -90,9 +102,62 @@ export async function POST(request: Request) {
     await mkdir(workDir, { recursive: true });
     await writeFile(tempFile, processedMarkdown, "utf8");
 
+    // Track temporary CSS files for cleanup
+    const tempCssFiles: string[] = [];
+
     try {
-      // 3) Execute marp-cli with absolute URLs
-      const command = `npx @marp-team/marp-cli "${tempFile}" --${format} --output "${outputFile}" --no-stdin --allow-local-files --theme-set default --theme-set gaia --theme-set uncover`;
+      // 3) Execute marp-cli with theme support
+      let command = `npx @marp-team/marp-cli "${tempFile}" --${format} --output "${outputFile}" --no-stdin --allow-local-files --theme-set default --theme-set gaia --theme-set uncover`;
+
+      // カスタムテーマの追加（CSS URL変換付き）
+      try {
+        const baseUrl =
+          process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000";
+        const themeResponse = await fetch(`${baseUrl}/api/themes`);
+        const themes = await themeResponse.json();
+
+        for (const theme of themes) {
+          if (!theme.isBuiltIn && theme.fileName) {
+            try {
+              // 元のCSSファイルを読み込み
+              const originalThemePath = join(
+                process.cwd(),
+                "public",
+                "themes",
+                theme.fileName
+              );
+              const cssContent = await readFile(originalThemePath, "utf8");
+
+              // CSS内のurl()を絶対URLに変換
+              const modifiedCss = convertThemeCssUrls(cssContent, baseUrl);
+
+              // 変換後のCSSを一時ファイルに保存
+              const tempCssPath = join(workDir, `${theme.name}-modified.css`);
+              await writeFile(tempCssPath, modifiedCss, "utf8");
+              tempCssFiles.push(tempCssPath);
+
+              // 一時CSSファイルを--theme-setで指定
+              command += ` --theme-set "${tempCssPath}"`;
+            } catch (error) {
+              // CSS変換失敗時は元のファイルを使用
+              console.warn(
+                `Failed to process custom theme ${theme.fileName}:`,
+                error
+              );
+              const originalThemePath = join(
+                process.cwd(),
+                "public",
+                "themes",
+                theme.fileName
+              );
+              command += ` --theme-set "${originalThemePath}"`;
+            }
+          }
+        }
+      } catch (error) {
+        // カスタムテーマ取得失敗時は組み込みテーマのみで続行
+        console.warn("Failed to load custom themes for export:", error);
+      }
 
       await execAsync(command, {
         maxBuffer: ENV_CONFIG.marpExportMaxBuffer,
@@ -102,11 +167,11 @@ export async function POST(request: Request) {
       // Read the generated file as buffer
       const fileBuffer = await readFile(outputFile);
 
-      // Clean up temp files
-      await Promise.all([
-        unlink(tempFile).catch(() => {}),
-        unlink(outputFile).catch(() => {}),
-      ]);
+      // Clean up temp files (including modified CSS files)
+      const filesToCleanup = [tempFile, outputFile, ...tempCssFiles];
+      await Promise.all(
+        filesToCleanup.map((file) => unlink(file).catch(() => {}))
+      );
 
       // Return file as response
       const mimeType =
@@ -125,7 +190,7 @@ export async function POST(request: Request) {
         operationId,
       });
 
-      return new NextResponse(fileBuffer, {
+      return new NextResponse(new Uint8Array(fileBuffer), {
         status: 200,
         headers: {
           "Content-Type": mimeType,
@@ -135,59 +200,36 @@ export async function POST(request: Request) {
           "X-Processing-Time": processingTime.toString(),
         },
       });
-    } catch (execError) {
-      // Clean up temp file on error
-      await unlink(tempFile).catch(() => {});
+    } catch (error) {
+      // Clean up temp files on error (including modified CSS files)
+      const filesToCleanup = [tempFile, outputFile, ...tempCssFiles];
+      await Promise.all(
+        filesToCleanup.map((file) => unlink(file).catch(() => {}))
+      );
 
-      // 統一エラーハンドリング: Marp CLIエラー
+      const execError = error as ExecError;
+
+      // 統一エラーハンドリング: marp-cli実行エラー
       const processingTime = Date.now() - startTime;
       return ServerErrorHandler.handleApiError(
-        execError as Error,
+        new Error(`marp-cli execution failed: ${execError.message}`),
         {
           operation: "marp-export",
           format,
           processingTime,
-          stderr: (execError as ExecError).stderr || "",
+          stderr: execError.stderr || "No stderr output",
         },
         operationId
       );
     }
   } catch (error) {
-    // 統一エラーハンドリング: 一般的なエラー
+    // 統一エラーハンドリング: その他のエラー
     const processingTime = Date.now() - startTime;
     return ServerErrorHandler.handleApiError(
       error as Error,
       {
-        operation: "export-general",
+        operation: "marp-export",
         processingTime,
-        format: "unknown",
-      },
-      operationId
-    );
-  }
-}
-
-// Test endpoint
-export async function GET() {
-  const operationId = nanoid(8);
-
-  try {
-    // Test if marp-cli can generate PDF/PPTX
-    await execAsync("npx @marp-team/marp-cli --version");
-
-    return NextResponse.json({
-      status: "Marp CLI export service is available",
-      supportedFormats: ["pdf", "pptx", "html"],
-      success: true,
-      operationId,
-    });
-  } catch (error) {
-    // 統一エラーハンドリング: Marp CLI利用不可エラー
-    return ServerErrorHandler.handleApiError(
-      error as Error,
-      {
-        operation: "marp-export-test",
-        isHealthCheck: true,
       },
       operationId
     );

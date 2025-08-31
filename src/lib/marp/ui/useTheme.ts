@@ -1,20 +1,19 @@
 import { useState, useEffect, useCallback } from "react";
 import { logger } from "@/lib/logging/logger";
 import { LOG_CATEGORIES } from "@/lib/logging/logCategories";
+import type { MarpTheme } from "@/types/marp";
 
-export type MarpTheme = "default" | "gaia" | "uncover";
-
-const THEMES: MarpTheme[] = ["default", "gaia", "uncover"];
+const BUILTIN_THEMES: string[] = ["default", "gaia", "uncover"];
 
 export interface ThemeState {
   selectedTheme: MarpTheme;
-  availableThemes: MarpTheme[];
+  availableThemes: string[];
   isHydrated: boolean;
   handleThemeChange: (newTheme: MarpTheme) => void;
   setSelectedTheme: (newTheme: MarpTheme) => void;
   updateMarkdownTheme: (markdown: string, newTheme: MarpTheme) => string;
   getThemeDisplayName: (theme: MarpTheme) => string;
-  isValidTheme: (theme: string) => theme is MarpTheme;
+  isValidTheme: (theme: string) => boolean;
   getNextTheme: () => MarpTheme;
   getPreviousTheme: () => MarpTheme;
   cycleToNextTheme: () => void;
@@ -28,7 +27,26 @@ export interface ThemeState {
 export default function useTheme(): ThemeState {
   // Hydration Mismatch回避のため、初期値は常にdefaultを使用
   const [selectedTheme, setSelectedTheme] = useState<MarpTheme>("default");
+  const [availableThemes, setAvailableThemes] =
+    useState<string[]>(BUILTIN_THEMES);
   const [isHydrated, setIsHydrated] = useState(false);
+
+  // 利用可能なテーマを取得
+  useEffect(() => {
+    const fetchThemes = async () => {
+      try {
+        const response = await fetch("/api/themes");
+        const themes = await response.json();
+        const themeNames = themes.map((t: { name: string }) => t.name);
+        setAvailableThemes(themeNames);
+      } catch {
+        // エラー時は組み込みテーマのみ使用
+        setAvailableThemes(BUILTIN_THEMES);
+      }
+    };
+
+    fetchThemes();
+  }, []);
 
   // クライアントサイドでlocalStorageからテーマを復元
   useEffect(() => {
@@ -38,7 +56,7 @@ export default function useTheme(): ThemeState {
         try {
           const parsed = JSON.parse(saved);
           const savedTheme = parsed.theme;
-          if (savedTheme && THEMES.includes(savedTheme)) {
+          if (savedTheme && typeof savedTheme === "string") {
             setSelectedTheme(savedTheme);
           }
         } catch (error) {
@@ -53,14 +71,6 @@ export default function useTheme(): ThemeState {
 
   const handleThemeChange = useCallback(
     (newTheme: MarpTheme): void => {
-      if (!THEMES.includes(newTheme)) {
-        logger.warn(LOG_CATEGORIES.SAVE, "Invalid theme selected", {
-          theme: newTheme,
-          availableThemes: THEMES,
-        });
-        return;
-      }
-
       setSelectedTheme(newTheme);
 
       logger.debug(LOG_CATEGORIES.SAVE, "Theme changed", {
@@ -106,30 +116,33 @@ export default function useTheme(): ThemeState {
   );
 
   const getThemeDisplayName = useCallback((theme: MarpTheme): string => {
-    const displayNames: Record<MarpTheme, string> = {
+    const displayNames: Record<string, string> = {
       default: "Default",
       gaia: "Gaia",
       uncover: "Uncover",
     };
-    return displayNames[theme];
+    return displayNames[theme] || theme;
   }, []);
 
-  const isValidTheme = useCallback((theme: string): theme is MarpTheme => {
-    return THEMES.includes(theme as MarpTheme);
-  }, []);
+  const isValidTheme = useCallback(
+    (theme: string): boolean => {
+      return availableThemes.includes(theme);
+    },
+    [availableThemes]
+  );
 
   const getNextTheme = useCallback((): MarpTheme => {
-    const currentIndex = THEMES.indexOf(selectedTheme);
-    const nextIndex = (currentIndex + 1) % THEMES.length;
-    return THEMES[nextIndex] ?? THEMES[0] ?? "default";
-  }, [selectedTheme]);
+    const currentIndex = availableThemes.indexOf(selectedTheme);
+    const nextIndex = (currentIndex + 1) % availableThemes.length;
+    return availableThemes[nextIndex] ?? availableThemes[0] ?? "default";
+  }, [selectedTheme, availableThemes]);
 
   const getPreviousTheme = useCallback((): MarpTheme => {
-    const currentIndex = THEMES.indexOf(selectedTheme);
+    const currentIndex = availableThemes.indexOf(selectedTheme);
     const previousIndex =
-      currentIndex === 0 ? THEMES.length - 1 : currentIndex - 1;
-    return THEMES[previousIndex] ?? THEMES[0] ?? "default";
-  }, [selectedTheme]);
+      currentIndex === 0 ? availableThemes.length - 1 : currentIndex - 1;
+    return availableThemes[previousIndex] ?? availableThemes[0] ?? "default";
+  }, [selectedTheme, availableThemes]);
 
   const cycleToNextTheme = useCallback((): void => {
     const nextTheme = getNextTheme();
@@ -143,7 +156,7 @@ export default function useTheme(): ThemeState {
 
   return {
     selectedTheme,
-    availableThemes: THEMES,
+    availableThemes,
     isHydrated,
     handleThemeChange,
     setSelectedTheme: handleThemeChange,

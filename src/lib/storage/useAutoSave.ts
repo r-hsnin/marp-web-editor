@@ -2,7 +2,6 @@
 
 import { useEffect, useCallback, useRef, useMemo } from "react";
 import { toast } from "sonner";
-import { logger } from "../logging/logger";
 import { LOG_CATEGORIES } from "../logging/logCategories";
 import { useErrorHandler } from "../error";
 import { useEditorStorage } from "./useLocalStorage";
@@ -85,12 +84,6 @@ export function useAutoSave({
                 duration: 2000,
               });
             }
-
-            logger.debug(LOG_CATEGORIES.SAVE, "Content saved successfully", {
-              markdownLength: saveData.markdown.length,
-              theme: saveData.theme,
-              timestamp: saveResult.timestamp?.toISOString(),
-            });
           }
 
           return saveResult;

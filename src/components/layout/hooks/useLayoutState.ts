@@ -3,7 +3,7 @@
 import { useState, useEffect, useCallback, useMemo, useRef } from "react";
 import type { MarpLayoutProps, UseLayoutStateReturn } from "../types";
 import type { ExportFormat } from "@/components/header/types";
-import type { MarpTheme } from "@/types/marp";
+import type { MarpTheme, MarpSettings } from "@/types/marp";
 import type { EditorView } from "@codemirror/view";
 
 // Import required utilities and hooks
@@ -11,6 +11,7 @@ import { DEFAULT_MARKDOWN } from "@/lib/constants/marp";
 import useExport from "@/lib/export";
 import { useAutoSave } from "@/lib/storage";
 import { useTheme } from "@/lib/marp/ui";
+import { FrontmatterProcessor } from "@/lib/marp/settings/frontmatterProcessor";
 import useEditorActions from "@/lib/editor/useEditorActions";
 import { useErrorHandler } from "@/lib/error";
 import useMarpSettings from "@/lib/marp/settings";
@@ -112,7 +113,6 @@ export function useLayoutState({
     updateSettings: updateMarpSettings,
     parseManualFrontmatterValues,
     getDisplayMarkdown,
-    getRenderMarkdown,
   } = useMarpSettings();
 
   // Export functionality (after getRenderMarkdown is available)
@@ -122,7 +122,14 @@ export function useLayoutState({
     handleExportHTML,
     handleExportPDF,
     handleExportPPTX,
-  } = useExport(markdown, selectedTheme, getRenderMarkdown);
+  } = useExport(markdown, selectedTheme, (md: string) =>
+    FrontmatterProcessor.getRenderMarkdown(md, {
+      theme: selectedTheme as MarpTheme,
+      paginate: marpSettings.paginate,
+      header: marpSettings.header,
+      footer: marpSettings.footer,
+    })
+  );
 
   // Restore dark mode setting from localStorage
   useEffect(() => {
@@ -220,9 +227,7 @@ export function useLayoutState({
   // Theme change wrapper to handle type conversion
   const handleThemeChangeWrapper = useCallback(
     (theme: string) => {
-      if (theme === "default" || theme === "gaia" || theme === "uncover") {
-        handleThemeChange(theme as MarpTheme);
-      }
+      handleThemeChange(theme);
     },
     [handleThemeChange]
   );
@@ -244,10 +249,25 @@ export function useLayoutState({
       onSaveToLocalStorage,
       onClearSavedData: handleClearSavedData,
       formatTimeAgo,
-      marpSettings,
+      marpSettings: {
+        ...marpSettings,
+        theme: selectedTheme as MarpTheme,
+      },
       marpManualSettings,
       marpIsHydrated,
-      onMarpSettingsChange: updateMarpSettings,
+      onMarpSettingsChange: (settings: Partial<MarpSettings>) => {
+        // テーマ変更の場合は専用ハンドラーを使用
+        if (settings.theme) {
+          handleThemeChangeWrapper(settings.theme);
+        }
+
+        // その他の設定変更は通常のハンドラーを使用
+        const otherSettings = { ...settings };
+        delete otherSettings.theme;
+        if (Object.keys(otherSettings).length > 0) {
+          updateMarpSettings(otherSettings);
+        }
+      },
       parseManualFrontmatterValues,
       markdown,
     }),
@@ -299,39 +319,35 @@ export function useLayoutState({
 
   const previewProps = useMemo(
     () => ({
-      markdown: getRenderMarkdown(markdown),
+      markdown: FrontmatterProcessor.getRenderMarkdown(markdown, {
+        theme: selectedTheme as MarpTheme,
+        paginate: marpSettings.paginate,
+        header: marpSettings.header,
+        footer: marpSettings.footer,
+      }),
       theme: selectedTheme as MarpTheme,
       isDark,
       mobileTab,
       settings: marpSettings,
       onSlideInfoChange: () => {}, // Placeholder function
     }),
-    [
-      getRenderMarkdown,
-      markdown,
-      selectedTheme,
-      isDark,
-      mobileTab,
-      marpSettings,
-    ]
+    [markdown, selectedTheme, isDark, mobileTab, marpSettings]
   );
 
   const shareDialogProps = useMemo(
     () => ({
       isOpen: showShareDialog,
       onClose: closeShareDialog,
-      markdown: getRenderMarkdown(markdown),
+      markdown: FrontmatterProcessor.getRenderMarkdown(markdown, {
+        theme: selectedTheme as MarpTheme,
+        paginate: marpSettings.paginate,
+        header: marpSettings.header,
+        footer: marpSettings.footer,
+      }),
       theme: selectedTheme as MarpTheme,
       settings: marpSettings,
     }),
-    [
-      showShareDialog,
-      closeShareDialog,
-      getRenderMarkdown,
-      markdown,
-      selectedTheme,
-      marpSettings,
-    ]
+    [showShareDialog, closeShareDialog, markdown, selectedTheme, marpSettings]
   );
 
   const mobileProps = useMemo(

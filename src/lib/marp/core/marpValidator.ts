@@ -7,11 +7,34 @@ import type { MarpTheme } from "@/types/marp";
 
 export class MarpValidator {
   /**
-   * テーマの有効性を検証
+   * テーマの有効性を検証（非同期対応）
    */
-  static validateTheme(theme: string): string {
-    const validThemes = THEMES.map((t) => t.value);
-    return validThemes.includes(theme as MarpTheme) ? theme : "default";
+  static async validateTheme(theme: string): Promise<string> {
+    // 組み込みテーマの場合は即座に検証
+    const validBuiltInThemes = THEMES.map((t) => t.value);
+    if (validBuiltInThemes.includes(theme as MarpTheme)) {
+      return theme;
+    }
+
+    // カスタムテーマの存在確認
+    try {
+      const response = await fetch("/api/themes");
+
+      if (!response.ok) {
+        throw new Error(`Themes API failed: ${response.status}`);
+      }
+
+      const themes = await response.json();
+      const themeExists = themes.some(
+        (t: { name: string }) => t.name === theme
+      );
+
+      return themeExists ? theme : "default";
+    } catch (error) {
+      // API呼び出し失敗時はdefaultにフォールバック
+      console.error(`Theme validation failed for "${theme}":`, error);
+      return "default";
+    }
   }
 
   /**

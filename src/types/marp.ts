@@ -6,8 +6,8 @@
  * and maintainability.
  */
 
-// Marp theme literal type
-export type MarpTheme = "default" | "gaia" | "uncover";
+// Marp theme type (supports custom themes)
+export type MarpTheme = string;
 
 // Export format literal type
 export type ExportFormat = "html" | "pdf" | "pptx" | "png" | "jpeg";
@@ -38,4 +38,18 @@ export interface ExportFormatOption {
   value: ExportFormat;
   label: string;
   description?: string;
+}
+
+// Custom theme interfaces
+export interface CustomTheme {
+  name: string;
+  fileName: string;
+  css: string;
+}
+
+export interface ThemeInfo {
+  name: string;
+  displayName: string;
+  isBuiltIn: boolean;
+  fileName?: string;
 }
