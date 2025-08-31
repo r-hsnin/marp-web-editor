@@ -23,6 +23,7 @@ import {
 } from "lucide-react";
 import ImageUploadButton from "./components/ImageUploadButton";
 import { AIButtons } from "@/components/ai/AIButtons";
+import { TemplateDropdown } from "@/components/templates/TemplateDropdown";
 import type { EditorRef } from "@/components/layout/layoutTypes";
 
 // 型定義
@@ -70,7 +71,23 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
 
   const toolbarItems: ToolbarGroup[] = [
     {
-      group: "slides",
+      group: "templates",
+      items: [
+        {
+          icon: "custom",
+          label: "テンプレート",
+          type: "custom",
+          render: () => (
+            <TemplateDropdown
+              currentMarkdown={currentMarkdown}
+              onMarkdownChange={onMarkdownChange || (() => {})}
+            />
+          ),
+        },
+      ],
+    },
+    {
+      group: "editor",
       items: [
         {
           icon: FileText,
@@ -80,11 +97,6 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
         },
         { icon: Heading1, label: "Heading 1", level: 1, type: "heading" },
         { icon: Heading2, label: "Heading 2", level: 2, type: "heading" },
-      ],
-    },
-    {
-      group: "formatting",
-      items: [
         {
           icon: Bold,
           label: "Bold",
@@ -103,11 +115,6 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
           decorationType: "code",
           type: "decoration",
         },
-      ],
-    },
-    {
-      group: "lists",
-      items: [
         {
           icon: List,
           label: "Bullet List",
@@ -120,11 +127,6 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
           text: "1. List item",
           type: "insert",
         },
-      ],
-    },
-    {
-      group: "media",
-      items: [
         {
           icon: Image,
           label: "画像をアップロード",
@@ -138,61 +140,82 @@ const ToolbarButtons: React.FC<ToolbarProps> = ({
   return (
     <TooltipProvider>
       <div className="flex items-center gap-1">
-        {/* 既存のツールバーボタン */}
-        {toolbarItems.map((group) =>
-          group.items.map((item) => {
-            const Icon = item.icon as LucideIcon;
-            const isMediaGroup = group.group === "media";
-            const isImageUpload =
-              isMediaGroup && item.label === "画像をアップロード";
+        {/* ツールバーボタン */}
+        {toolbarItems.map((group, groupIndex) => (
+          <React.Fragment key={group.group}>
+            {group.items.map((item) => {
+              const Icon = item.icon as LucideIcon;
+              const isMediaGroup = group.group === "editor";
+              const isImageUpload =
+                isMediaGroup && item.label === "画像をアップロード";
 
-            if (isImageUpload && editorRef) {
+              if (isImageUpload && editorRef) {
+                return (
+                  <ImageUploadButton
+                    key={item.label}
+                    editorRef={editorRef}
+                    className="h-7 w-7 p-0"
+                    aria-label="画像をアップロード"
+                  />
+                );
+              }
+
+              // カスタムレンダリング対応
+              if (item.type === "custom" && item.render) {
+                return (
+                  <Tooltip key={item.label}>
+                    <TooltipTrigger asChild>
+                      <div>{item.render()}</div>
+                    </TooltipTrigger>
+                    <TooltipContent side="bottom">
+                      <p className="text-xs font-medium">{item.label}</p>
+                    </TooltipContent>
+                  </Tooltip>
+                );
+              }
+
               return (
-                <ImageUploadButton
-                  key={item.label}
-                  editorRef={editorRef}
-                  className="h-7 w-7 p-0"
-                  aria-label="画像をアップロード"
-                />
+                <Tooltip key={item.label}>
+                  <TooltipTrigger asChild>
+                    <Button
+                      variant="ghost"
+                      size="sm"
+                      onClick={() => {
+                        if (
+                          item.type === "heading" &&
+                          onHeadingToggle &&
+                          item.level
+                        ) {
+                          onHeadingToggle(item.level);
+                        } else if (
+                          item.type === "decoration" &&
+                          onTextDecoration &&
+                          item.decorationType
+                        ) {
+                          onTextDecoration(item.decorationType);
+                        } else if (item.type === "insert" && item.text) {
+                          insertText(item.text);
+                        }
+                      }}
+                      className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 rounded-md"
+                      aria-label={item.label}
+                    >
+                      <Icon className="h-3.5 w-3.5" />
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent side="bottom">
+                    <p className="text-xs font-medium">{item.label}</p>
+                  </TooltipContent>
+                </Tooltip>
               );
-            }
+            })}
 
-            return (
-              <Tooltip key={item.label}>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => {
-                      if (
-                        item.type === "heading" &&
-                        onHeadingToggle &&
-                        item.level
-                      ) {
-                        onHeadingToggle(item.level);
-                      } else if (
-                        item.type === "decoration" &&
-                        onTextDecoration &&
-                        item.decorationType
-                      ) {
-                        onTextDecoration(item.decorationType);
-                      } else if (item.type === "insert" && item.text) {
-                        insertText(item.text);
-                      }
-                    }}
-                    className="h-7 w-7 p-0 hover:bg-primary/10 hover:text-primary transition-all duration-200 rounded-md"
-                    aria-label={item.label}
-                  >
-                    <Icon className="h-3.5 w-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent side="bottom">
-                  <p className="text-xs font-medium">{item.label}</p>
-                </TooltipContent>
-              </Tooltip>
-            );
-          })
-        )}
+            {/* グループ間のセパレーター */}
+            {groupIndex < toolbarItems.length - 1 && (
+              <Separator orientation="vertical" className="h-4 mx-1" />
+            )}
+          </React.Fragment>
+        ))}
 
         {/* AI機能ボタン */}
         {onMarkdownChange && (
