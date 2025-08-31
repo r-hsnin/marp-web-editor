@@ -1,0 +1,258 @@
+/* @theme custom */
+
+@import "default";
+
+/* --- Global Styles --- */
+
+/* Default slide background */
+section {
+  background-image: url("../images/background-default.png");
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+}
+
+/* Citation and caption styling */
+cite,
+figcaption,
+section.image-center figcaption {
+  display: block;
+  text-align: right;
+  font-size: 0.9em;
+  font-style: italic;
+  margin-top: 0.5em;
+  color: #666;
+}
+
+/* Code block improvements */
+pre {
+  font-size: 0.9em;
+  overflow-x: auto;
+}
+
+/* --- Layout Classes --- */
+
+/* Cover slide: 表紙用のスライド
+   使い方: <!-- _class: cover -->
+   効果: 中央配置で大きなフォント、表紙背景画像を表示 */
+section.cover {
+  background-image: url("../images/background-cover.png");
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  h1 {
+    font-size: 2.4em;
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    font-size: 1.95em;
+    margin-bottom: 0.5em;
+  }
+
+  p {
+    font-size: 1.2em;
+  }
+}
+
+/* Section break slide: セクション区切り用のスライド
+   使い方: <!-- _class: section -->
+   効果: 中央配置で中程度のフォント、セクション区切りとして使用 */
+section.section {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  text-align: center;
+
+  h1 {
+    font-size: 2.08em;
+  }
+
+  h2 {
+    font-size: 1.69em;
+  }
+
+  h3 {
+    font-size: 1.43em;
+  }
+}
+
+/* Image-centric slide: 画像を中央に大きく表示するスライド
+   使い方: <!-- _class: image-center -->
+   効果: 画像を中央に配置し、キャプションを下部に表示 */
+section.image-center {
+  h1 {
+    margin-bottom: 0.5em;
+  }
+
+  h2 {
+    margin-bottom: 0.5em;
+    text-align: center;
+  }
+
+  img {
+    display: block;
+    margin: 1em auto;
+    max-width: 50%;
+    max-height: 30vh;
+    object-fit: contain;
+  }
+
+  figcaption,
+  p:last-of-type,
+  strong {
+    display: block;
+    margin-top: 0.5em;
+    font-size: 0.9em;
+    font-style: italic;
+    color: #666;
+    text-align: center;
+  }
+}
+
+/* Two-column layout: 2カラムを表現するレイアウト
+   使い方: <!-- _class: columns -->
+   効果: 2カラムレイアウトで左右に内容を配置、比較や対比に最適
+   HTML構造: <div class="columns-container"><div class="column-item">...</div><div class="column-item">...</div></div> */
+section.columns {
+  .columns-container {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 2em;
+    align-items: start;
+    width: 100%;
+  }
+
+  .column-item {
+    font-size: 0.6em;
+
+    img {
+      max-height: 50vh;
+      max-width: 40%;
+      height: auto;
+      display: block;
+    }
+  }
+
+  h1 {
+    font-size: 1.44em;
+  }
+
+  h2 {
+    font-size: 1.17em;
+    margin-bottom: 0.6em;
+  }
+
+  h3 {
+    font-size: 0.99em;
+    margin-bottom: 0.6em;
+  }
+
+  p,
+  ul,
+  ol {
+    margin-bottom: 0.7em;
+  }
+}
+
+/* Text-dense slide: 通常より多くのテキストを掲載するためのスライド
+   使い方: <!-- _class: text-dense -->
+   効果: 文字サイズを大きくして情報密度を上げ、詳細説明や参考資料に最適 */
+section.text-dense {
+  font-size: 1.5em;
+  line-height: 1.6;
+
+  h1 {
+    font-size: 1.6em;
+  }
+
+  h2 {
+    font-size: 1.3em;
+  }
+
+  h3 {
+    font-size: 1.1em;
+  }
+
+  p,
+  ul,
+  ol {
+    margin-bottom: 0.8em;
+  }
+
+  h1,
+  h2,
+  h3,
+  h4,
+  h5,
+  h6 {
+    margin-bottom: 0.8em;
+  }
+}
+
+/* Card slide: カード型のボックスでコンテンツを整理
+   使い方: <!-- _class: card -->
+   効果: 影付きのカードで情報を視覚的に分離、複数の要素を整理して表示
+   HTML構造: <div class="card-container"><div class="card-item"><h3>タイトル</h3><p>内容</p></div></div> */
+section.card {
+  h1 {
+    margin-bottom: 1.5em;
+  }
+
+  .card-container {
+    display: flex;
+    gap: 1.2em;
+    justify-content: center;
+    align-items: stretch;
+    flex-wrap: nowrap;
+  }
+
+  .card-item {
+    background: linear-gradient(145deg, #f8f9fa 0%, #e9ecef 100%);
+    border: 1px solid #dee2e6;
+    border-radius: 10px;
+    box-shadow: 0 3px 10px rgba(0, 0, 0, 0.08);
+    padding: 1.2em;
+    flex: 1;
+    max-width: 300px;
+    font-size: 0.7em;
+    display: flex;
+    flex-direction: column;
+
+    h3 {
+      margin-top: 0;
+      margin-bottom: 0.8em;
+      color: #343a40;
+      font-size: 1em;
+      font-weight: 600;
+      padding-bottom: 0.4em;
+      border-bottom: 2px solid #e9ecef;
+    }
+
+    ul,
+    p {
+      margin-bottom: 0.6em;
+      font-size: 0.95em;
+      line-height: 1.4;
+      flex-grow: 1;
+    }
+
+    ul {
+      padding-left: 1.2em;
+    }
+
+    li {
+      margin-bottom: 0.3em;
+    }
+
+    &:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 6px 20px rgba(0, 0, 0, 0.12);
+      transition: all 0.3s ease;
+    }
+  }
+}
