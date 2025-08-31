@@ -29,7 +29,7 @@ export interface UsePreviewCoreReturn {
  */
 export default function usePreviewCore({
   markdown,
-  theme = "default",
+  theme,
   settings = {
     theme: "default",
     paginate: true,
@@ -40,7 +40,7 @@ export default function usePreviewCore({
   // useMarpCoreフックでクライアントサイドレンダリング（フロントマター設定を含む）
   const { html, css, isLoading, renderTime } = useMarpCore(
     markdown,
-    theme,
+    theme || "default",
     settings
   );
 

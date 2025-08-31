@@ -2,7 +2,7 @@
 
 **Markdownでプレゼンテーションを作成するための、リアルタイムプレビュー機能を備えたモダンなWebエディタ**
 
-![Next.js](https://img.shields.io/badge/Next.js-15.3.5-black?style=flat-square&logo=next.js)
+![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.8.3-blue?style=flat-square&logo=typescript)
 ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-4-38B2AC?style=flat-square&logo=tailwind-css)
@@ -24,14 +24,16 @@
 ### 🎨 テーマ・カスタマイズ
 
 - **内蔵テーマ** - default、gaia、uncoverの3つのテーマ
+- **カスタムテーマ対応** - 管理者がCSSファイルを配置するだけで独自テーマを追加可能
 - **UI設定コントロール** - GUIでテーマ、サイズ、ページネーション設定
 - **手動フロントマター対応** - 手動設定時は該当UIをグレーアウト表示
 - **リアルタイム切り替え** - 設定変更が即座にプレビューに反映
+- **完全なエクスポート対応** - カスタムテーマでのHTML/PDF/PPTX出力
 
-### 🤖 AI支援機能（OpenAI GPT-4対応）
+### 🤖 AI支援機能（OpenAI）
 
 - **ワンショット修正** - 簡単な指示でスライドを即座に改善
-- **エージェント型チャット** - 対話的なスライド編集支援  
+- **エージェント型チャット** - 対話的なスライド編集支援
 - **レート制限** - 安全な利用制限（10回/分・15回/分、ratelimit.ts実装）
 - **オプション機能** - OpenAI API Key設定時のみ有効
 
@@ -140,6 +142,7 @@ src/
 │   │   ├── ai/            # AI機能API
 │   │   ├── marp-render/   # プレビューレンダリング
 │   │   ├── marp-export/   # ファイルエクスポート
+│   │   ├── themes/        # テーマ関連API
 │   │   └── share/         # 共有機能
 │   ├── share/[shareId]/   # 共有ページ
 │   └── page.tsx           # ホームページ
@@ -155,9 +158,19 @@ src/
 │   ├── export/           # エクスポート機能
 │   ├── storage/          # LocalStorage管理
 │   ├── ai/               # AI処理ロジック
+│   ├── themes/           # テーマ処理ライブラリ
 │   ├── ratelimit.ts      # レート制限実装
 │   └── error/            # エラーハンドリング
 ├── types/                # TypeScript型定義
+└── ...
+```
+
+**静的ファイル**:
+
+```
+public/
+├── themes/               # カスタムテーマファイル
+├── images/               # テーマ用画像ファイル
 └── ...
 ```
 
@@ -224,6 +237,27 @@ npm start
 # 反転カラースライド
 
 特別な強調スライド
+```
+
+### カスタムテーマの追加
+
+管理者は独自のテーマを簡単に追加できます：
+
+1. **CSSファイルを作成** - Marp記法に従ったテーマCSSを作成
+2. **ファイルを配置** - `public/themes/` ディレクトリにCSSファイルを配置
+3. **画像ファイル** - 背景画像などは `public/images/` に配置
+4. **自動認識** - アプリケーション再起動後、テーマセレクターに自動表示
+
+#### テーマファイル例
+
+```css
+/* @theme custom */
+@import "default";
+
+section {
+  background-image: url("../images/background.png");
+  background-size: cover;
+}
 ```
 
 ---

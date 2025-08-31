@@ -47,7 +47,30 @@ async function executeMarpCli(
   outputFile: string,
   operationId: string
 ) {
-  const command = `npx @marp-team/marp-cli "${tempFile}" --html --output "${outputFile}" --no-stdin --allow-local-files --theme-set default --theme-set gaia --theme-set uncover`;
+  let command = `npx @marp-team/marp-cli "${tempFile}" --html --output "${outputFile}" --no-stdin --allow-local-files --theme-set default --theme-set gaia --theme-set uncover`;
+
+  // カスタムテーマの追加
+  try {
+    const themeResponse = await fetch(
+      `${process.env.NEXT_PUBLIC_BASE_URL || "http://localhost:3000"}/api/themes`
+    );
+    const themes = await themeResponse.json();
+
+    for (const theme of themes) {
+      if (!theme.isBuiltIn && theme.fileName) {
+        const themePath = join(
+          process.cwd(),
+          "public",
+          "themes",
+          theme.fileName
+        );
+        command += ` --theme-set "${themePath}"`;
+      }
+    }
+  } catch (error) {
+    // カスタムテーマ取得失敗時は組み込みテーマのみで続行
+    console.warn("Failed to load custom themes for render:", error);
+  }
 
   logger.debug(LOG_CATEGORIES.MARP_CLI, "Executing marp-cli command", {
     operationId,

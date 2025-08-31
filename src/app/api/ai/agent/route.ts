@@ -11,11 +11,14 @@ export async function POST(request: NextRequest) {
     // レート制限チェック
     const clientIP = getClientIP(request);
     const rateLimitResult = await checkRateLimit(agentRateLimit, clientIP);
-    
+
     if (!rateLimitResult.success) {
-      return new Response("API利用制限に達しました。1分後に再試行してください。", {
-        status: 429,
-      });
+      return new Response(
+        "API利用制限に達しました。1分後に再試行してください。",
+        {
+          status: 429,
+        }
+      );
     }
 
     // リクエストボディの解析（最小限の検証）

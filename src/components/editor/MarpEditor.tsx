@@ -77,9 +77,7 @@ const MarpEditor: React.FC<MarpEditorProps> = React.memo(
         <div className="border-b bg-gradient-to-r from-muted/50 to-muted/30 px-4 py-3 flex items-center justify-between h-12">
           <div className="flex items-center gap-2">
             <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></div>
-            <h2 className="text-sm font-semibold text-foreground">
-              Markdown Editor
-            </h2>
+            <h2 className="text-sm font-semibold text-foreground">Editor</h2>
           </div>
           <div className="flex items-center gap-2">
             {onInsertText && onHeadingToggle && onTextDecoration && (
