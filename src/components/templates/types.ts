@@ -1,10 +1,13 @@
-export interface Template {
+export interface TemplateMetadata {
   id: string;
   name: string;
   description: string;
-  content: string;
   category: string;
   icon: string;
+}
+
+export interface Template extends TemplateMetadata {
+  content: string;
 }
 
 export interface TemplateCategory {

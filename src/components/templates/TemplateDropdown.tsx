@@ -33,6 +33,7 @@ export const TemplateDropdown: React.FC<TemplateDropdownProps> = ({
     handleTemplateSelect,
     handleConfirmApply,
     handleConfirmCancel,
+    isLoading,
   } = useTemplates({ currentMarkdown, onMarkdownChange });
 
   return (
@@ -55,11 +56,17 @@ export const TemplateDropdown: React.FC<TemplateDropdownProps> = ({
                 key={template.id}
                 variant="ghost"
                 onClick={() => handleTemplateSelect(template)}
+                disabled={isLoading(template.id)}
                 className="w-full justify-start h-auto p-3 flex flex-col items-start gap-1"
               >
                 <div className="flex items-center gap-2">
                   <span className="text-sm">{template.icon}</span>
                   <span className="font-medium text-sm">{template.name}</span>
+                  {isLoading(template.id) && (
+                    <span className="text-xs text-muted-foreground">
+                      読み込み中...
+                    </span>
+                  )}
                 </div>
                 <span className="text-xs text-muted-foreground text-left">
                   {template.description}
