@@ -6,45 +6,36 @@ import type { AIError } from "./types";
  */
 export const AI_CONFIG = {
   models: {
-    chat: "gpt-4.1-mini",
+    chat: "gpt-4.1",
     structured: "gpt-5-mini",
   },
   temperature: {
-    structured: 0.3,
-    chat: 0.7,
+    chat: 0.2,
   },
   maxRetries: 2,
 } as const;
 
 /**
- * GPT-5系モデルかどうかを判定
- */
-function isGPT5Model(modelName: string): boolean {
-  return modelName.startsWith("gpt-5");
-}
-
-/**
  * モデルに応じた最適なパラメータを生成
  */
 export function createModelParams(modelName: string) {
-  const baseParams = {
-    model: openai(modelName),
-    temperature: AI_CONFIG.temperature.structured,
-  };
-
-  // GPT-5系の場合は providerOptions を追加
-  if (isGPT5Model(modelName)) {
+  if (modelName.startsWith("gpt-5")) {
+    // GPT-5系: temperatureなし、reasoning_effortのみ
     return {
-      ...baseParams,
+      model: openai(modelName),
       providerOptions: {
         openai: {
-          reasoningEffort: "minimal" as const,
+          reasoning_effort: "minimal" as const,
         },
       },
     };
   }
 
-  return baseParams;
+  // GPT-4系: temperature対応
+  return {
+    model: openai(modelName),
+    temperature: AI_CONFIG.temperature.chat,
+  };
 }
 
 /**
