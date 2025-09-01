@@ -15,6 +15,7 @@ import { Button } from "@/components/ui/button";
 import { Textarea } from "@/components/ui/textarea";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/lib/ui/useToast";
+import { useChatHistory } from "@/lib/chat-history";
 
 interface ToolResult {
   success: boolean;
@@ -38,6 +39,8 @@ export function AgentChatDialog({
   onMarkdownChange,
 }: AgentChatDialogProps) {
   const { showSuccess, showError } = useToast();
+  const { load, save, clear } = useChatHistory();
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [processedToolResults, setProcessedToolResults] = useState<Set<string>>(
     new Set()
   );
@@ -131,6 +134,39 @@ export function AgentChatDialog({
   useEffect(() => {
     scrollToBottom();
   }, [messages, status, scrollToBottom]);
+
+  // メッセージ変更時に自動保存
+  useEffect(() => {
+    if (messages.length > 0) {
+      save(messages);
+    }
+  }, [messages, save]);
+
+  // ダイアログ開時に履歴を復元
+  useEffect(() => {
+    if (open) {
+      const savedMessages = load();
+      if (savedMessages.length > 0) {
+        setMessages(savedMessages);
+      }
+      // 少し遅延させて一番下までスクロール
+      setTimeout(() => {
+        scrollToBottom();
+      }, 100);
+    }
+  }, [open, load, setMessages, scrollToBottom]);
+
+  // ダイアログ開時に入力エリアにフォーカス
+  useEffect(() => {
+    if (open) {
+      // 少し遅延させてフォーカス
+      const timer = setTimeout(() => {
+        textareaRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timer);
+    }
+    return undefined;
+  }, [open]);
 
   // AI応答完了時に入力エリアにフォーカス
   useEffect(() => {
@@ -276,10 +312,20 @@ export function AgentChatDialog({
             <MessageSquare className="h-5 w-5" />
             AI相談
           </DialogTitle>
-          <DialogDescription>
-            AIエージェントとの対話を通じて、スライドを段階的に改善します。
-            AIが自動的にスライドを分析・修正することがあります。
-          </DialogDescription>
+          <div className="flex items-start justify-between gap-4">
+            <DialogDescription className="flex-1">
+              AIエージェントとの対話を通じて、スライドを段階的に改善します。
+              AIが自動的にスライドを分析・修正することがあります。
+            </DialogDescription>
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowClearConfirm(true)}
+              className="flex-shrink-0"
+            >
+              履歴をクリア
+            </Button>
+          </div>
         </DialogHeader>
 
         {/* メッセージ表示エリア */}
@@ -393,6 +439,37 @@ export function AgentChatDialog({
           AIが自動的にスライドを修正する場合があります。最大5ステップまで自動実行されます。
         </div>
       </DialogContent>
+
+      {/* 履歴クリア確認ダイアログ */}
+      <Dialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>履歴をクリア</DialogTitle>
+            <DialogDescription>
+              チャット履歴をすべて削除しますか？この操作は取り消せません。
+            </DialogDescription>
+          </DialogHeader>
+          <div className="flex justify-end gap-2 mt-4">
+            <Button
+              variant="outline"
+              onClick={() => setShowClearConfirm(false)}
+            >
+              キャンセル
+            </Button>
+            <Button
+              variant="destructive"
+              onClick={() => {
+                clear();
+                setMessages([]);
+                setShowClearConfirm(false);
+                showSuccess("チャット履歴をクリアしました");
+              }}
+            >
+              削除
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
     </Dialog>
   );
 }
