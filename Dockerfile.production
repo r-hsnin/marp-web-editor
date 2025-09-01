@@ -1,5 +1,5 @@
-# Production-fix: Based on official Marp-CLI Docker configuration
-# Optimized for Windows rendering compatibility
+# Production-optimized: Standalone mode with Marp-CLI support
+# Optimized for smaller image size while maintaining full functionality
 
 # Build stage
 FROM node:22.15.0-bookworm-slim AS builder
@@ -22,17 +22,17 @@ RUN npm ci --no-audit --no-fund
 COPY prisma ./prisma/
 RUN npx prisma generate
 
-# Copy source code
+# Copy source code and config
 COPY .env.docker ./.env
 COPY . .
 
-# Build application with environment variables
+# Build application with standalone output
 RUN set -a && \
     . ./.env && \
     set +a && \
     npm run build
 
-# Production stage - Based on official Marp-CLI configuration
+# Production stage - Optimized for standalone mode
 FROM node:22.15.0-bookworm-slim AS runner
 
 # Install Playwright Chromium with comprehensive dependencies (official Marp-CLI approach)
@@ -49,6 +49,7 @@ RUN apt-get update && \
     dumb-init \
     openssl \
     gosu \
+    curl \
     fonts-liberation \
     fonts-noto-cjk \
     fonts-noto-cjk-extra \
@@ -71,21 +72,13 @@ RUN groupadd --system --gid 1001 nodejs \
 # Working directory
 WORKDIR /home/nextjs/app
 
-# Install production dependencies only
-COPY package*.json ./
-RUN npm ci --only=production --no-audit --no-fund --no-optional \
-    && npm cache clean --force
-
-# Generate Prisma client
-COPY --chown=nextjs:nodejs prisma ./prisma/
-RUN npx prisma generate && rm -rf /tmp/*
-
-# Copy build artifacts
-COPY --from=builder --chown=nextjs:nodejs /app/.next ./.next
+# Copy standalone build output
+COPY --from=builder --chown=nextjs:nodejs /app/.next/standalone ./
+COPY --from=builder --chown=nextjs:nodejs /app/.next/static ./.next/static
 COPY --from=builder --chown=nextjs:nodejs /app/public ./public
-COPY --chown=nextjs:nodejs src ./src
-COPY --chown=nextjs:nodejs next.config.mjs tsconfig.json postcss.config.mjs ./
-COPY --chown=nextjs:nodejs .env.docker ./.env
+
+# Copy Prisma schema for runtime
+COPY --from=builder --chown=nextjs:nodejs /app/prisma ./prisma/
 
 # Create directories and set permissions
 RUN mkdir -p uploads data \
@@ -100,12 +93,12 @@ ENV LANG=ja_JP.UTF-8 \
     CHROME_PATH=/usr/local/bin/chrome \
     PUPPETEER_CACHE_DIR=/home/nextjs/.cache \
     PUPPETEER_ARGS="--no-sandbox --disable-setuid-sandbox --disable-dev-shm-usage --font-render-hinting=none --disable-font-subpixel-positioning --force-device-scale-factor=1 --disable-features=VizDisplayCompositor --lang=ja --accept-lang=ja-JP,ja" \
-    NODE_OPTIONS="--max-old-space-size=1024"
+    NODE_OPTIONS="--max-old-space-size=410"
 
-# Create startup script with font verification
+# Create startup script with database initialization
 RUN echo '#!/bin/bash' > start.sh \
     && echo 'set -e' >> start.sh \
-    && echo 'echo "Starting Marp Web Editor (Production-Fix)..."' >> start.sh \
+    && echo 'echo "Starting Marp Web Editor (Standalone Mode)..."' >> start.sh \
     && echo 'echo "Chromium path: $CHROME_PATH"' >> start.sh \
     && echo 'echo "Japanese font: $(fc-match \"sans-serif:lang=ja\" 2>/dev/null || echo \"Not found\")"' >> start.sh \
     && echo 'mkdir -p data' >> start.sh \
@@ -114,9 +107,13 @@ RUN echo '#!/bin/bash' > start.sh \
     && echo '  npx prisma db push --accept-data-loss' >> start.sh \
     && echo 'fi' >> start.sh \
     && echo 'echo "Application ready"' >> start.sh \
-    && echo 'exec npm start' >> start.sh \
+    && echo 'exec node server.js' >> start.sh \
     && chmod +x start.sh \
     && chown nextjs:nodejs start.sh
+
+# Add health check
+HEALTHCHECK --interval=30s --timeout=3s --start-period=5s --retries=3 \
+  CMD curl -f http://localhost:3000/api/health || exit 1
 
 # Switch to non-root user
 USER nextjs
