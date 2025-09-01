@@ -108,7 +108,7 @@ docker run -p 3000:3000 marp-web-editor
 
 | 技術             | バージョン | 用途                                       |
 | ---------------- | ---------- | ------------------------------------------ |
-| **Next.js**      | 15.3.5     | App Routerによるフルスタックフレームワーク |
+| **Next.js**      | 15.5.2     | App Routerによるフルスタックフレームワーク |
 | **React**        | 19         | ユーザーインターフェース構築               |
 | **TypeScript**   | 5.8.3      | 型安全な開発環境                           |
 | **Tailwind CSS** | 4          | ユーティリティファーストCSS                |
@@ -146,6 +146,7 @@ src/
 ├── app/                    # Next.js App Router
 │   ├── api/               # APIエンドポイント
 │   │   ├── ai/            # AI機能API
+│   │   ├── health/        # ヘルスチェックAPI
 │   │   ├── marp-render/   # プレビューレンダリング
 │   │   ├── marp-export/   # ファイルエクスポート
 │   │   ├── themes/        # テーマ関連API
@@ -280,6 +281,39 @@ section {
 
 ---
 
+## 🔍 運用・監視
+
+### ヘルスチェック
+
+```bash
+# アプリケーション状態確認
+curl http://localhost:3000/api/health
+
+# レスポンス例
+{
+  "status": "healthy",
+  "timestamp": "2025-09-01T20:55:05.681Z",
+  "uptime": 150.554033699,
+  "memory": {...},
+  "version": "0.4.0"
+}
+```
+
+### Docker運用
+
+```bash
+# 最適化ビルド
+docker build -f Dockerfile.production -t marp-web-editor .
+
+# ヘルスチェック付き起動
+docker run -p 3000:3000 marp-web-editor
+
+# コンテナ状態確認
+docker ps  # health: healthy を確認
+```
+
+---
+
 ## ⚙️ 環境変数
 
 `.env` ファイルを作成し、以下の変数を設定してください：
@@ -294,6 +328,12 @@ NEXT_PUBLIC_BASE_URL="https://your-domain.com"
 # AI機能（オプション）
 OPENAI_API_KEY="sk-..."
 ```
+
+### 重要な環境変数
+
+- **`NEXT_PUBLIC_BASE_URL`** - ビルド時に固定化される。本番ドメインを設定
+- **`DATABASE_URL`** - ランタイム変更可能
+- **`PORT`/`HOSTNAME`** - サーバー起動設定（ランタイム変更可能）
 
 詳細な環境変数については `.env.example` を参照してください。
 
