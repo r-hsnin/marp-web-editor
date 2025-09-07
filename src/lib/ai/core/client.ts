@@ -1,5 +1,10 @@
-import { openai } from "@ai-sdk/openai";
+import { createOpenAI } from "@ai-sdk/openai";
 import type { AIError } from "./types";
+
+/**
+ * OpenAIクライアント
+ */
+const openai = createOpenAI();
 
 /**
  * AI SDK共通設定
@@ -39,7 +44,7 @@ export function createModelParams(modelName: string) {
 }
 
 /**
- * OpenAIクライアント
+ * OpenAIクライアント（エクスポート用）
  */
 export const aiClient = openai;
 

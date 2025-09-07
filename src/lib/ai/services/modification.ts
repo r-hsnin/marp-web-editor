@@ -30,7 +30,7 @@ export async function modifySlide(
     const result = await generateObject({
       ...modelParams,
       schema: MarkdownModificationSchema,
-      system: createModificationSystemPrompt(),
+      system: await createModificationSystemPrompt(),
       prompt: createModificationUserPrompt(targetContent, instructions),
     });
 
