@@ -6,39 +6,34 @@ import {
 } from "ai";
 import { aiClient, AI_CONFIG } from "../core/client";
 import { createAgentSystemPrompt } from "../prompts";
-import {
-  createModifySlideToolWithContext,
-  createAnalyzeSlideToolWithContext,
-} from "../tools";
+import { createToolsWithContext } from "../tools/create-tools";
 
 /**
  * エージェント型チャット処理を実行
  */
 export async function processChat(
   messages: UIMessage[],
-  currentMarkdown: string
+  getCurrentMarkdown: () => string,
+  setMarkdown: (content: string) => void
 ) {
   // UIMessagesをModelMessagesに変換
   const modelMessages = convertToModelMessages(messages);
 
   // システムメッセージを追加
+  // システムメッセージを作成
   const systemMessage = {
     role: "system" as const,
-    content: createAgentSystemPrompt(currentMarkdown),
+    content: await createAgentSystemPrompt(),
   };
 
-  // 現在のMarkdownを注入してツールを作成
-  const modifySlideTool = createModifySlideToolWithContext(currentMarkdown);
-  const analyzeSlideTool = createAnalyzeSlideToolWithContext(currentMarkdown);
+  // 新しいツールセットを作成
+  const tools = createToolsWithContext(getCurrentMarkdown, setMarkdown);
 
   // streamText実行
   const result = streamText({
     model: aiClient(AI_CONFIG.models.chat),
     messages: [systemMessage, ...modelMessages],
-    tools: {
-      modifySlide: modifySlideTool,
-      analyzeSlide: analyzeSlideTool,
-    },
+    tools,
     stopWhen: stepCountIs(5),
     maxRetries: AI_CONFIG.maxRetries,
     temperature: AI_CONFIG.temperature.chat,

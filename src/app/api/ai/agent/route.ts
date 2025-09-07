@@ -30,6 +30,13 @@ export async function POST(request: NextRequest) {
       return new Response("Invalid messages format", { status: 400 });
     }
 
+    // Markdownの状態管理
+    let markdown = currentMarkdown || "";
+    const getCurrentMarkdown = () => markdown;
+    const setMarkdown = (newContent: string) => {
+      markdown = newContent;
+    };
+
     // OpenAI API Keyの確認
     const apiKey = process.env.OPENAI_API_KEY;
     if (!apiKey) {
@@ -48,9 +55,15 @@ export async function POST(request: NextRequest) {
     }
 
     // エージェント処理を実行
-    const result = await processChat(messages, currentMarkdown || "");
+    const result = await processChat(messages, getCurrentMarkdown, setMarkdown);
 
-    return result.toUIMessageStreamResponse();
+    // 更新されたMarkdownを含むレスポンスを作成
+    const response = result.toUIMessageStreamResponse();
+
+    // カスタムヘッダーで更新されたMarkdownを送信
+    response.headers.set("X-Updated-Markdown", encodeURIComponent(markdown));
+
+    return response;
   } catch (error) {
     console.error("AI Agent Chat Error:", error);
     return new Response("エージェント処理中にエラーが発生しました", {

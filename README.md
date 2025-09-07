@@ -1,6 +1,6 @@
 # Marp Web Editor
 
-**Markdownでプレゼンテーションを作成するための、リアルタイムプレビュー機能を備えたモダンなWebエディタ**
+**Markdownでプレゼンテーションを作成するための、リアルタイムプレビュー機能を備えたWebエディタ**
 
 ![Next.js](https://img.shields.io/badge/Next.js-15.5.2-black?style=flat-square&logo=next.js)
 ![React](https://img.shields.io/badge/React-19-blue?style=flat-square&logo=react)
@@ -40,6 +40,7 @@
 
 - **ワンショット修正** - 簡単な指示でスライドを即座に改善
 - **エージェント型チャット** - 対話的なスライド編集支援
+- **専門的アドバイス** - Marpガイドラインに基づいた適切な提案
 - **レート制限** - 安全な利用制限（10回/分・15回/分、ratelimit.ts実装）
 - **オプション機能** - OpenAI API Key設定時のみ有効
 
@@ -116,6 +117,9 @@ docker run -p 3000:3000 marp-web-editor
 | **CodeMirror 6** | -          | 高機能テキストエディタ                     |
 | **Allotment**    | -          | リサイズ可能な分割画面                     |
 | **AI SDK**       | 5.0.24     | OpenAI API統合・React対応                  |
+| **react-markdown** | 10.1.0   | Markdownレンダリング                       |
+| **remark-gfm**   | 4.0.1      | GitHub Flavored Markdown対応              |
+| **@tailwindcss/typography** | 0.5.16 | タイポグラフィプラグイン           |
 | **Zod**          | 4.1.3      | 型安全なバリデーション                     |
 
 ### バックエンド・データ
@@ -166,6 +170,8 @@ src/
 │   ├── export/           # エクスポート機能
 │   ├── storage/          # LocalStorage管理
 │   ├── ai/               # AI処理ロジック
+│   │   ├── tools/        # AIツール群
+│   │   └── prompts/files/ # プロンプト管理
 │   ├── themes/           # テーマ処理ライブラリ
 │   ├── ratelimit.ts      # レート制限実装
 │   └── error/            # エラーハンドリング
@@ -179,6 +185,7 @@ src/
 public/
 ├── themes/               # カスタムテーマファイル
 ├── templates/            # テンプレートファイル
+├── guidelines/           # Marpガイドライン
 ├── images/               # テーマ用画像ファイル
 └── ...
 ```

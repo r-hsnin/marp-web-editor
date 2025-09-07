@@ -4,6 +4,8 @@ import React, { useEffect, useState, useCallback, useRef } from "react";
 import { MessageSquare, Send, Bot, User } from "lucide-react";
 import { useChat } from "@ai-sdk/react";
 import { DefaultChatTransport, type UIMessage } from "ai";
+import ReactMarkdown from "react-markdown";
+import remarkGfm from "remark-gfm";
 import {
   Dialog,
   DialogContent,
@@ -41,9 +43,8 @@ export function AgentChatDialog({
   const { showSuccess, showError } = useToast();
   const { load, save, clear } = useChatHistory();
   const [showClearConfirm, setShowClearConfirm] = useState(false);
-  const [processedToolResults, setProcessedToolResults] = useState<Set<string>>(
-    new Set()
-  );
+  const processedToolResults = useRef<Set<string>>(new Set());
+  const isRestoringHistory = useRef(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const textareaRef = useRef<HTMLTextAreaElement>(null);
 
@@ -100,16 +101,22 @@ export function AgentChatDialog({
       if (activeTool) {
         const toolName = activeTool.type.replace("tool-", "");
         switch (toolName) {
-          case "modifySlide":
-            return "AIがスライドを修正しています...";
-          case "analyzeSlide":
-            return "AIがスライドを分析しています...";
+          case "writeContent":
+            return "📝 スライドを更新中...";
+          case "analyzeStructure":
+            return "🔍 スライド構造を分析中...";
+          case "readContent":
+            return "📖 コンテンツを読み取り中...";
+          case "getGuidelines":
+            return "📋 Marpガイドラインを確認中...";
+          case "getTemplate":
+            return "📄 テンプレートを確認中...";
           default:
-            return "AI処理中...";
+            return "⚙️ AI処理中... しばらくお待ちください";
         }
       }
     }
-    return "AIが考えています...";
+    return "🤔 AIが考えています... ";
   };
 
   // メッセージフィルタリング
@@ -147,7 +154,12 @@ export function AgentChatDialog({
     if (open) {
       const savedMessages = load();
       if (savedMessages.length > 0) {
+        isRestoringHistory.current = true;
         setMessages(savedMessages);
+        // 次のtickでフラグをリセット
+        setTimeout(() => {
+          isRestoringHistory.current = false;
+        }, 0);
       }
       // 少し遅延させて一番下までスクロール
       setTimeout(() => {
@@ -178,6 +190,11 @@ export function AgentChatDialog({
 
   // Tool実行結果の監視とスライド更新
   useEffect(() => {
+    // 履歴復元中は処理をスキップ
+    if (isRestoringHistory.current) {
+      return;
+    }
+
     const lastMessage = messages[messages.length - 1];
     if (lastMessage?.role === "assistant" && lastMessage.parts) {
       for (const part of lastMessage.parts) {
@@ -195,14 +212,14 @@ export function AgentChatDialog({
         }
 
         // 既に処理済みの場合はスキップ
-        if (processedToolResults.has(toolResultId)) {
+        if (processedToolResults.current.has(toolResultId)) {
           continue;
         }
 
         // AI SDK 5.0では tool-${toolName} 形式
         // ToolUIPartの型ガードを使用してstateプロパティの存在を確認
         if (
-          part.type === "tool-modifySlide" &&
+          part.type === "tool-writeContent" &&
           "state" in part &&
           part.state === "output-available"
         ) {
@@ -215,24 +232,20 @@ export function AgentChatDialog({
               showSuccess("スライドが自動修正されました");
 
               // 処理済みとしてマーク
-              setProcessedToolResults(
-                (prev) => new Set([...prev, toolResultId])
-              );
+              processedToolResults.current.add(toolResultId);
             } else if (!typedResult.success) {
               showError(
                 `スライド修正に失敗: ${typedResult.error || "不明なエラー"}`
               );
 
               // 処理済みとしてマーク
-              setProcessedToolResults(
-                (prev) => new Set([...prev, toolResultId])
-              );
+              processedToolResults.current.add(toolResultId);
             }
           }
         }
 
         if (
-          part.type === "tool-analyzeSlide" &&
+          part.type === "tool-analyzeStructure" &&
           "state" in part &&
           part.state === "output-available"
         ) {
@@ -246,23 +259,17 @@ export function AgentChatDialog({
           }
 
           // 処理済みとしてマーク
-          setProcessedToolResults((prev) => new Set([...prev, toolResultId]));
+          processedToolResults.current.add(toolResultId);
         }
       }
     }
-  }, [
-    messages,
-    processedToolResults,
-    onMarkdownChange,
-    showError,
-    showSuccess,
-  ]);
+  }, [messages, onMarkdownChange, showError, showSuccess]);
 
   // ダイアログを閉じる際の状態リセット
   const handleOpenChange = (newOpen: boolean) => {
     if (!newOpen) {
       setMessages([]);
-      setProcessedToolResults(new Set());
+      processedToolResults.current = new Set();
     }
     onOpenChange(newOpen);
   };
@@ -373,12 +380,21 @@ export function AgentChatDialog({
                     {/* メッセージパーツを表示 */}
                     {message.parts.map((part, index: number) => {
                       if (part.type === "text") {
-                        return (
+                        return message.role === "user" ? (
                           <div
                             key={index}
                             className="text-sm whitespace-pre-wrap"
                           >
                             {part.text}
+                          </div>
+                        ) : (
+                          <div
+                            key={index}
+                            className="text-sm prose prose-sm max-w-none dark:prose-invert prose-p:my-2 prose-headings:my-2 prose-ul:my-2 prose-ol:my-2 prose-hr:my-3"
+                          >
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {part.text}
+                            </ReactMarkdown>
                           </div>
                         );
                       }
