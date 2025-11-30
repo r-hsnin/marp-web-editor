@@ -1,9 +1,9 @@
-import React from 'react';
-import { useEditorStore } from '@/lib/store';
-import { useSlides } from '@/hooks/useSlides';
-import { useMarp } from '@/hooks/useMarp';
-import { FileText, Layers, Type } from 'lucide-react';
 import { Separator } from '@/components/ui/separator';
+import { useMarp } from '@/hooks/useMarp';
+import { useSlides } from '@/hooks/useSlides';
+import { useEditorStore } from '@/lib/store';
+import { FileText, Layers, Type } from 'lucide-react';
+import type React from 'react';
 
 export const Footer: React.FC = () => {
   const { markdown } = useEditorStore();

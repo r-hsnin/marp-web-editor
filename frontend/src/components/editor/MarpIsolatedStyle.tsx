@@ -1,7 +1,7 @@
-import React from "react";
+import React from 'react';
 
 export function createIsolatedMarpCSS(css: string): string {
-  if (!css) return "";
+  if (!css) return '';
 
   return `
     /* Marp CSS with enhanced specificity */
@@ -41,7 +41,8 @@ export interface MarpStyleProps {
 export const MarpIsolatedStyle: React.FC<MarpStyleProps> = ({ css }) => {
   if (!css) return null;
 
-  return React.createElement("style", {
+  return React.createElement('style', {
+    // biome-ignore lint/security/noDangerouslySetInnerHtml: Necessary for injecting dynamic CSS
     dangerouslySetInnerHTML: {
       __html: createIsolatedMarpCSS(css),
     },

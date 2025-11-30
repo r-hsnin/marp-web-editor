@@ -1,28 +1,23 @@
-import React from "react";
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 import {
-  LayoutList,
-  Presentation,
-  Maximize2,
-  Minimize2,
   ChevronLeft,
   ChevronRight,
-} from "lucide-react";
-import { Button } from "@/components/ui/button";
-import {
-  Tooltip,
-  TooltipContent,
-  TooltipProvider,
-  TooltipTrigger,
-} from "@/components/ui/tooltip";
-import { Separator } from "@/components/ui/separator";
-import { cn } from "@/lib/utils";
+  LayoutList,
+  Maximize2,
+  Minimize2,
+  Presentation,
+} from 'lucide-react';
+import type React from 'react';
 
-import { ThemeSelector } from "@/components/header/ThemeSelector";
-import { PaginationToggle } from "@/components/header/PaginationToggle";
+import { PaginationToggle } from '@/components/header/PaginationToggle';
+import { ThemeSelector } from '@/components/header/ThemeSelector';
 
 interface PreviewToolbarProps {
-  viewMode: "list" | "slide";
-  setViewMode: (mode: "list" | "slide") => void;
+  viewMode: 'list' | 'slide';
+  setViewMode: (mode: 'list' | 'slide') => void;
   isFullscreen: boolean;
   toggleFullscreen: () => void;
   currentSlideIndex: number;
@@ -54,34 +49,30 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
   onPaginateToggle,
 }) => {
   return (
-    <div className="flex items-center justify-between p-1 border-b border-border bg-muted/20 h-10">
-      <div className="flex items-center gap-2 px-2">
-        <span className="text-xs font-medium text-muted-foreground/70 uppercase tracking-wider">Preview</span>
-        <Separator orientation="vertical" className="h-4 bg-border/50" />
+    <div className="flex items-center justify-between p-1 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-10 z-10 relative">
+      <div className="flex items-center gap-2 px-3">
+        <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+          Preview
+        </span>
+        <Separator orientation="vertical" className="h-3 bg-border/50" />
       </div>
 
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           <TooltipProvider delayDuration={300}>
-            <ThemeSelector
-              currentTheme={currentTheme}
-              onThemeChange={onThemeChange}
-            />
+            <ThemeSelector currentTheme={currentTheme} onThemeChange={onThemeChange} />
 
-            <PaginationToggle
-              enabled={paginate}
-              onToggle={onPaginateToggle}
-            />
+            <PaginationToggle enabled={paginate} onToggle={onPaginateToggle} />
 
             <Separator orientation="vertical" className="h-5 mx-1 bg-border/50" />
 
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant={viewMode === "list" ? "secondary" : "ghost"}
+                  variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setViewMode("list")}
+                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  onClick={() => setViewMode('list')}
                 >
                   <LayoutList className="h-3.5 w-3.5" />
                 </Button>
@@ -92,10 +83,10 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button
-                  variant={viewMode === "slide" ? "secondary" : "ghost"}
+                  variant={viewMode === 'slide' ? 'secondary' : 'ghost'}
                   size="icon"
-                  className="h-7 w-7"
-                  onClick={() => setViewMode("slide")}
+                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  onClick={() => setViewMode('slide')}
                 >
                   <Presentation className="h-3.5 w-3.5" />
                 </Button>
@@ -112,26 +103,26 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
             variant="ghost"
             size="icon"
             onClick={onPrevSlide}
-            disabled={!hasPrevSlide || viewMode === "list"}
+            disabled={!hasPrevSlide || viewMode === 'list'}
             className={cn(
-              "h-6 w-6 transition-opacity",
-              (!hasPrevSlide || viewMode === "list") && "opacity-30 cursor-not-allowed"
+              'h-6 w-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-opacity',
+              (!hasPrevSlide || viewMode === 'list') && 'opacity-30 cursor-not-allowed',
             )}
           >
             <ChevronLeft className="h-3.5 w-3.5" />
           </Button>
-          <span className="text-xs font-medium tabular-nums min-w-[3rem] text-center">
+          <span className="text-xs font-medium tabular-nums min-w-[3rem] text-center text-muted-foreground">
             {currentSlideIndex + 1} / {totalSlides}
           </span>
           <Button
             variant="ghost"
             size="icon"
             className={cn(
-              "h-6 w-6 transition-opacity",
-              (!hasNextSlide || viewMode === "list") && "opacity-30 cursor-not-allowed"
+              'h-6 w-6 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-opacity',
+              (!hasNextSlide || viewMode === 'list') && 'opacity-30 cursor-not-allowed',
             )}
             onClick={onNextSlide}
-            disabled={!hasNextSlide || viewMode === "list"}
+            disabled={!hasNextSlide || viewMode === 'list'}
           >
             <ChevronRight className="h-3.5 w-3.5" />
           </Button>
@@ -145,7 +136,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7"
+                className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
                 onClick={toggleFullscreen}
               >
                 {isFullscreen ? (
@@ -155,9 +146,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                 )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>
-              {isFullscreen ? "Exit Fullscreen" : "Fullscreen"}
-            </TooltipContent>
+            <TooltipContent>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>

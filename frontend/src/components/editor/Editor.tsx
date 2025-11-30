@@ -1,17 +1,17 @@
-import React from "react";
-import CodeMirror from "@uiw/react-codemirror";
-import { markdown, markdownLanguage } from "@codemirror/lang-markdown";
-import { languages } from "@codemirror/language-data";
-import { oneDark } from "@codemirror/theme-one-dark";
-import { githubLight } from "@uiw/codemirror-theme-github";
-import { useEditorStore } from "@/lib/store";
-import { useTheme } from "@/components/theme-provider";
+import { useTheme } from '@/components/theme-provider';
+import { useEditorStore } from '@/lib/store';
+import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
+import { languages } from '@codemirror/language-data';
+import { oneDark } from '@codemirror/theme-one-dark';
+import { githubLight } from '@uiw/codemirror-theme-github';
+import CodeMirror from '@uiw/react-codemirror';
+import React from 'react';
 
-import { EditorToolbar } from "@/components/editor/EditorToolbar";
-import { EditorView } from "@codemirror/view";
-import { FrontmatterProcessor } from "@/lib/marp/frontmatterProcessor";
+import { EditorToolbar } from '@/components/editor/EditorToolbar';
+import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
+import { EditorView } from '@codemirror/view';
 
-import { AIFloatingButton } from "@/components/editor/AIFloatingButton";
+import { AIFloatingButton } from '@/components/editor/AIFloatingButton';
 
 export const Editor: React.FC = () => {
   const { markdown: content, setMarkdown, fontSize } = useEditorStore();
@@ -30,7 +30,7 @@ export const Editor: React.FC = () => {
       const newMarkdown = FrontmatterProcessor.mergeContentWithFrontmatter(content, value);
       setMarkdown(newMarkdown);
     },
-    [content, setMarkdown]
+    [content, setMarkdown],
   );
 
   const onCreateEditor = React.useCallback((view: EditorView) => {
@@ -50,7 +50,7 @@ export const Editor: React.FC = () => {
           ]}
           onChange={onChange}
           onCreateEditor={onCreateEditor}
-          theme={resolvedTheme === "dark" ? oneDark : githubLight}
+          theme={resolvedTheme === 'dark' ? oneDark : githubLight}
           className="h-full"
           style={{ fontSize: `${fontSize}px` }}
           basicSetup={{
@@ -82,7 +82,7 @@ export const Editor: React.FC = () => {
         />
 
         <div className="absolute bottom-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <AIFloatingButton onClick={() => console.log("AI Generate clicked")} />
+          <AIFloatingButton onClick={() => console.log('AI Generate clicked')} />
         </div>
       </div>
     </div>

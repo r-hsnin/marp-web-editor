@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useCallback, useEffect, useMemo, useState } from 'react';
 
 export interface Slide {
   id: number;
@@ -32,21 +32,21 @@ export const useSlides = (html: string): SlidesNavigation => {
 
     try {
       const parser = new DOMParser();
-      const doc = parser.parseFromString(html, "text/html");
+      const doc = parser.parseFromString(html, 'text/html');
 
       // Marp renders slides as SVG inside a .marpit container or just as SVGs
       // We need to handle both cases, but typically Marp Core output (html: true)
       // produces a structure where each slide is an <svg> element.
-      
+
       // Try to find the container first
-      const marpitContainer = doc.querySelector(".marpit");
+      const marpitContainer = doc.querySelector('.marpit');
       let svgElements: NodeListOf<SVGElement>;
 
       if (marpitContainer) {
-        svgElements = marpitContainer.querySelectorAll("svg[data-marpit-svg]");
+        svgElements = marpitContainer.querySelectorAll('svg[data-marpit-svg]');
       } else {
         // Fallback: look for SVGs directly in body if no container
-        svgElements = doc.querySelectorAll("svg[data-marpit-svg]");
+        svgElements = doc.querySelectorAll('svg[data-marpit-svg]');
       }
 
       if (svgElements.length === 0) {
@@ -57,31 +57,30 @@ export const useSlides = (html: string): SlidesNavigation => {
 
       return Array.from(svgElements).map((svg, index): Slide => {
         // Create a container for each slide to maintain Marp structure
-        const slideContainer = document.createElement("div");
-        slideContainer.className = "marpit";
+        const slideContainer = document.createElement('div');
+        slideContainer.className = 'marpit';
 
         const clonedSvg = svg.cloneNode(true) as SVGElement;
         slideContainer.appendChild(clonedSvg);
 
         // Extract metadata from section
-        const section = svg.querySelector("section");
-        const textContent = section?.textContent?.trim() || "";
+        const section = svg.querySelector('section');
+        const textContent = section?.textContent?.trim() || '';
         const title =
-          section?.querySelector("h1, h2, h3")?.textContent?.trim() ||
-          `Slide ${index + 1}`;
-        const theme = section?.getAttribute("data-theme") || "default";
+          section?.querySelector('h1, h2, h3')?.textContent?.trim() || `Slide ${index + 1}`;
+        const theme = section?.getAttribute('data-theme') || 'default';
 
         return {
           id: index,
           html: slideContainer.outerHTML,
-          sectionHtml: section?.outerHTML || "",
+          sectionHtml: section?.outerHTML || '',
           textContent,
           title,
           theme,
         };
       });
     } catch (error) {
-      console.error("Failed to parse slides from HTML", error);
+      console.error('Failed to parse slides from HTML', error);
       return [];
     }
   }, [html]);
@@ -99,13 +98,11 @@ export const useSlides = (html: string): SlidesNavigation => {
         setCurrentSlideIndex(index);
       }
     },
-    [slides.length]
+    [slides.length],
   );
 
   const goToNextSlide = useCallback((): void => {
-    setCurrentSlideIndex((prev) =>
-      prev < slides.length - 1 ? prev + 1 : prev
-    );
+    setCurrentSlideIndex((prev) => (prev < slides.length - 1 ? prev + 1 : prev));
   }, [slides.length]);
 
   const goToPrevSlide = useCallback((): void => {
@@ -123,26 +120,26 @@ export const useSlides = (html: string): SlidesNavigation => {
   const handleKeyDown = useCallback(
     (event: KeyboardEvent): void => {
       switch (event.key) {
-        case "ArrowRight":
-        case " ":
+        case 'ArrowRight':
+        case ' ':
           event.preventDefault();
           goToNextSlide();
           break;
-        case "ArrowLeft":
+        case 'ArrowLeft':
           event.preventDefault();
           goToPrevSlide();
           break;
-        case "Home":
+        case 'Home':
           event.preventDefault();
           goToFirstSlide();
           break;
-        case "End":
+        case 'End':
           event.preventDefault();
           goToLastSlide();
           break;
       }
     },
-    [goToNextSlide, goToPrevSlide, goToFirstSlide, goToLastSlide]
+    [goToNextSlide, goToPrevSlide, goToFirstSlide, goToLastSlide],
   );
 
   const currentSlide = slides[currentSlideIndex] || null;

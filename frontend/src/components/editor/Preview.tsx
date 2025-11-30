@@ -1,21 +1,31 @@
-import React, { useEffect, useRef, useState } from 'react';
-import { useEditorStore } from '@/lib/store';
-import { useMarp } from '@/hooks/useMarp';
-import { useSlides } from '@/hooks/useSlides';
 import { MarpIsolatedStyle } from '@/components/editor/MarpIsolatedStyle';
 import { useTheme } from '@/components/theme-provider';
+import { Button } from '@/components/ui/button';
+import { useMarp } from '@/hooks/useMarp';
+import { useSlides } from '@/hooks/useSlides';
+import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
+import { useEditorStore } from '@/lib/store';
+import clsx from 'clsx';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { PreviewToolbar } from './PreviewToolbar';
 import { SlideList } from './SlideList';
 import { SlideView } from './SlideView';
-import { Button } from '@/components/ui/button';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import clsx from 'clsx';
-import { FrontmatterProcessor } from "@/lib/marp/frontmatterProcessor";
 
 export const Preview: React.FC = () => {
   const { markdown, setMarkdown } = useEditorStore();
   const { html, css } = useMarp(markdown);
-  const { slides, currentSlide, currentSlideIndex, totalSlides, hasNextSlide, hasPrevSlide, goToSlide, goToNextSlide, goToPrevSlide } = useSlides(html);
+  const {
+    slides,
+    currentSlide,
+    currentSlideIndex,
+    totalSlides,
+    hasNextSlide,
+    hasPrevSlide,
+    goToSlide,
+    goToNextSlide,
+    goToPrevSlide,
+  } = useSlides(html);
   const { resolvedTheme } = useTheme();
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'list' | 'slide'>('list');
@@ -41,7 +51,7 @@ export const Preview: React.FC = () => {
     if (!containerRef.current) return;
 
     if (!document.fullscreenElement) {
-      containerRef.current.requestFullscreen().catch(err => {
+      containerRef.current.requestFullscreen().catch((err) => {
         console.error(`Error attempting to enable fullscreen mode: ${err.message} (${err.name})`);
       });
     } else {
@@ -89,7 +99,7 @@ export const Preview: React.FC = () => {
         onNextSlide={goToNextSlide}
         hasPrevSlide={hasPrevSlide}
         hasNextSlide={hasNextSlide}
-        currentTheme={currentSettings.theme || "default"}
+        currentTheme={currentSettings.theme || 'default'}
         onThemeChange={handleThemeChange}
         paginate={currentSettings.paginate || false}
         onPaginateToggle={handlePaginateToggle}
@@ -98,9 +108,9 @@ export const Preview: React.FC = () => {
       <div
         ref={containerRef}
         className={clsx(
-          "flex-1 overflow-y-auto transition-colors duration-300 relative scroll-smooth",
-          resolvedTheme === "dark" ? "bg-zinc-950/30" : "bg-slate-50/50",
-          isFullscreen && "p-0 bg-black"
+          'flex-1 overflow-y-auto transition-colors duration-300 relative scroll-smooth',
+          resolvedTheme === 'dark' ? 'bg-zinc-950/30' : 'bg-slate-50/50',
+          isFullscreen && 'p-0 bg-black',
         )}
       >
         <MarpIsolatedStyle css={css} />

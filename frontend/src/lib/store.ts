@@ -1,4 +1,4 @@
-import { create } from "zustand";
+import { create } from 'zustand';
 
 interface EditorState {
   markdown: string;
@@ -28,7 +28,7 @@ export const useEditorStore = create<EditorState>((set) => ({
 Content on the left
 `,
   setMarkdown: (markdown) => set({ markdown }),
-  theme: "default",
+  theme: 'default',
   setTheme: (theme) => set({ theme }),
   fontSize: 14,
   setFontSize: (fontSize) => set({ fontSize }),

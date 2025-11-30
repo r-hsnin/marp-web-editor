@@ -97,25 +97,42 @@
   }
 
   .dark {
-    --background: 220 13% 18%;
-    --foreground: 220 14% 71%;
-    --card: 220 13% 18%;
-    --card-foreground: 220 14% 71%;
-    --popover: 220 13% 18%;
-    --popover-foreground: 220 14% 71%;
+    /* Base - Slate 900/950 hybrid for deep editor feel */
+    --background: 222.2 47.4% 11.2%; /* Slate 950 */
+    --foreground: 210 40% 98%; /* Slate 50 */
+
+    /* Card/Surface - Slightly lighter than background */
+    --card: 222.2 47.4% 11.2%;
+    --card-foreground: 210 40% 98%;
+
+    /* Popover - Distinct from background */
+    --popover: 222.2 47.4% 11.2%;
+    --popover-foreground: 210 40% 98%;
+
+    /* Primary - Vibrant Blue (Tailwind Blue 500/600) */
     --primary: 217.2 91.2% 59.8%;
     --primary-foreground: 222.2 47.4% 11.2%;
-    --secondary: 220 13% 25%;
-    --secondary-foreground: 220 14% 71%;
-    --muted: 220 13% 25%;
-    --muted-foreground: 220 14% 60%;
-    --accent: 220 13% 25%;
-    --accent-foreground: 220 14% 71%;
+
+    /* Secondary - Slate 800 */
+    --secondary: 217.2 32.6% 17.5%;
+    --secondary-foreground: 210 40% 98%;
+
+    /* Muted - Slate 800/900 */
+    --muted: 217.2 32.6% 17.5%;
+    --muted-foreground: 215 20.2% 65.1%;
+
+    /* Accent - Slate 800 (Hover states) */
+    --accent: 217.2 32.6% 17.5%;
+    --accent-foreground: 210 40% 98%;
+
+    /* Destructive */
     --destructive: 0 62.8% 30.6%;
     --destructive-foreground: 210 40% 98%;
-    --border: 220 13% 25%;
-    --input: 220 13% 25%;
-    --ring: 224.3 76.3% 48%;
+
+    /* Border - Slate 800 */
+    --border: 217.2 32.6% 17.5%;
+    --input: 217.2 32.6% 17.5%;
+    --ring: 212.7 26.8% 83.9%;
   }
 }
 
