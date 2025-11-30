@@ -25,9 +25,13 @@ const routes = app
   )
   .route(
     '/api/themes',
-    new Hono().get('/', (_c) => {
-      return _c.json({ themes: [] as string[] });
-    }),
+    new Hono()
+      .get('/', (_c) => {
+        return _c.json({ themes: [] as string[] });
+      })
+      .get('/:name', (_c) => {
+        return _c.text('', 200, { 'Content-Type': 'text/css' });
+      }),
   );
 
 export type AppType = typeof routes;

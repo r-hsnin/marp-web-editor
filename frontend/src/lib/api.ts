@@ -8,10 +8,14 @@ const client = hc<AppType>('http://localhost:3001');
 
 export type { ExportFormat };
 
-export const exportSlide = async (markdown: string, format: ExportFormat): Promise<void> => {
+export const exportSlide = async (
+  markdown: string,
+  format: ExportFormat,
+  theme?: string,
+): Promise<void> => {
   try {
     const response = await client.api.export.$post({
-      json: { markdown, format },
+      json: { markdown, format, theme },
     });
 
     if (!response.ok) {

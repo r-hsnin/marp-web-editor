@@ -7,13 +7,14 @@ const exportRoute = new Hono();
 
 exportRoute.post('/', zValidator('json', exportSchema), async (c) => {
   console.log('Received export request');
-  const { markdown, format } = c.req.valid('json');
-  console.log(`Exporting format: ${format}`);
+  const { markdown, format, theme } = c.req.valid('json');
+  console.log(`Exporting format: ${format}, theme: ${theme}`);
 
   try {
     const buffer = await marpConverter.convert({
       markdown,
       format: format as ExportFormat,
+      theme,
     });
 
     const contentTypes: Record<string, string> = {

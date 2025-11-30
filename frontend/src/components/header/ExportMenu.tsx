@@ -6,6 +6,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { type ExportFormat, exportSlide } from '@/lib/api';
+import { useThemeStore } from '@/lib/marp/themeStore';
 import { useEditorStore } from '@/lib/store';
 import {
   Download,
@@ -20,13 +21,14 @@ import { useState } from 'react';
 
 export const ExportMenu: React.FC = () => {
   const { markdown } = useEditorStore();
+  const { activeThemeId } = useThemeStore();
   const [isExporting, setIsExporting] = useState(false);
 
   const handleExport = async (format: ExportFormat) => {
     if (isExporting) return;
     setIsExporting(true);
     try {
-      await exportSlide(markdown, format);
+      await exportSlide(markdown, format, activeThemeId);
     } catch (error) {
       console.error('Failed to export:', error);
       alert('Failed to export presentation. Please check the console for details.');

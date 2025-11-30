@@ -1,5 +1,5 @@
-import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
+import { access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { v4 as uuidv4 } from 'uuid';
@@ -9,6 +9,7 @@ export type ExportFormat = 'pdf' | 'pptx' | 'html' | 'png' | 'jpg';
 export interface ConvertOptions {
   markdown: string;
   format: ExportFormat;
+  theme?: string;
 }
 
 export class MarpConverter {
@@ -47,7 +48,7 @@ export class MarpConverter {
   }
 
   async convert(options: ConvertOptions): Promise<Buffer> {
-    const { markdown, format } = options;
+    const { markdown, format, theme } = options;
     const inputPath = await this.createTempFile(markdown, 'md');
     const outputPath = inputPath.replace(/\.md$/, `.${format}`);
 
@@ -64,6 +65,30 @@ export class MarpConverter {
       // Use 'node' instead of 'bun' for the child process.
       // Puppeteer/Chrome interaction is unstable under Bun on Windows.
       const args = ['node', cliPath, inputPath, '-o', outputPath, '--allow-local-files'];
+
+      if (theme) {
+        // Check if it's a built-in theme
+        const builtInThemes = ['default', 'gaia', 'uncover'];
+        if (builtInThemes.includes(theme)) {
+          args.push('--theme', theme);
+        } else {
+          // Assume custom theme
+          // Validate theme name to prevent path traversal
+          const safeThemeName = theme.replace(/[^a-zA-Z0-9_\-]/g, '');
+          if (safeThemeName !== theme) {
+            console.warn(`Invalid theme name: ${theme}. Using default.`);
+          } else {
+            const themePath = resolve(process.cwd(), 'themes', `${safeThemeName}.css`);
+            try {
+              await access(themePath);
+              args.push('--theme-set', themePath);
+              args.push('--theme', safeThemeName);
+            } catch {
+              console.warn(`Theme file not found: ${themePath}`);
+            }
+          }
+        }
+      }
 
       const browserPath = this.getBrowserPath();
       const env: Record<string, string | undefined> = {

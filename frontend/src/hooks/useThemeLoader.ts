@@ -19,9 +19,9 @@ export const useThemeLoader = () => {
         return;
       }
 
-      // 2. External Theme (from backend)
+      // 2. External Theme (from backend API)
       try {
-        const res = await fetch(`/themes/${activeThemeId}.css`);
+        const res = await fetch(`http://localhost:3001/api/themes/${activeThemeId}`);
         if (!res.ok) throw new Error('Failed to load theme');
         const css = await res.text();
         setLoadedCss(css);
@@ -35,6 +35,22 @@ export const useThemeLoader = () => {
 
     loadTheme();
   }, [activeThemeId]);
+
+  // Fetch available themes from backend
+  useEffect(() => {
+    const fetchThemes = async () => {
+      try {
+        const res = await fetch('http://localhost:3001/api/themes');
+        if (res.ok) {
+          const data = await res.json();
+          useThemeStore.getState().setAvailableThemes(data.themes);
+        }
+      } catch (error) {
+        console.error('Failed to fetch themes:', error);
+      }
+    };
+    fetchThemes();
+  }, []);
 
   return { loadedCss, isLoading, activeThemeId };
 };
