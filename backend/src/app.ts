@@ -1,7 +1,8 @@
 import { Hono } from 'hono';
 import { cors } from 'hono/cors';
-import aiRoute from './routes/ai';
-import exportRoute from './routes/export';
+import aiRoute from './routes/ai.js';
+import exportRoute from './routes/export.js';
+import themesRoute from './routes/themes.js';
 
 const app = new Hono();
 
@@ -13,7 +14,10 @@ app.get('/health', (c) => {
   return c.json({ status: 'ok' });
 });
 
-const routes = app.route('/api/export', exportRoute).route('/api/ai', aiRoute);
+const routes = app
+  .route('/api/export', exportRoute)
+  .route('/api/ai', aiRoute)
+  .route('/api/themes', themesRoute);
 
 export type AppType = typeof routes;
 export default app;

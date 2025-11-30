@@ -1,7 +1,7 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { type ExportFormat, marpConverter } from '../lib/marp';
-import { exportSchema } from '../schemas/export';
+import { type ExportFormat, marpConverter } from '../lib/marp.js';
+import { exportSchema } from '../schemas/export.js';
 
 const exportRoute = new Hono();
 

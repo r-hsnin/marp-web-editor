@@ -2,7 +2,7 @@ import { openai } from '@ai-sdk/openai';
 import { zValidator } from '@hono/zod-validator';
 import { streamText } from 'ai';
 import { Hono } from 'hono';
-import { generateSchema } from '../schemas/ai';
+import { generateSchema } from '../schemas/ai.js';
 
 const aiRoute = new Hono();
 
