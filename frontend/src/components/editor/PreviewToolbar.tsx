@@ -12,8 +12,8 @@ import {
 } from 'lucide-react';
 import type React from 'react';
 
+import { ThemeSelector } from '@/components/editor/ThemeSelector';
 import { PaginationToggle } from '@/components/header/PaginationToggle';
-import { ThemeSelector } from '@/components/header/ThemeSelector';
 
 interface PreviewToolbarProps {
   viewMode: 'list' | 'slide';
@@ -26,8 +26,6 @@ interface PreviewToolbarProps {
   onNextSlide: () => void;
   hasPrevSlide: boolean;
   hasNextSlide: boolean;
-  currentTheme: string;
-  onThemeChange: (theme: string) => void;
   paginate: boolean;
   onPaginateToggle: () => void;
 }
@@ -43,8 +41,6 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
   onNextSlide,
   hasPrevSlide,
   hasNextSlide,
-  currentTheme,
-  onThemeChange,
   paginate,
   onPaginateToggle,
 }) => {
@@ -60,8 +56,8 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
       <div className="flex items-center gap-2">
         <div className="flex items-center gap-1">
           <TooltipProvider delayDuration={300}>
-            <ThemeSelector currentTheme={currentTheme} onThemeChange={onThemeChange} />
-
+            <ThemeSelector />
+            <Separator orientation="vertical" className="h-5 mx-1 bg-border/50" />
             <PaginationToggle enabled={paginate} onToggle={onPaginateToggle} />
 
             <Separator orientation="vertical" className="h-5 mx-1 bg-border/50" />

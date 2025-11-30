@@ -10,7 +10,19 @@ import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/comp
 import { Share2 } from 'lucide-react';
 import type React from 'react';
 
+import { fetchThemes } from '@/lib/api';
+import { useThemeStore } from '@/lib/marp/themeStore';
+import { useEffect } from 'react';
+
 export const MainLayout: React.FC = () => {
+  const { setAvailableThemes } = useThemeStore();
+
+  useEffect(() => {
+    fetchThemes()
+      .then(setAvailableThemes)
+      .catch((err) => console.error('Failed to fetch themes:', err));
+  }, [setAvailableThemes]);
+
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground font-sans selection:bg-primary/20">
       {/* Header */}

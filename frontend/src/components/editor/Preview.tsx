@@ -36,11 +36,6 @@ export const Preview: React.FC = () => {
     return FrontmatterProcessor.parseSettings(markdown);
   }, [markdown]);
 
-  const handleThemeChange = (theme: string) => {
-    const newMarkdown = FrontmatterProcessor.updateFrontmatter(markdown, { theme });
-    setMarkdown(newMarkdown);
-  };
-
   const handlePaginateToggle = () => {
     const newPaginate = !currentSettings.paginate;
     const newMarkdown = FrontmatterProcessor.updateFrontmatter(markdown, { paginate: newPaginate });
@@ -99,8 +94,6 @@ export const Preview: React.FC = () => {
         onNextSlide={goToNextSlide}
         hasPrevSlide={hasPrevSlide}
         hasNextSlide={hasNextSlide}
-        currentTheme={currentSettings.theme || 'default'}
-        onThemeChange={handleThemeChange}
         paginate={currentSettings.paginate || false}
         onPaginateToggle={handlePaginateToggle}
       />

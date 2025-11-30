@@ -50,3 +50,17 @@ export const exportSlide = async (markdown: string, format: ExportFormat): Promi
     throw error;
   }
 };
+
+export const fetchThemes = async (): Promise<string[]> => {
+  try {
+    const response = await client.api.themes.$get();
+    if (!response.ok) {
+      throw new Error('Failed to fetch themes');
+    }
+    const data = await response.json();
+    return data.themes;
+  } catch (error) {
+    console.error('Failed to fetch themes:', error);
+    return [];
+  }
+};
