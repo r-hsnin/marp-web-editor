@@ -2,6 +2,7 @@ import { Hono } from 'hono';
 import { cors } from 'hono/cors';
 import aiRoute from './routes/ai.js';
 import exportRoute from './routes/export.js';
+import templatesRoute from './routes/templates.js';
 import themesRoute from './routes/themes.js';
 
 const app = new Hono();
@@ -17,7 +18,8 @@ app.get('/health', (c) => {
 const routes = app
   .route('/api/export', exportRoute)
   .route('/api/ai', aiRoute)
-  .route('/api/themes', themesRoute);
+  .route('/api/themes', themesRoute)
+  .route('/api/templates', templatesRoute);
 
 export type AppType = typeof routes;
 export default app;

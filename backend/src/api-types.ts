@@ -32,6 +32,23 @@ const routes = app
       .get('/:name', (_c) => {
         return _c.text('', 200, { 'Content-Type': 'text/css' });
       }),
+  )
+  .route(
+    '/api/templates',
+    new Hono()
+      .get('/', (_c) => {
+        return _c.json({
+          templates: [] as {
+            id: string;
+            name: string;
+            description: string;
+            icon: string;
+          }[],
+        });
+      })
+      .get('/:name', (_c) => {
+        return _c.text('', 200, { 'Content-Type': 'text/markdown' });
+      }),
   );
 
 export type AppType = typeof routes;

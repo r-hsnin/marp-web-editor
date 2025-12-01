@@ -1,3 +1,4 @@
+import { existsSync } from 'node:fs';
 import fs from 'node:fs/promises';
 import { access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
