@@ -1,3 +1,4 @@
+import { TemplateSelector } from '@/components/editor/TemplateSelector';
 import { Button } from '@/components/ui/button';
 import {
   DropdownMenu,
@@ -202,6 +203,8 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ view }) => {
         <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
           Editor
         </span>
+        <Separator orientation="vertical" className="h-3 bg-border/50" />
+        <TemplateSelector />
         <Separator orientation="vertical" className="h-3 bg-border/50" />
       </div>
 

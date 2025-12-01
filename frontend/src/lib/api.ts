@@ -68,3 +68,39 @@ export const fetchThemes = async (): Promise<string[]> => {
     return [];
   }
 };
+
+export interface Template {
+  id: string;
+  name: string;
+  description: string;
+  icon: string;
+}
+
+export const fetchTemplates = async (): Promise<Template[]> => {
+  try {
+    const response = await client.api.templates.$get();
+    if (!response.ok) {
+      throw new Error('Failed to fetch templates');
+    }
+    const data = await response.json();
+    return data.templates;
+  } catch (error) {
+    console.error('Failed to fetch templates:', error);
+    return [];
+  }
+};
+
+export const fetchTemplate = async (name: string): Promise<string> => {
+  try {
+    const response = await client.api.templates[':name'].$get({
+      param: { name },
+    });
+    if (!response.ok) {
+      throw new Error('Failed to fetch template');
+    }
+    return await response.text();
+  } catch (error) {
+    console.error(`Failed to fetch template ${name}:`, error);
+    throw error;
+  }
+};
