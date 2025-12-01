@@ -68,7 +68,7 @@ export const MainLayout: React.FC = () => {
       <div className="flex-1 overflow-hidden bg-background">
         <ResizablePanelGroup direction="horizontal" className="h-full w-full">
           <ResizablePanel defaultSize={50} minSize={30} className="bg-background flex flex-col">
-            <div className="flex-1 relative">
+            <div className="flex-1 relative overflow-hidden">
               <Editor />
             </div>
           </ResizablePanel>
@@ -79,7 +79,7 @@ export const MainLayout: React.FC = () => {
           />
 
           <ResizablePanel defaultSize={50} minSize={30} className="bg-muted/10 flex flex-col">
-            <div className="flex-1 p-0 bg-muted/10 relative">
+            <div className="flex-1 p-0 bg-muted/10 relative overflow-hidden">
               <Preview />
             </div>
           </ResizablePanel>

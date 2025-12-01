@@ -82,7 +82,7 @@ export const Preview: React.FC = () => {
   }, [viewMode, isFullscreen, goToNextSlide, goToPrevSlide]);
 
   return (
-    <div className="flex flex-col h-full w-full bg-background relative group">
+    <div className="flex flex-col h-full w-full bg-background relative group overflow-hidden">
       <PreviewToolbar
         viewMode={viewMode}
         setViewMode={setViewMode}
