@@ -36,7 +36,12 @@ app.get('/:name', async (c) => {
     await access(themePath);
     const css = await readFile(themePath, 'utf-8');
 
-    return c.text(css, 200, {
+    // Rewrite relative image paths to absolute backend URLs
+    // This allows the frontend to load images correctly while keeping the CSS file
+    // utilizing relative paths for local Marp CLI export compatibility.
+    const processedCss = css.replace(/\.\.\/images\//g, 'http://localhost:3001/api/images/');
+
+    return c.text(processedCss, 200, {
       'Content-Type': 'text/css',
       'Cache-Control': 'public, max-age=3600',
     });

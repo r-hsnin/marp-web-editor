@@ -36,7 +36,12 @@ app.get('/:name', async (c) => {
     await access(templatePath);
     const content = await readFile(templatePath, 'utf-8');
 
-    return c.text(content, 200, {
+    // Rewrite relative image paths to absolute backend URLs
+    // This ensures images in templates (like ./images/shika_senbei.png)
+    // are displayed correctly in the frontend editor.
+    const processedContent = content.replace(/\.\/images\//g, 'http://localhost:3001/api/images/');
+
+    return c.text(processedContent, 200, {
       'Content-Type': 'text/markdown',
       'Cache-Control': 'public, max-age=3600',
     });

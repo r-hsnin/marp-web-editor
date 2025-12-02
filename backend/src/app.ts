@@ -1,4 +1,5 @@
 import { Hono } from 'hono';
+import { serveStatic } from 'hono/bun';
 import { cors } from 'hono/cors';
 import aiRoute from './routes/ai.js';
 import exportRoute from './routes/export.js';
@@ -9,6 +10,16 @@ const app = new Hono();
 
 // Configure CORS
 app.use('/*', cors());
+
+// Serve static images
+app.use(
+  '/api/images/*',
+  cors(),
+  serveStatic({
+    root: './images',
+    rewriteRequestPath: (path) => path.replace(/^\/api\/images\//, ''),
+  }),
+);
 
 // Health check endpoint
 app.get('/health', (c) => {
