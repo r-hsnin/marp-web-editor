@@ -1,7 +1,7 @@
 import app from './app.js';
 
-const port = 3001;
-console.log(`Server is running on http://localhost:${port}`);
+const port = Number(Bun.env.PORT) || 3001;
+console.log(`Server is running on ${Bun.env.APP_BASE_URL || `http://localhost:${port}`}`);
 
 export default {
   fetch: app.fetch,

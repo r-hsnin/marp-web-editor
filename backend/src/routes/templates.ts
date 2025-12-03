@@ -39,7 +39,7 @@ app.get('/:name', async (c) => {
     // Rewrite relative image paths to absolute backend URLs
     // This ensures images in templates (like ./images/shika_senbei.png)
     // are displayed correctly in the frontend editor.
-    const processedContent = content.replace(/\.\/images\//g, 'http://localhost:3001/api/images/');
+    const processedContent = content.replace(/\.\/images\//g, `${Bun.env.APP_BASE_URL || 'http://localhost:3001'}/api/images/`);
 
     return c.text(processedContent, 200, {
       'Content-Type': 'text/markdown',
