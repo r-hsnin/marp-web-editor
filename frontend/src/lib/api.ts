@@ -1,10 +1,8 @@
 import { hc } from 'hono/client';
 import type { AppType, ExportFormat } from '../../../backend/src/api-types';
 
-export const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001/api';
-
 // Ideally, we should extract the route definitions to a shared package.
-const client = hc<AppType>(import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001');
+const client = hc<AppType>('/');
 
 export type { ExportFormat };
 

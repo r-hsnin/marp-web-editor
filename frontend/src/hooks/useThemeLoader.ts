@@ -21,7 +21,7 @@ export const useThemeLoader = () => {
 
       // 2. External Theme (from backend API)
       try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/themes/${activeThemeId}`);
+        const res = await fetch(`/api/themes/${activeThemeId}`);
         if (!res.ok) throw new Error('Failed to load theme');
         const css = await res.text();
         setLoadedCss(css);
@@ -38,18 +38,11 @@ export const useThemeLoader = () => {
 
   // Fetch available themes from backend
   useEffect(() => {
-    const fetchThemes = async () => {
-      try {
-        const res = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001'}/api/themes`);
-        if (res.ok) {
-          const data = await res.json();
-          useThemeStore.getState().setAvailableThemes(data.themes);
-        }
-      } catch (error) {
-        console.error('Failed to fetch themes:', error);
-      }
+    const loadThemes = async () => {
+        const themes = await import('../lib/api').then(m => m.fetchThemes());
+        useThemeStore.getState().setAvailableThemes(themes);
     };
-    fetchThemes();
+    loadThemes();
   }, []);
 
   return { loadedCss, isLoading, activeThemeId };
