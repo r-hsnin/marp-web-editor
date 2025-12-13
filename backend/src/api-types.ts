@@ -1,6 +1,6 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
-import { generateSchema } from './schemas/ai.js';
+import { chatSchema, generateSchema } from './schemas/ai.js';
 import { exportSchema } from './schemas/export.js';
 export type { ExportFormat } from './schemas/export.js';
 
@@ -18,10 +18,15 @@ const routes = app
   )
   .route(
     '/api/ai',
-    new Hono().post('/generate', zValidator('json', generateSchema), (_c) => {
-      // Simulating the return type of streamText(...).toTextStreamResponse()
-      return new Response();
-    }),
+    new Hono()
+      .post('/generate', zValidator('json', generateSchema), (_c) => {
+        // Simulating the return type of streamText(...).toTextStreamResponse()
+        return new Response();
+      })
+      .post('/chat', zValidator('json', chatSchema), (_c) => {
+        // Simulating the return type of toDataStreamResponse()
+        return new Response();
+      }),
   )
   .route(
     '/api/themes',

@@ -1,12 +1,15 @@
 import { Footer } from '@/components/Footer';
+import { ChatView } from '@/components/ai/ChatView';
 import { Editor } from '@/components/editor/Editor';
 import { Preview } from '@/components/editor/Preview';
 import { ExportMenu } from '@/components/header/ExportMenu';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { useEditorStore } from '@/lib/store';
 import { Share2 } from 'lucide-react';
 import type React from 'react';
 
@@ -16,6 +19,7 @@ import { useEffect } from 'react';
 
 export const MainLayout: React.FC = () => {
   const { setAvailableThemes } = useThemeStore();
+  const { isChatOpen, closeChat } = useEditorStore();
 
   useEffect(() => {
     fetchThemes()
@@ -87,6 +91,18 @@ export const MainLayout: React.FC = () => {
       </div>
 
       <Footer />
+
+      <Dialog open={isChatOpen} onOpenChange={closeChat}>
+        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
+          <DialogTitle className="sr-only">AI Assistant</DialogTitle>
+          <DialogDescription className="sr-only">
+            Chat with AI Assistant to generate slides
+          </DialogDescription>
+          <div className="flex-1 min-h-0 flex flex-col">
+            <ChatView />
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 };

@@ -14,7 +14,7 @@ import { EditorView } from '@codemirror/view';
 import { AIFloatingButton } from '@/components/editor/AIFloatingButton';
 
 export const Editor: React.FC = () => {
-  const { markdown: content, setMarkdown, fontSize } = useEditorStore();
+  const { markdown: content, setMarkdown, fontSize, openChat } = useEditorStore();
   const { resolvedTheme } = useTheme();
   const [view, setView] = React.useState<EditorView | null>(null);
 
@@ -82,7 +82,7 @@ export const Editor: React.FC = () => {
         />
 
         <div className="absolute bottom-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <AIFloatingButton onClick={() => console.log('AI Generate clicked')} />
+          <AIFloatingButton onClick={openChat} />
         </div>
       </div>
     </div>

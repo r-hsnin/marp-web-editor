@@ -7,6 +7,9 @@ interface EditorState {
   setTheme: (theme: string) => void;
   fontSize: number;
   setFontSize: (fontSize: number) => void;
+  isChatOpen: boolean;
+  openChat: () => void;
+  closeChat: () => void;
 }
 
 export const useEditorStore = create<EditorState>((set) => ({
@@ -32,4 +35,7 @@ Content on the left
   setTheme: (theme) => set({ theme }),
   fontSize: 14,
   setFontSize: (fontSize) => set({ fontSize }),
+  isChatOpen: false,
+  openChat: () => set({ isChatOpen: true }),
+  closeChat: () => set({ isChatOpen: false }),
 }));

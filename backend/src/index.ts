@@ -6,4 +6,5 @@ console.log(`Server is running on ${Bun.env.APP_BASE_URL || `http://localhost:${
 export default {
   fetch: app.fetch,
   port,
+  idleTimeout: 60, // Increase timeout for AI generation (default is usually 10-30s)
 };

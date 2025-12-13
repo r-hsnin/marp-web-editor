@@ -9,7 +9,16 @@ import themesRoute from './routes/themes.js';
 const app = new Hono();
 
 // Configure CORS
-app.use('/*', cors());
+// Configure CORS
+app.use(
+  '/*',
+  cors({
+    origin: '*',
+    allowMethods: ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+    allowHeaders: ['Content-Type', 'Authorization'],
+    exposeHeaders: ['X-Agent-Intent'],
+  }),
+);
 
 // Serve static images
 app.use(
