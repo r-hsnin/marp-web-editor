@@ -39,7 +39,10 @@ app.get('/:name', async (c) => {
     // Rewrite relative image paths to absolute backend URLs
     // This allows the frontend to load images correctly while keeping the CSS file
     // utilizing relative paths for local Marp CLI export compatibility.
-    const processedCss = css.replace(/\.\.\/images\//g, `${Bun.env.APP_BASE_URL || 'http://localhost:3001'}/api/images/`);
+    const processedCss = css.replace(
+      /\.\.\/images\//g,
+      `${Bun.env.APP_BASE_URL || 'http://localhost:3001'}/api/images/`,
+    );
 
     return c.text(processedCss, 200, {
       'Content-Type': 'text/css',

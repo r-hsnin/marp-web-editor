@@ -39,8 +39,8 @@ export const useThemeLoader = () => {
   // Fetch available themes from backend
   useEffect(() => {
     const loadThemes = async () => {
-        const themes = await import('../lib/api').then(m => m.fetchThemes());
-        useThemeStore.getState().setAvailableThemes(themes);
+      const themes = await import('../lib/api').then((m) => m.fetchThemes());
+      useThemeStore.getState().setAvailableThemes(themes);
     };
     loadThemes();
   }, []);
