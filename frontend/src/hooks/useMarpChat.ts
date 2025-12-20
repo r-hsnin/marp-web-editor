@@ -1,17 +1,62 @@
-import { useChat } from '@ai-sdk/react';
+import { type UIMessage, useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useEditorStore } from '../lib/store';
 
+const CHAT_STORAGE_KEY = 'marp-chat-history';
+const INTENTS_STORAGE_KEY = 'marp-chat-intents';
+
+function loadMessagesFromStorage(): UIMessage[] {
+  try {
+    const stored = localStorage.getItem(CHAT_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : [];
+  } catch {
+    return [];
+  }
+}
+
+function loadIntentsFromStorage(): Record<string, string> {
+  try {
+    const stored = localStorage.getItem(INTENTS_STORAGE_KEY);
+    return stored ? JSON.parse(stored) : {};
+  } catch {
+    return {};
+  }
+}
+
 export function useMarpChat() {
-  const { markdown } = useEditorStore();
+  const { markdown, setMarkdown } = useEditorStore();
   const [input, setInput] = useState('');
-  const [interactiveUI, setInteractiveUI] = useState<{
-    data: unknown;
-    toolName: string;
-  } | null>(null);
-  const [agentIntents, setAgentIntents] = useState<Record<string, string>>({});
+  const [agentIntents, setAgentIntents] = useState<Record<string, string>>(loadIntentsFromStorage);
   const currentIntentRef = useRef<string | null>(null);
+  const markdownRef = useRef(markdown);
+  const initialMessages = useMemo(() => loadMessagesFromStorage(), []);
+
+  // Keep ref in sync with latest markdown
+  useEffect(() => {
+    markdownRef.current = markdown;
+  }, [markdown]);
+
+  const transport = useMemo(
+    () =>
+      new DefaultChatTransport({
+        api: '/api/ai/chat',
+        prepareSendMessagesRequest({ messages }) {
+          // Send latest markdown content with every request
+          return { body: { messages, context: markdownRef.current } };
+        },
+        // Intercept the response to read the custom header
+        fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
+          const response = await fetch(input, init);
+          const intent = response.headers.get('X-Agent-Intent');
+          if (intent) {
+            currentIntentRef.current = intent;
+          }
+          return response;
+        }) as unknown as typeof fetch,
+      }),
+    [],
+  );
 
   const {
     messages,
@@ -19,22 +64,10 @@ export function useMarpChat() {
     stop,
     sendMessage: sendChatRequest,
     setMessages,
+    addToolOutput,
   } = useChat({
-    transport: new DefaultChatTransport({
-      api: '/api/ai/chat',
-      body: {
-        context: markdown,
-      },
-      // Intercept the response to read the custom header
-      fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
-        const response = await fetch(input, init);
-        const intent = response.headers.get('X-Agent-Intent');
-        if (intent) {
-          currentIntentRef.current = intent;
-        }
-        return response;
-      }) as unknown as typeof fetch,
-    }),
+    messages: initialMessages,
+    transport,
     // @ts-ignore: Correcting signature based on lint error
     // biome-ignore lint/suspicious/noExplicitAny: Handling varied API response signatures
     onFinish: (result: any) => {
@@ -76,6 +109,20 @@ export function useMarpChat() {
 
   const isLoading = status === 'submitted' || (status === 'streaming' && !lastMessageHasContent);
 
+  // Persist messages to localStorage
+  useEffect(() => {
+    if (messages.length > 0) {
+      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    }
+  }, [messages]);
+
+  // Persist intents to localStorage
+  useEffect(() => {
+    if (Object.keys(agentIntents).length > 0) {
+      localStorage.setItem(INTENTS_STORAGE_KEY, JSON.stringify(agentIntents));
+    }
+  }, [agentIntents]);
+
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
 
@@ -89,28 +136,7 @@ export function useMarpChat() {
         return { ...prev, [lastMessage.id]: intent };
       });
     }
-
-    if (lastMessage?.role === 'assistant' && !isLoading) {
-      // Extract text from parts array
-      const textContent = lastMessage.parts
-        .filter((part) => part.type === 'text')
-        .map((part) => part.text)
-        .join('');
-
-      if (textContent.trim().startsWith('{')) {
-        try {
-          const data = JSON.parse(textContent);
-          if (data.plan && Array.isArray(data.plan)) {
-            setInteractiveUI({ data, toolName: 'displayPlan' });
-          }
-        } catch (e) {
-          // Ignore JSON parse errors while streaming
-        }
-      }
-    } else if (lastMessage?.role === 'user') {
-      if (interactiveUI) setInteractiveUI(null);
-    }
-  }, [messages, isLoading, interactiveUI]);
+  }, [messages]);
 
   const handleInputChange = useCallback(
     (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
@@ -141,6 +167,43 @@ export function useMarpChat() {
     [sendChatRequest, input],
   );
 
+  const handleApplyProposal = useCallback(
+    (toolCallId: string, _result: unknown, slideIndex: number, newMarkdown: string) => {
+      // 1. Update the actual slide content
+      const slides = markdown.split('---');
+      if (slides[slideIndex]) {
+        slides[slideIndex] = `\n${newMarkdown}\n`;
+        setMarkdown(slides.join('---'));
+      }
+
+      // 2. Feedback to AI
+      addToolOutput({
+        tool: 'propose_edit',
+        toolCallId,
+        output: 'Applied successfully',
+      });
+    },
+    [markdown, setMarkdown, addToolOutput],
+  );
+
+  const handleDiscardProposal = useCallback(
+    (toolCallId: string) => {
+      addToolOutput({
+        tool: 'propose_edit',
+        toolCallId,
+        output: 'User discarded the proposal',
+      });
+    },
+    [addToolOutput],
+  );
+
+  const clearHistory = useCallback(() => {
+    setMessages([]);
+    setAgentIntents({});
+    localStorage.removeItem(CHAT_STORAGE_KEY);
+    localStorage.removeItem(INTENTS_STORAGE_KEY);
+  }, [setMessages]);
+
   return {
     messages,
     input,
@@ -148,7 +211,9 @@ export function useMarpChat() {
     sendMessage,
     isLoading,
     stop,
-    interactiveUI,
     agentIntents,
+    handleApplyProposal,
+    handleDiscardProposal,
+    clearHistory,
   };
 }

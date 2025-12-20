@@ -1,11 +1,22 @@
-import type { UIMessage } from 'ai';
-import { Bot, Send } from 'lucide-react';
-import { useEffect, useRef } from 'react';
+import { type UIMessage, getToolName, isToolUIPart } from 'ai';
+import { Bot, Send, Trash2 } from 'lucide-react';
+import { useEffect, useRef, useState } from 'react';
 import { useMarpChat } from '../../hooks/useMarpChat';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '../ui/alert-dialog';
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { InteractiveComponent } from './InteractiveComponent';
+import { ProposalCard } from './ProposalCard';
 
 export function ChatView() {
   const {
@@ -14,10 +25,13 @@ export function ChatView() {
     handleInputChange,
     sendMessage,
     isLoading,
-    interactiveUI,
     agentIntents,
+    handleApplyProposal,
+    handleDiscardProposal,
+    clearHistory,
   } = useMarpChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [showClearConfirm, setShowClearConfirm] = useState(false);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Need to scroll when messages change
   useEffect(() => {
@@ -25,6 +39,11 @@ export function ChatView() {
       scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
     }
   }, [messages]);
+
+  const handleClearHistory = () => {
+    clearHistory();
+    setShowClearConfirm(false);
+  };
 
   return (
     <div className="flex flex-col h-full bg-background">
@@ -40,9 +59,11 @@ export function ChatView() {
           </div>
         )}
         {messages.map((m: UIMessage) => {
+          const parts = m.parts ?? [];
           // Skip empty assistant messages during streaming
-          const hasContent = m.parts.some((part) => part.type === 'text' && part.text);
-          if (!hasContent && m.role === 'assistant') {
+          const hasTextContent = parts.some((part) => part.type === 'text' && part.text);
+          const hasToolContent = parts.some((part) => isToolUIPart(part));
+          if (!hasTextContent && !hasToolContent && m.role === 'assistant') {
             return null;
           }
 
@@ -71,7 +92,7 @@ export function ChatView() {
                     </Badge>
                   </div>
                 )}
-                {m.parts.map((part, index) => {
+                {parts.map((part, index) => {
                   if (part.type === 'text') {
                     return (
                       // biome-ignore lint/suspicious/noArrayIndexKey: Parts order is stable
@@ -80,21 +101,46 @@ export function ChatView() {
                       </div>
                     );
                   }
-                  if (part.type === 'tool-invocation') {
-                    // biome-ignore lint/suspicious/noExplicitAny: ToolInvocation access
-                    const toolInvocation = (part as any).toolInvocation;
+                  if (isToolUIPart(part)) {
+                    const toolName = getToolName(part);
                     return (
-                      <div key={toolInvocation.toolCallId} className="mt-2">
-                        <div className="text-xs opacity-70 mb-1">
-                          Tool: {toolInvocation.toolName}
-                        </div>
-                        {'result' in toolInvocation ? (
-                          <InteractiveComponent
-                            toolName={toolInvocation.toolName}
-                            data={toolInvocation.result}
+                      <div key={part.toolCallId} className="mt-2 w-[300px]">
+                        {toolName === 'propose_edit' ? (
+                          <ProposalCard
+                            toolCallId={part.toolCallId}
+                            input={
+                              part.input as
+                                | { slideIndex: number; newMarkdown: string; reason: string }
+                                | undefined
+                            }
+                            output={part.output as string | undefined}
+                            state={part.state}
+                            onApply={handleApplyProposal}
+                            onDiscard={handleDiscardProposal}
                           />
+                        ) : toolName === 'propose_plan' && part.input ? (
+                          <div className="p-3 border rounded-lg bg-muted/50">
+                            <div className="font-semibold text-sm mb-2">
+                              {(part.input as { title: string }).title}
+                            </div>
+                            <ul className="text-xs space-y-1">
+                              {(part.input as { outline: string[] }).outline.map((item, i) => (
+                                // biome-ignore lint/suspicious/noArrayIndexKey: Outline order is stable
+                                <li key={i} className="pl-2 border-l-2 border-primary/50">
+                                  {item}
+                                </li>
+                              ))}
+                            </ul>
+                          </div>
                         ) : (
-                          <div className="animate-pulse text-xs">Running...</div>
+                          <>
+                            <div className="text-xs opacity-70 mb-1">Tool: {toolName}</div>
+                            {part.state === 'output-available' ? (
+                              <InteractiveComponent toolName={toolName} data={part.output} />
+                            ) : (
+                              <div className="animate-pulse text-xs">Running...</div>
+                            )}
+                          </>
                         )}
                       </div>
                     );
@@ -110,19 +156,21 @@ export function ChatView() {
             <div className="bg-muted p-3 rounded-lg text-sm animate-pulse">Thinking...</div>
           </div>
         )}
-
-        {/* Render Interactive UI for the latest response if applicable */}
-        {interactiveUI && !isLoading && messages[messages.length - 1]?.role === 'assistant' && (
-          <div className="flex flex-col gap-1 items-start">
-            <div className="p-3 rounded-lg max-w-[85%] text-sm bg-muted text-foreground w-full">
-              <div className="text-xs opacity-70 mb-1">Generated Plan</div>
-              <InteractiveComponent data={interactiveUI.data} toolName={interactiveUI.toolName} />
-            </div>
-          </div>
-        )}
       </div>
 
       <form onSubmit={sendMessage} className="p-4 border-t border-border flex gap-2">
+        {messages.length > 0 && (
+          <Button
+            type="button"
+            variant="ghost"
+            size="icon"
+            onClick={() => setShowClearConfirm(true)}
+            title="Clear chat history"
+            className="text-muted-foreground hover:text-destructive"
+          >
+            <Trash2 className="w-4 h-4" />
+          </Button>
+        )}
         <Input
           value={input}
           onChange={handleInputChange}
@@ -133,6 +181,26 @@ export function ChatView() {
           <Send className="w-4 h-4" />
         </Button>
       </form>
+
+      <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Clear chat history?</AlertDialogTitle>
+            <AlertDialogDescription>
+              This will permanently delete all chat messages. This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              onClick={handleClearHistory}
+              className="bg-destructive text-destructive-foreground hover:bg-destructive/90"
+            >
+              Clear
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

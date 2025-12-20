@@ -1,5 +1,3 @@
-import { type SlidePlan, SlidePlanView } from './SlidePlanView';
-
 interface InteractiveComponentProps {
   data: unknown;
   toolName?: string;
@@ -7,10 +5,6 @@ interface InteractiveComponentProps {
 
 export function InteractiveComponent({ data, toolName }: InteractiveComponentProps) {
   if (!data) return null;
-
-  if (toolName === 'displayPlan') {
-    return <SlidePlanView data={data as SlidePlan} />;
-  }
 
   // Default fallback for debugging or unknown tools
   return (
