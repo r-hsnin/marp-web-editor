@@ -15,6 +15,7 @@ import {
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { AddProposalCard } from './AddProposalCard';
 import { InteractiveComponent } from './InteractiveComponent';
 import { ProposalCard } from './ProposalCard';
 
@@ -27,8 +28,10 @@ export function ChatView() {
     isLoading,
     agentIntents,
     handleApplyProposal,
+    handleApplyAddProposal,
     handleDiscardProposal,
     clearHistory,
+    getSlideContent,
   } = useMarpChat();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
@@ -104,7 +107,7 @@ export function ChatView() {
                   if (isToolUIPart(part)) {
                     const toolName = getToolName(part);
                     return (
-                      <div key={part.toolCallId} className="mt-2 w-[300px]">
+                      <div key={part.toolCallId} className="mt-2 w-full">
                         {toolName === 'propose_edit' ? (
                           <ProposalCard
                             toolCallId={part.toolCallId}
@@ -117,6 +120,30 @@ export function ChatView() {
                             state={part.state}
                             onApply={handleApplyProposal}
                             onDiscard={handleDiscardProposal}
+                            currentContent={
+                              (part.input as { slideIndex?: number } | undefined)?.slideIndex !==
+                              undefined
+                                ? getSlideContent((part.input as { slideIndex: number }).slideIndex)
+                                : ''
+                            }
+                          />
+                        ) : toolName === 'propose_add' ? (
+                          <AddProposalCard
+                            toolCallId={part.toolCallId}
+                            input={
+                              part.input as
+                                | {
+                                    insertAfter: number;
+                                    newMarkdown: string;
+                                    replaceAll: boolean;
+                                    reason: string;
+                                  }
+                                | undefined
+                            }
+                            output={part.output as string | undefined}
+                            state={part.state}
+                            onApply={handleApplyAddProposal}
+                            onDiscard={handleDiscardProposal}
                           />
                         ) : toolName === 'propose_plan' && part.input ? (
                           <div className="p-3 border rounded-lg bg-muted/50">
@@ -124,12 +151,14 @@ export function ChatView() {
                               {(part.input as { title?: string }).title ?? 'Planning...'}
                             </div>
                             <ul className="text-xs space-y-1">
-                              {((part.input as { outline?: string[] }).outline ?? []).map((item, i) => (
-                                // biome-ignore lint/suspicious/noArrayIndexKey: Outline order is stable
-                                <li key={i} className="pl-2 border-l-2 border-primary/50">
-                                  {item}
-                                </li>
-                              ))}
+                              {((part.input as { outline?: string[] }).outline ?? []).map(
+                                (item, i) => (
+                                  // biome-ignore lint/suspicious/noArrayIndexKey: Outline order is stable
+                                  <li key={i} className="pl-2 border-l-2 border-primary/50">
+                                    {item}
+                                  </li>
+                                ),
+                              )}
                             </ul>
                           </div>
                         ) : (

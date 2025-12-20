@@ -26,7 +26,7 @@ function loadIntentsFromStorage(): Record<string, string> {
 
 // Format markdown with slide indices for AI context
 function formatContextWithIndices(markdown: string): string {
-  const slides = markdown.split('---');
+  const slides = markdown.split(/\n---\n/);
   return slides.map((slide, i) => `[${i}]\n${slide.trim()}`).join('\n\n---\n\n');
 }
 
@@ -176,10 +176,16 @@ export function useMarpChat() {
   const handleApplyProposal = useCallback(
     (toolCallId: string, _result: unknown, slideIndex: number, newMarkdown: string) => {
       // 1. Update the actual slide content
-      const slides = markdown.split('---');
-      if (slides[slideIndex]) {
-        slides[slideIndex] = `\n${newMarkdown}\n`;
-        setMarkdown(slides.join('---'));
+      const slides = markdown.split(/\n---\n/);
+      if (slides[slideIndex] !== undefined) {
+        // Preserve the newline structure: each slide should have \n prefix/suffix
+        // so that join('\n---\n') produces \n\n---\n\n between slides
+        const isFirst = slideIndex === 0;
+        const isLast = slideIndex === slides.length - 1;
+        const prefix = isFirst ? '' : '\n';
+        const suffix = isLast ? '' : '\n';
+        slides[slideIndex] = `${prefix}${newMarkdown.trim()}${suffix}`;
+        setMarkdown(slides.join('\n---\n'));
       }
 
       // 2. Feedback to AI
@@ -192,10 +198,42 @@ export function useMarpChat() {
     [markdown, setMarkdown, addToolOutput],
   );
 
-  const handleDiscardProposal = useCallback(
-    (toolCallId: string) => {
+  const handleApplyAddProposal = useCallback(
+    (toolCallId: string, insertAfter: number, newMarkdown: string, replaceAll: boolean) => {
+      if (replaceAll) {
+        // Replace all slides
+        setMarkdown(newMarkdown.trim());
+      } else {
+        // Insert new slides
+        const existingSlides = markdown.split(/\n---\n/);
+        const newSlides = newMarkdown.trim().split(/\n---\n/);
+        const insertIndex = insertAfter + 1; // insertAfter: -1 means insert at 0
+
+        // Insert new slides with proper formatting
+        const formattedNewSlides = newSlides.map((s, i) => {
+          const isFirst = insertIndex === 0 && i === 0;
+          const prefix = isFirst ? '' : '\n';
+          return `${prefix}${s.trim()}\n`;
+        });
+
+        existingSlides.splice(insertIndex, 0, ...formattedNewSlides);
+        setMarkdown(existingSlides.join('\n---\n'));
+      }
+
+      // Feedback to AI
       addToolOutput({
-        tool: 'propose_edit',
+        tool: 'propose_add',
+        toolCallId,
+        output: replaceAll ? 'All slides replaced successfully' : 'Slides added successfully',
+      });
+    },
+    [markdown, setMarkdown, addToolOutput],
+  );
+
+  const handleDiscardProposal = useCallback(
+    (toolCallId: string, toolName: 'propose_edit' | 'propose_add' = 'propose_edit') => {
+      addToolOutput({
+        tool: toolName,
         toolCallId,
         output: 'User discarded the proposal',
       });
@@ -210,6 +248,15 @@ export function useMarpChat() {
     localStorage.removeItem(INTENTS_STORAGE_KEY);
   }, [setMessages]);
 
+  // Helper to get current slide content by index
+  const getSlideContent = useCallback(
+    (slideIndex: number): string => {
+      const slides = markdown.split(/\n---\n/);
+      return slides[slideIndex]?.trim() ?? '';
+    },
+    [markdown],
+  );
+
   return {
     messages,
     input,
@@ -219,7 +266,9 @@ export function useMarpChat() {
     stop,
     agentIntents,
     handleApplyProposal,
+    handleApplyAddProposal,
     handleDiscardProposal,
     clearHistory,
+    getSlideContent,
   };
 }
