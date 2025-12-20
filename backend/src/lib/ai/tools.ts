@@ -6,8 +6,8 @@ import { z } from 'zod';
  * Used by Editor and Writer agents to suggest changes to slides
  */
 export const proposeEditSchema = z.object({
-  slideIndex: z.number().describe('The 0-based index of the slide to edit'),
-  newMarkdown: z.string().describe('The complete new markdown content for the target slide'),
+  slideIndex: z.number().describe('The 0-based index from the context (e.g., [0], [1], [2])'),
+  newMarkdown: z.string().describe('The new markdown content for the slide. Do NOT include slide separator ---'),
   reason: z.string().describe('Brief explanation of changes for the user'),
 });
 

@@ -24,6 +24,12 @@ function loadIntentsFromStorage(): Record<string, string> {
   }
 }
 
+// Format markdown with slide indices for AI context
+function formatContextWithIndices(markdown: string): string {
+  const slides = markdown.split('---');
+  return slides.map((slide, i) => `[${i}]\n${slide.trim()}`).join('\n\n---\n\n');
+}
+
 export function useMarpChat() {
   const { markdown, setMarkdown } = useEditorStore();
   const [input, setInput] = useState('');
@@ -42,8 +48,8 @@ export function useMarpChat() {
       new DefaultChatTransport({
         api: '/api/ai/chat',
         prepareSendMessagesRequest({ messages }) {
-          // Send latest markdown content with every request
-          return { body: { messages, context: markdownRef.current } };
+          // Send markdown with slide indices for accurate AI targeting
+          return { body: { messages, context: formatContextWithIndices(markdownRef.current) } };
         },
         // Intercept the response to read the custom header
         fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {

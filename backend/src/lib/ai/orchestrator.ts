@@ -2,6 +2,7 @@ import { type CoreMessage, generateObject } from 'ai';
 import { z } from 'zod';
 import { architectAgent } from './agents/architect.js';
 import { editorAgent } from './agents/editor.js';
+import { generalAgent } from './agents/general.js';
 import { writerAgent } from './agents/writer.js';
 import { aiModel } from './config.js';
 
@@ -53,9 +54,7 @@ ${context}
         response = await editorAgent.run(messages, context, normalizedTargetSlide);
         break;
       default:
-        // For general chat, we just stream text back
-        // In a real app, you might have a 'chatAgent'
-        response = await writerAgent.run(messages, context, undefined); // Fallback to writer for now
+        response = await generalAgent.run(messages, context);
         break;
     }
 
