@@ -7,7 +7,7 @@ import { aiModel } from './config.js';
 
 export const IntentSchema = z.object({
   intent: z.enum(['architect', 'writer', 'editor', 'general_chat']),
-  targetSlide: z.number().optional().describe('The slide number to edit, if applicable'),
+  targetSlide: z.number().nullish().describe('The slide number to edit, if applicable'),
 });
 
 export type Intent = z.infer<typeof IntentSchema>;
@@ -39,17 +39,18 @@ ${context}
     console.log(`[Orchestrator] Intent: ${intent}, TargetSlide: ${targetSlide}`);
 
     // 2. Route to Specialist
-    // 2. Route to Specialist
     let response: Response;
+    const normalizedTargetSlide = targetSlide ?? undefined;
+
     switch (intent) {
       case 'architect':
         response = await architectAgent.run(messages, context);
         break;
       case 'writer':
-        response = await writerAgent.run(messages, context, targetSlide);
+        response = await writerAgent.run(messages, context, normalizedTargetSlide);
         break;
       case 'editor':
-        response = await editorAgent.run(messages, context, targetSlide);
+        response = await editorAgent.run(messages, context, normalizedTargetSlide);
         break;
       default:
         // For general chat, we just stream text back
