@@ -1,6 +1,11 @@
 import { type CoreMessage, stepCountIs, streamText } from 'ai';
 import { aiModel } from '../config.js';
-import { getMarpGuidelineTool, proposeEditTool, proposeInsertTool, proposeReplaceTool } from '../tools.js';
+import {
+  getMarpGuidelineTool,
+  proposeEditTool,
+  proposeInsertTool,
+  proposeReplaceTool,
+} from '../tools.js';
 
 export const editorAgent = {
   async run(messages: CoreMessage[], context: string, targetSlide?: number) {

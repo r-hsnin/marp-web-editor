@@ -99,7 +99,10 @@ export function ChatView() {
                   if (part.type === 'text') {
                     return (
                       // biome-ignore lint/suspicious/noArrayIndexKey: Text parts order is stable
-                      <div key={index} className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]">
+                      <div
+                        key={index}
+                        className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]"
+                      >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{part.text}</ReactMarkdown>
                       </div>
                     );

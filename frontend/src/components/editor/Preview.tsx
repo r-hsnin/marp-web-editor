@@ -65,6 +65,17 @@ export const Preview: React.FC = () => {
   // Handle keyboard navigation
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
+      // Skip if focus is on an input element
+      const target = e.target as HTMLElement;
+      if (
+        target.tagName === 'INPUT' ||
+        target.tagName === 'TEXTAREA' ||
+        target.isContentEditable ||
+        target.closest('.cm-editor')
+      ) {
+        return;
+      }
+
       // Only handle navigation if we are in slide view or fullscreen
       if (viewMode === 'slide' || isFullscreen) {
         if (e.key === 'ArrowRight' || e.key === ' ') {

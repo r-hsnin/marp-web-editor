@@ -8,7 +8,7 @@ interface ProposalCardProps {
   output?: string;
   state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
   onApply: (toolCallId: string, result: unknown, slideIndex: number, newMarkdown: string) => void;
-  onDiscard: (toolCallId: string, toolName?: 'propose_edit' | 'propose_add') => void;
+  onDiscard: (toolCallId: string, toolName?: 'propose_edit' | 'propose_insert' | 'propose_replace') => void;
   currentContent?: string;
 }
 
