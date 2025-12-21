@@ -1,3 +1,5 @@
+import { readFileSync } from 'node:fs';
+import { join } from 'node:path';
 import { tool } from 'ai';
 import { z } from 'zod';
 
@@ -14,26 +16,32 @@ export const proposeEditSchema = z.object({
 });
 
 /**
- * Schema for propose_add tool
- * Used by Editor agent to add new slides or replace all slides
+ * Schema for propose_insert tool
+ * Used by Editor agent to insert new slides
  */
-export const proposeAddSchema = z.object({
+export const proposeInsertSchema = z.object({
   insertAfter: z
     .number()
-    .describe(
-      'Insert after this slide index. Use -1 to insert at the beginning. Ignored if replaceAll is true.',
-    ),
+    .describe('Insert after this slide index. Use -1 to insert at the beginning.'),
   newMarkdown: z
     .string()
     .describe(
       'The markdown content for new slide(s). Can include --- to add multiple slides at once.',
     ),
-  replaceAll: z
-    .boolean()
+  reason: z.string().describe('Brief explanation for this insertion'),
+});
+
+/**
+ * Schema for propose_replace tool
+ * Used by Editor agent to replace all slides
+ */
+export const proposeReplaceSchema = z.object({
+  newMarkdown: z
+    .string()
     .describe(
-      'If true, replace all existing slides with the new content. If false, insert new slides.',
+      'The complete markdown content for the new presentation. Include --- between slides.',
     ),
-  reason: z.string().describe('Brief explanation for this change'),
+  reason: z.string().describe('Brief explanation for this replacement'),
 });
 
 /**
@@ -51,25 +59,58 @@ export const proposePlanSchema = z.object({
  * No 'execute' function = AI SDK will emit tool calls for frontend handling
  */
 export const proposeEditTool = tool({
-  description:
-    'Propose edits to existing slides. Use this tool when you want to modify the content of slides.',
+  description: 'Propose edits to an existing slide. Use this when modifying a single slide.',
   inputSchema: proposeEditSchema,
   outputSchema: z.string(),
-  // No execute function - this is intentional for Human-in-the-loop
 });
 
-export const proposeAddTool = tool({
-  description:
-    'Propose adding a new slide. Use this tool when you want to add a new slide to the presentation.',
-  inputSchema: proposeAddSchema,
+export const proposeInsertTool = tool({
+  description: 'Propose inserting new slides. Use this when adding slides to the presentation.',
+  inputSchema: proposeInsertSchema,
   outputSchema: z.string(),
-  // No execute function - this is intentional for Human-in-the-loop
+});
+
+export const proposeReplaceTool = tool({
+  description:
+    'Propose replacing all slides. Use this when creating a new presentation or completely restructuring.',
+  inputSchema: proposeReplaceSchema,
+  outputSchema: z.string(),
 });
 
 export const proposePlanTool = tool({
   description:
-    'Propose a plan for the presentation structure. Use this tool when creating a new deck or significantly restructuring.',
+    'Propose a plan for the presentation structure. Use this when creating a new deck or significantly restructuring.',
   inputSchema: proposePlanSchema,
   outputSchema: z.string(),
-  // No execute function - this is intentional for Human-in-the-loop
+});
+
+/**
+ * getMarpGuideline tool - Server-side tool with execute function
+ * Retrieves Marp best practices for a specific topic
+ */
+const guidelineTopics = ['slide-structure', 'formatting', 'best-practices', 'themes'] as const;
+type GuidelineTopic = (typeof guidelineTopics)[number];
+
+function loadGuideline(topic: GuidelineTopic): string {
+  try {
+    const filePath = join(process.cwd(), 'guidelines', `${topic}.md`);
+    return readFileSync(filePath, 'utf-8');
+  } catch {
+    return `Failed to load guidelines for topic "${topic}".`;
+  }
+}
+
+export const getMarpGuidelineTool = tool({
+  description:
+    'Get Marp best practices for a specific topic. Use this when you need guidance on slide creation.',
+  inputSchema: z.object({
+    topic: z
+      .enum(guidelineTopics)
+      .describe(
+        'Topic to get guidelines for: slide-structure, formatting, best-practices, or themes',
+      ),
+  }),
+  execute: async ({ topic }) => {
+    return loadGuideline(topic);
+  },
 });
