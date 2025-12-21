@@ -1,7 +1,10 @@
 import { type UIMessage, getToolName, isToolUIPart } from 'ai';
 import { Bot, Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
+import ReactMarkdown from 'react-markdown';
+import remarkGfm from 'remark-gfm';
 import { useMarpChat } from '../../hooks/useMarpChat';
+import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -28,7 +31,8 @@ export function ChatView() {
     isLoading,
     agentIntents,
     handleApplyProposal,
-    handleApplyAddProposal,
+    handleApplyInsertProposal,
+    handleApplyReplaceProposal,
     handleDiscardProposal,
     clearHistory,
     getSlideContent,
@@ -63,7 +67,6 @@ export function ChatView() {
         )}
         {messages.map((m: UIMessage) => {
           const parts = m.parts ?? [];
-          // Skip empty assistant messages during streaming
           const hasTextContent = parts.some((part) => part.type === 'text' && part.text);
           const hasToolContent = parts.some((part) => isToolUIPart(part));
           if (!hasTextContent && !hasToolContent && m.role === 'assistant') {
@@ -73,10 +76,7 @@ export function ChatView() {
           return (
             <div
               key={m.id}
-              className={`flex flex-col gap-1 ${
-                // Note: role is still accessible on UIMessage, though type might be 'user' | 'assistant' | 'system'
-                m.role === 'user' ? 'items-end' : 'items-start'
-              }`}
+              className={`flex flex-col gap-1 ${m.role === 'user' ? 'items-end' : 'items-start'}`}
             >
               <div
                 className={`p-3 rounded-lg max-w-[85%] text-sm ${
@@ -98,14 +98,53 @@ export function ChatView() {
                 {parts.map((part, index) => {
                   if (part.type === 'text') {
                     return (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: Parts order is stable
-                      <div key={index} className="whitespace-pre-wrap">
-                        {part.text}
+                      // biome-ignore lint/suspicious/noArrayIndexKey: Text parts order is stable
+                      <div key={index} className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]">
+                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{part.text}</ReactMarkdown>
                       </div>
                     );
                   }
                   if (isToolUIPart(part)) {
                     const toolName = getToolName(part);
+
+                    // getMarpGuideline: サーバーサイドツール - アコーディオンで表示
+                    if (toolName === 'getMarpGuideline') {
+                      if (part.state !== 'output-available' || !part.output) {
+                        return (
+                          <div
+                            key={part.toolCallId}
+                            className="text-xs text-muted-foreground animate-pulse"
+                          >
+                            Loading guideline...
+                          </div>
+                        );
+                      }
+                      const topic = (part.input as { topic?: string })?.topic ?? 'guideline';
+                      return (
+                        <Accordion
+                          key={part.toolCallId}
+                          type="single"
+                          collapsible
+                          className="w-full mt-2"
+                        >
+                          <AccordionItem value="guideline" className="border rounded-md px-2">
+                            <AccordionTrigger className="text-xs text-muted-foreground hover:no-underline">
+                              📖 Reference: {topic}
+                            </AccordionTrigger>
+                            <AccordionContent>
+                              <div className="prose prose-xs max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]">
+                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                                  {typeof part.output === 'string'
+                                    ? part.output
+                                    : JSON.stringify(part.output)}
+                                </ReactMarkdown>
+                              </div>
+                            </AccordionContent>
+                          </AccordionItem>
+                        </Accordion>
+                      );
+                    }
+
                     return (
                       <div key={part.toolCallId} className="mt-2 w-full">
                         {toolName === 'propose_edit' ? (
@@ -127,22 +166,19 @@ export function ChatView() {
                                 : ''
                             }
                           />
-                        ) : toolName === 'propose_add' ? (
+                        ) : toolName === 'propose_insert' || toolName === 'propose_replace' ? (
                           <AddProposalCard
                             toolCallId={part.toolCallId}
+                            toolType={toolName}
                             input={
                               part.input as
-                                | {
-                                    insertAfter: number;
-                                    newMarkdown: string;
-                                    replaceAll: boolean;
-                                    reason: string;
-                                  }
+                                | { insertAfter?: number; newMarkdown: string; reason: string }
                                 | undefined
                             }
                             output={part.output as string | undefined}
                             state={part.state}
-                            onApply={handleApplyAddProposal}
+                            onApplyInsert={handleApplyInsertProposal}
+                            onApplyReplace={handleApplyReplaceProposal}
                             onDiscard={handleDiscardProposal}
                           />
                         ) : toolName === 'propose_plan' && part.input ? (

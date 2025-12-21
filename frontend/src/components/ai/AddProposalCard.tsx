@@ -2,31 +2,42 @@ import { Check, Plus, RefreshCw, X } from 'lucide-react';
 import { Button } from '../ui/button';
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from '../ui/card';
 
+type ToolType = 'propose_insert' | 'propose_replace';
+
+interface InsertInput {
+  insertAfter: number;
+  newMarkdown: string;
+  reason: string;
+}
+
+interface ReplaceInput {
+  newMarkdown: string;
+  reason: string;
+}
+
 interface AddProposalCardProps {
   toolCallId: string;
-  input:
-    | { insertAfter: number; newMarkdown: string; replaceAll: boolean; reason: string }
-    | undefined;
+  toolType: ToolType;
+  input: InsertInput | ReplaceInput | undefined;
   output?: string;
   state: 'input-streaming' | 'input-available' | 'output-available' | 'output-error';
-  onApply: (
-    toolCallId: string,
-    insertAfter: number,
-    newMarkdown: string,
-    replaceAll: boolean,
-  ) => void;
-  onDiscard: (toolCallId: string, toolName: 'propose_add') => void;
+  onApplyInsert: (toolCallId: string, insertAfter: number, newMarkdown: string) => void;
+  onApplyReplace: (toolCallId: string, newMarkdown: string) => void;
+  onDiscard: (toolCallId: string, toolName: ToolType) => void;
 }
 
 export function AddProposalCard({
   toolCallId,
+  toolType,
   input,
   output,
   state,
-  onApply,
+  onApplyInsert,
+  onApplyReplace,
   onDiscard,
 }: AddProposalCardProps) {
   const isPending = state === 'input-available';
+  const isReplace = toolType === 'propose_replace';
 
   if (!input) {
     return (
@@ -38,12 +49,13 @@ export function AddProposalCard({
     );
   }
 
-  const { insertAfter, newMarkdown, replaceAll, reason } = input;
+  const { newMarkdown, reason } = input;
+  const insertAfter = isReplace ? -1 : (input as InsertInput).insertAfter;
   const slideCount = newMarkdown?.split(/\n---\n/).length ?? 1;
 
   let titleText: string;
   let Icon = Plus;
-  if (replaceAll) {
+  if (isReplace) {
     titleText = `Replace All (${slideCount} slides)`;
     Icon = RefreshCw;
   } else if (slideCount > 1) {
@@ -55,6 +67,14 @@ export function AddProposalCard({
       insertAfter === -1 ? 'at the beginning' : `after Slide #${insertAfter + 1}`;
     titleText = `Add New Slide (${positionText})`;
   }
+
+  const handleApply = () => {
+    if (isReplace) {
+      onApplyReplace(toolCallId, newMarkdown);
+    } else {
+      onApplyInsert(toolCallId, insertAfter, newMarkdown);
+    }
+  };
 
   return (
     <Card className={`w-full ${isPending ? 'border-primary' : 'opacity-70'}`}>
@@ -83,19 +103,15 @@ export function AddProposalCard({
           <Button
             variant="ghost"
             size="sm"
-            onClick={() => onDiscard(toolCallId, 'propose_add')}
+            onClick={() => onDiscard(toolCallId, toolType)}
             className="text-destructive hover:text-destructive/90 hover:bg-destructive/10"
           >
             <X className="w-4 h-4 mr-1" />
             Discard
           </Button>
-          <Button
-            variant="default"
-            size="sm"
-            onClick={() => onApply(toolCallId, insertAfter, newMarkdown, replaceAll)}
-          >
+          <Button variant="default" size="sm" onClick={handleApply}>
             <Check className="w-4 h-4 mr-1" />
-            {replaceAll ? 'Replace' : 'Add'}
+            {isReplace ? 'Replace' : 'Add'}
           </Button>
         </CardFooter>
       )}
@@ -107,7 +123,7 @@ export function AddProposalCard({
             </span>
           ) : (
             <span className="flex items-center text-green-500">
-              <Check className="w-3 h-3 mr-1" /> {replaceAll ? 'Replaced' : 'Added'}
+              <Check className="w-3 h-3 mr-1" /> {isReplace ? 'Replaced' : 'Added'}
             </span>
           )}
         </CardFooter>
