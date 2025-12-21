@@ -16,6 +16,7 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
+    "@marp-editor/shared": "workspace:*",
     "@ai-sdk/anthropic": "^2.0.49",
     "@ai-sdk/google": "^2.0.43",
     "@ai-sdk/openai": "^2.0.72",

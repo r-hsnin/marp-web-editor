@@ -1,10 +1,9 @@
+import type { AppType, ExportFormat, Template } from '@marp-editor/shared';
 import { hc } from 'hono/client';
-import type { AppType, ExportFormat } from '../../../backend/src/api-types';
 
-// Ideally, we should extract the route definitions to a shared package.
 const client = hc<AppType>('/');
 
-export type { ExportFormat };
+export type { ExportFormat, Template };
 
 export const exportSlide = async (
   markdown: string,
@@ -66,13 +65,6 @@ export const fetchThemes = async (): Promise<string[]> => {
     return [];
   }
 };
-
-export interface Template {
-  id: string;
-  name: string;
-  description: string;
-  icon: string;
-}
 
 export const fetchTemplates = async (): Promise<Template[]> => {
   try {

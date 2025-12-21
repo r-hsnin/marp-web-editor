@@ -8,7 +8,7 @@
     "start": "bun run --filter frontend start",
     "check": "biome check ."
   },
-  "workspaces": ["frontend", "backend"],
+  "workspaces": ["packages/*", "frontend", "backend"],
   "devDependencies": {
     "@biomejs/biome": "1.9.4",
     "@types/node": "^24.1.0",
