@@ -40,10 +40,7 @@ app.get('/:name', async (c) => {
     // This allows the frontend to load images correctly while keeping the CSS file
     // utilizing relative paths for local Marp CLI export compatibility.
     const baseUrl = Bun.env.APP_BASE_URL || '';
-    const processedCss = css.replace(
-      /\.\.\/images\//g,
-      `${baseUrl}/api/images/`,
-    );
+    const processedCss = css.replace(/\.\.\/images\//g, `${baseUrl}/api/images/`);
 
     return c.text(processedCss, 200, {
       'Content-Type': 'text/css',
