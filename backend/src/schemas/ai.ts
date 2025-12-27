@@ -13,6 +13,7 @@ export const generateSchema = z.object({
 export const chatSchema = z.object({
   messages: z.array(z.any()), // Accept UIMessage format with flexible structure
   context: z.string().default(''),
+  theme: z.string().optional(),
 });
 
 export type GenerateRequest = z.infer<typeof generateSchema>;

@@ -13,7 +13,7 @@ export const IntentSchema = z.object({
 export type Intent = z.infer<typeof IntentSchema>;
 
 export const orchestrator = {
-  async run(messages: CoreMessage[], context: string): Promise<Response> {
+  async run(messages: CoreMessage[], context: string, theme?: string): Promise<Response> {
     const lastMessage = messages[messages.length - 1];
 
     // 1. Analyze Intent
@@ -37,7 +37,7 @@ ${context}
       schema: IntentSchema,
     });
 
-    console.log(`[Orchestrator] Intent: ${intent}, TargetSlide: ${targetSlide}`);
+    console.log(`[Orchestrator] Intent: ${intent}, TargetSlide: ${targetSlide}, Theme: ${theme}`);
 
     // 2. Route to Specialist
     let response: Response;
@@ -45,13 +45,13 @@ ${context}
 
     switch (intent) {
       case 'architect':
-        response = await architectAgent.run(messages, context);
+        response = await architectAgent.run(messages, context, theme);
         break;
       case 'editor':
-        response = await editorAgent.run(messages, context, normalizedTargetSlide);
+        response = await editorAgent.run(messages, context, theme, normalizedTargetSlide);
         break;
       default:
-        response = await generalAgent.run(messages, context);
+        response = await generalAgent.run(messages, context, theme);
         break;
     }
 

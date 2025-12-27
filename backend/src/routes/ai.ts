@@ -38,7 +38,7 @@ aiRoute.post('/generate', zValidator('json', generateSchema), async (c) => {
 });
 
 aiRoute.post('/chat', zValidator('json', chatSchema), async (c) => {
-  const { messages, context } = c.req.valid('json');
+  const { messages, context, theme } = c.req.valid('json');
 
   try {
     console.log('Received chat request messages count:', messages.length);
@@ -72,7 +72,7 @@ aiRoute.post('/chat', zValidator('json', chatSchema), async (c) => {
       };
     });
 
-    return await orchestrator.run(coreMessages, context);
+    return await orchestrator.run(coreMessages, context, theme);
   } catch (error) {
     console.error('AI chat error:', error);
     const message = error instanceof Error ? error.message : String(error);

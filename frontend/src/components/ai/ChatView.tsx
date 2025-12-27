@@ -4,7 +4,6 @@ import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useMarpChat } from '../../hooks/useMarpChat';
-import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from '../ui/accordion';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -95,12 +94,11 @@ export function ChatView() {
                     </Badge>
                   </div>
                 )}
-                {parts.map((part, index) => {
+                {parts.map((part) => {
                   if (part.type === 'text') {
                     return (
-                      // biome-ignore lint/suspicious/noArrayIndexKey: Text parts order is stable
                       <div
-                        key={index}
+                        key={`text-${part.text.slice(0, 20)}`}
                         className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]"
                       >
                         <ReactMarkdown remarkPlugins={[remarkGfm]}>{part.text}</ReactMarkdown>
@@ -109,44 +107,6 @@ export function ChatView() {
                   }
                   if (isToolUIPart(part)) {
                     const toolName = getToolName(part);
-
-                    // getMarpGuideline: サーバーサイドツール - アコーディオンで表示
-                    if (toolName === 'getMarpGuideline') {
-                      if (part.state !== 'output-available' || !part.output) {
-                        return (
-                          <div
-                            key={part.toolCallId}
-                            className="text-xs text-muted-foreground animate-pulse"
-                          >
-                            Loading guideline...
-                          </div>
-                        );
-                      }
-                      const topic = (part.input as { topic?: string })?.topic ?? 'guideline';
-                      return (
-                        <Accordion
-                          key={part.toolCallId}
-                          type="single"
-                          collapsible
-                          className="w-full mt-2"
-                        >
-                          <AccordionItem value="guideline" className="border rounded-md px-2">
-                            <AccordionTrigger className="text-xs text-muted-foreground hover:no-underline">
-                              📖 Reference: {topic}
-                            </AccordionTrigger>
-                            <AccordionContent>
-                              <div className="prose prose-xs max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]">
-                                <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                                  {typeof part.output === 'string'
-                                    ? part.output
-                                    : JSON.stringify(part.output)}
-                                </ReactMarkdown>
-                              </div>
-                            </AccordionContent>
-                          </AccordionItem>
-                        </Accordion>
-                      );
-                    }
 
                     return (
                       <div key={part.toolCallId} className="mt-2 w-full">

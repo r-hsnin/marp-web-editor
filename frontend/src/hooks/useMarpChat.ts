@@ -1,6 +1,7 @@
 import { type UIMessage, useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useThemeStore } from '../lib/marp/themeStore';
 import { useEditorStore } from '../lib/store';
 
 const CHAT_STORAGE_KEY = 'marp-chat-history';
@@ -31,22 +32,34 @@ function formatContextWithIndices(markdown: string): string {
 
 export function useMarpChat() {
   const { markdown, setMarkdown } = useEditorStore();
+  const { activeThemeId } = useThemeStore();
   const [input, setInput] = useState('');
   const [agentIntents, setAgentIntents] = useState<Record<string, string>>(loadIntentsFromStorage);
   const currentIntentRef = useRef<string | null>(null);
   const markdownRef = useRef(markdown);
+  const themeRef = useRef(activeThemeId);
   const initialMessages = useMemo(() => loadMessagesFromStorage(), []);
 
   useEffect(() => {
     markdownRef.current = markdown;
   }, [markdown]);
 
+  useEffect(() => {
+    themeRef.current = activeThemeId;
+  }, [activeThemeId]);
+
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
         api: '/api/ai/chat',
         prepareSendMessagesRequest({ messages }) {
-          return { body: { messages, context: formatContextWithIndices(markdownRef.current) } };
+          return {
+            body: {
+              messages,
+              context: formatContextWithIndices(markdownRef.current),
+              theme: themeRef.current,
+            },
+          };
         },
         fetch: (async (input: RequestInfo | URL, init?: RequestInit) => {
           const response = await fetch(input, init);

@@ -1,5 +1,3 @@
-import { readFileSync } from 'node:fs';
-import { join } from 'node:path';
 import { tool } from 'ai';
 import { z } from 'zod';
 
@@ -82,35 +80,4 @@ export const proposePlanTool = tool({
     'Propose a plan for the presentation structure. Use this when creating a new deck or significantly restructuring.',
   inputSchema: proposePlanSchema,
   outputSchema: z.string(),
-});
-
-/**
- * getMarpGuideline tool - Server-side tool with execute function
- * Retrieves Marp best practices for a specific topic
- */
-const guidelineTopics = ['slide-structure', 'formatting', 'best-practices', 'themes'] as const;
-type GuidelineTopic = (typeof guidelineTopics)[number];
-
-function loadGuideline(topic: GuidelineTopic): string {
-  try {
-    const filePath = join(process.cwd(), 'guidelines', `${topic}.md`);
-    return readFileSync(filePath, 'utf-8');
-  } catch {
-    return `Failed to load guidelines for topic "${topic}".`;
-  }
-}
-
-export const getMarpGuidelineTool = tool({
-  description:
-    'Get Marp best practices for a specific topic. Use this when you need guidance on slide creation.',
-  inputSchema: z.object({
-    topic: z
-      .enum(guidelineTopics)
-      .describe(
-        'Topic to get guidelines for: slide-structure, formatting, best-practices, or themes',
-      ),
-  }),
-  execute: async ({ topic }) => {
-    return loadGuideline(topic);
-  },
 });
