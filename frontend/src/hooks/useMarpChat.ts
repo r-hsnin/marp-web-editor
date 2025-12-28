@@ -97,13 +97,22 @@ export function useMarpChat() {
     },
     onError: (error) => {
       console.error('Chat error:', error);
+      // Extract user-friendly message, hide sensitive details
+      let displayMessage = 'Connection failed. Please try again.';
+      const msg = error.message || '';
+      if (msg.includes('API key')) {
+        displayMessage = 'API key is invalid or missing. Please check your configuration.';
+      } else if (msg.includes('rate limit')) {
+        displayMessage = 'Rate limit exceeded. Please wait a moment.';
+      } else if (msg.includes('network') || msg.includes('fetch')) {
+        displayMessage = 'Network error. Please check your connection.';
+      }
       setMessages((prevMessages) => [
         ...prevMessages,
         {
           id: `err-${Date.now()}`,
           role: 'assistant',
-          content: `⚠️ Error: ${error.message || 'Connection failed'}`,
-          parts: [],
+          parts: [{ type: 'text', text: `⚠️ ${displayMessage}` }],
         },
       ]);
     },

@@ -13,12 +13,13 @@ export type Intent = z.infer<typeof IntentSchema>;
 
 export const orchestrator = {
   async run(messages: CoreMessage[], context: string, theme?: string): Promise<Response> {
-    // 1. Analyze Intent
-    const {
-      object: { intent },
-    } = await generateObject({
-      model: aiModel,
-      system: `You are the Orchestrator of a presentation slide generator.
+    try {
+      // 1. Analyze Intent
+      const {
+        object: { intent },
+      } = await generateObject({
+        model: aiModel,
+        system: `You are the Orchestrator of a presentation slide generator.
 Your job is to analyze the user's request and route it to the correct specialist agent.
 
 - architect: When the user wants to plan or discuss presentation structure WITHOUT making changes. (e.g., "What should I include?", "Suggest an outline")
@@ -30,29 +31,37 @@ IMPORTANT: If the user wants to actually CREATE or MODIFY content, use "editor".
 Current Context:
 ${context}
 `,
-      messages,
-      schema: IntentSchema,
-    });
+        messages,
+        schema: IntentSchema,
+      });
 
-    console.log(`[Orchestrator] Intent: ${intent}, Theme: ${theme}`);
+      console.log(`[Orchestrator] Intent: ${intent}, Theme: ${theme}`);
 
-    // 2. Route to Specialist
-    let response: Response;
+      // 2. Route to Specialist
+      let response: Response;
 
-    switch (intent) {
-      case 'architect':
-        response = await architectAgent.run(messages, context);
-        break;
-      case 'editor':
-        response = await editorAgent.run(messages, context, theme);
-        break;
-      default:
-        response = await generalAgent.run(messages, context, theme);
-        break;
+      switch (intent) {
+        case 'architect':
+          response = await architectAgent.run(messages, context);
+          break;
+        case 'editor':
+          response = await editorAgent.run(messages, context, theme);
+          break;
+        default:
+          response = await generalAgent.run(messages, context, theme);
+          break;
+      }
+
+      // 3. Add Intent Header for Frontend UI
+      response.headers.set('X-Agent-Intent', intent);
+      return response;
+    } catch (error) {
+      console.error('[Orchestrator] Error:', error);
+      const message = error instanceof Error ? error.message : 'Unknown error';
+      return new Response(JSON.stringify({ error: 'AI processing failed', details: message }), {
+        status: 500,
+        headers: { 'Content-Type': 'application/json' },
+      });
     }
-
-    // 3. Add Intent Header for Frontend UI
-    response.headers.set('X-Agent-Intent', intent);
-    return response;
   },
 };
