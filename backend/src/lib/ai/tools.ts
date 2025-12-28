@@ -24,7 +24,7 @@ export const proposeInsertSchema = z.object({
   newMarkdown: z
     .string()
     .describe(
-      'The markdown content for new slide(s). Can include --- to add multiple slides at once.',
+      'The markdown content for new slide(s). Use --- to separate multiple slides. Do NOT start with ---.',
     ),
   reason: z.string().describe('Brief explanation for this insertion'),
 });
@@ -37,7 +37,7 @@ export const proposeReplaceSchema = z.object({
   newMarkdown: z
     .string()
     .describe(
-      'The complete markdown content for the new presentation. Include --- between slides.',
+      'The complete markdown content for the new presentation. Use --- to separate slides. Do NOT start with ---.',
     ),
   reason: z.string().describe('Brief explanation for this replacement'),
 });

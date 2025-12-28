@@ -190,7 +190,9 @@ export function useMarpChat() {
   const handleApplyInsertProposal = useCallback(
     (toolCallId: string, insertAfter: number, newMarkdown: string) => {
       const existingSlides = markdown.split(/\n---\n/);
-      const newSlides = newMarkdown.trim().split(/\n---\n/);
+      // Remove leading --- if present
+      const cleanedMarkdown = newMarkdown.trim().replace(/^---\n/, '');
+      const newSlides = cleanedMarkdown.split(/\n---\n/);
       const insertIndex = insertAfter + 1;
 
       const formattedNewSlides = newSlides.map((s, i) => {
@@ -213,7 +215,9 @@ export function useMarpChat() {
 
   const handleApplyReplaceProposal = useCallback(
     (toolCallId: string, newMarkdown: string) => {
-      setMarkdown(newMarkdown.trim());
+      // Remove leading --- if present (prevents first slide becoming frontmatter)
+      const cleaned = newMarkdown.trim().replace(/^---\n/, '');
+      setMarkdown(cleaned);
 
       addToolOutput({
         tool: 'propose_replace',
