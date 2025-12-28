@@ -6,7 +6,13 @@
     "dev": "bun run --filter frontend dev",
     "build": "bun run --filter frontend build",
     "start": "bun run --filter frontend start",
-    "check": "biome check ."
+    "check": "biome check .",
+    "prepare": "husky"
+  },
+  "lint-staged": {
+    "*.{js,ts,cjs,mjs,jsx,tsx,json,jsonc}": [
+      "biome check --write --no-errors-on-unmatched"
+    ]
   },
   "workspaces": [
     "packages/*",
@@ -16,6 +22,8 @@
   "devDependencies": {
     "@biomejs/biome": "2.3.10",
     "@types/node": "^24.10.4",
+    "husky": "^9.1.7",
+    "lint-staged": "^16.2.7",
     "typescript": "^5.8.3"
   }
 }
