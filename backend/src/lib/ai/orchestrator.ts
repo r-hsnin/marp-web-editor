@@ -1,4 +1,4 @@
-import { type CoreMessage, generateObject } from 'ai';
+import { generateObject, type ModelMessage } from 'ai';
 import { z } from 'zod';
 import { architectAgent } from './agents/architect.js';
 import { editorAgent } from './agents/editor.js';
@@ -12,7 +12,7 @@ export const IntentSchema = z.object({
 export type Intent = z.infer<typeof IntentSchema>;
 
 export const orchestrator = {
-  async run(messages: CoreMessage[], context: string, theme?: string): Promise<Response> {
+  async run(messages: ModelMessage[], context: string, theme?: string): Promise<Response> {
     try {
       // 1. Analyze Intent
       const {

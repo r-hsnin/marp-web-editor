@@ -1,9 +1,9 @@
-import { type CoreMessage, streamText } from 'ai';
+import { type ModelMessage, streamText } from 'ai';
 import { getRequiredModel } from '../config.js';
 import { buildSystemPrompt } from '../promptBuilder.js';
 
 export const generalAgent = {
-  async run(messages: CoreMessage[], context: string, theme?: string) {
+  async run(messages: ModelMessage[], context: string, theme?: string) {
     const systemPrompt = buildSystemPrompt('general', context, theme);
 
     const result = streamText({
