@@ -37,13 +37,13 @@ http://localhost:5173 を開く
 
 ## Features
 
-| 機能                   | 説明                                                                |
-| ---------------------- | ------------------------------------------------------------------- |
-| リアルタイムプレビュー | Markdown 編集と同時にスライド確認、自動保存                         |
-| AI 支援                | 指示でスライド改善、対話的な編集支援（OpenAI / Anthropic / Google） |
-| エクスポート           | HTML / PDF / PPTX                                                   |
-| テーマ                 | 4 種内蔵 + カスタム対応                                             |
-| テンプレート           | 用途別テンプレートをワンクリック適用                                |
+| 機能                   | 説明                                                                          |
+| ---------------------- | ----------------------------------------------------------------------------- |
+| リアルタイムプレビュー | Markdown 編集と同時にスライド確認、自動保存                                   |
+| AI 支援                | 指示でスライド改善、対話的な編集支援（OpenAI / Anthropic / Google / Bedrock） |
+| エクスポート           | PDF / PPTX / HTML / PNG / JPG（画像は先頭スライドのみ）                       |
+| テーマ                 | 3 種内蔵（default / gaia / uncover）+ カスタム（professional）                |
+| テンプレート           | 用途別テンプレートをワンクリック適用                                          |
 
 ---
 
@@ -85,7 +85,7 @@ http://localhost:5173 を開く
 | ------------ | ------------------------------------- |
 | Hono 4 + Bun | API サーバー                          |
 | Marp CLI     | スライドレンダリング                  |
-| AI SDK       | AI 統合 (OpenAI / Anthropic / Google) |
+| AI SDK       | AI 統合 (OpenAI / Anthropic / Google / Bedrock) |
 | Puppeteer    | PDF/PPTX 生成                         |
 | Zod          | バリデーション                        |
 
@@ -95,21 +95,28 @@ http://localhost:5173 を開く
 
 ### AI 機能
 
-`backend/.env` に使用するプロバイダーの API キーを設定:
+`backend/.env` でプロバイダーと API キーを設定します。
 
 ```env
-PORT=3001
-APP_BASE_URL=http://localhost:3001
+# プロバイダー選択: openai / anthropic / google / bedrock
+AI_PROVIDER=openai
 
-# いずれか1つ以上を設定
+# 各プロバイダーの API キー（使用するものを設定）
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GOOGLE_GENERATIVE_AI_API_KEY=...
+
+# Bedrock 使用時（AWS 標準認証）
+AWS_ACCESS_KEY_ID=...
+AWS_SECRET_ACCESS_KEY=...
+AWS_REGION=us-east-1
 ```
+
+モデルを変更する場合は `backend/src/lib/ai/config.ts` を編集してください。
 
 ### カスタムテーマ
 
-`backend/themes/` に CSS ファイルを配置:
+`backend/themes/` に CSS ファイルを配置します。
 
 ```css
 /* @theme mytheme */
@@ -121,9 +128,35 @@ section {
 }
 ```
 
+AI にテーマのクラスを認識させたい場合は、`backend/guidelines/themes/mytheme.md` にガイドラインを作成します。
+
+```markdown
+# My Theme
+
+## Available Classes
+
+### highlight
+<!-- _class: highlight -->
+# Title
+Use for: 強調スライド
+```
+
+サーバー再起動後に利用可能になります。
+
 ### カスタムテンプレート
 
-`backend/templates/` に Markdown ファイルを配置。サーバー再起動で自動認識。
+`backend/templates/` に Markdown ファイルを配置し、`templates.json` に登録します。
+
+```json
+{
+  "id": "my-template",
+  "name": "テンプレート名",
+  "description": "説明文",
+  "icon": "📝"
+}
+```
+
+サーバー再起動後に利用可能になります。
 
 ---
 
@@ -142,7 +175,9 @@ marp-web-editor/
 │   │   ├── routes/         # APIエンドポイント
 │   │   ├── lib/ai/         # AIエージェント・ツール
 │   │   └── schemas/        # Zodスキーマ
-│   ├── guidelines/         # AI用Marpガイドライン
+│   ├── guidelines/         # AI用ガイドライン
+│   │   ├── base-rules.md   # 基本ルール
+│   │   └── themes/         # テーマ別ガイドライン
 │   ├── templates/          # スライドテンプレート
 │   └── themes/             # カスタムテーマCSS
 │
