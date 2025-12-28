@@ -1,22 +1,28 @@
 import { LocalStorage } from './local.js';
+import { S3Storage } from './s3.js';
+
+export type ResolveResult =
+  | { type: 'file'; path: string }
+  | { type: 'redirect'; url: string }
+  | null;
 
 export interface ImageStorage {
   upload(file: File): Promise<{ id: string; url: string }>;
-  getPath(id: string): string | null;
+  resolve(id: string): Promise<ResolveResult>;
 }
 
 export type StorageType = 'local' | 's3';
 
-const storageType = (process.env.IMAGE_STORAGE || 'local') as StorageType;
+const storageType = (Bun.env.IMAGE_STORAGE || 'local') as StorageType;
 
 function createStorage(): ImageStorage {
-  switch (storageType) {
-    case 's3':
-      // TODO: S3 実装
-      throw new Error('S3 storage not implemented yet');
-    default:
-      return new LocalStorage();
+  if (storageType === 's3') {
+    if (!Bun.env.S3_BUCKET || !Bun.env.S3_REGION) {
+      throw new Error('S3_BUCKET and S3_REGION are required when IMAGE_STORAGE=s3');
+    }
+    return new S3Storage();
   }
+  return new LocalStorage();
 }
 
 export const storage = createStorage();

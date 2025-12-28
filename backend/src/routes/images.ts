@@ -1,4 +1,4 @@
-import { createReadStream, existsSync } from 'node:fs';
+import { createReadStream } from 'node:fs';
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
 import { storage } from '../lib/storage/index.js';
@@ -37,12 +37,18 @@ imagesRoute.post('/', async (c) => {
 // GET /api/images/:id - 配信
 imagesRoute.get('/:id', async (c) => {
   const id = c.req.param('id');
-  const filePath = storage.getPath(id);
+  const result = await storage.resolve(id);
 
-  if (!filePath || !existsSync(filePath)) {
+  if (!result) {
     return c.json({ error: 'Not found' }, 404);
   }
 
+  if (result.type === 'redirect') {
+    c.header('Cache-Control', 'no-cache');
+    return c.redirect(result.url);
+  }
+
+  // ローカルファイル配信
   const ext = id.split('.').pop()?.toLowerCase();
   const contentType =
     ext === 'png'
@@ -59,7 +65,7 @@ imagesRoute.get('/:id', async (c) => {
   c.header('Cache-Control', 'public, max-age=31536000');
 
   return stream(c, async (s) => {
-    const readable = createReadStream(filePath);
+    const readable = createReadStream(result.path);
     for await (const chunk of readable) {
       await s.write(chunk);
     }

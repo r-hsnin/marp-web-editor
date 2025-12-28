@@ -57,7 +57,9 @@ export const ImageUpload: React.FC<ImageUploadProps> = ({ open, onClose, onInser
 
         const { url } = await response.json();
         const altText = file.name.replace(/\.[^/.]+$/, '');
-        onInsert(`![${altText}](${API_BASE}${url})`);
+        // url が絶対パスか相対パスかで分岐
+        const imageUrl = url.startsWith('http') ? url : `${API_BASE}${url}`;
+        onInsert(`![${altText}](${imageUrl})`);
         onClose();
       } catch (err) {
         setError(err instanceof Error ? err.message : 'アップロードに失敗しました');
