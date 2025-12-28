@@ -1,7 +1,8 @@
 import { existsSync } from 'node:fs';
 import fs, { access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join, resolve } from 'node:path';
+import { dirname, join, resolve } from 'node:path';
+import { pathToFileURL } from 'node:url';
 import type { ExportFormat } from '@marp-editor/shared';
 import { v4 as uuidv4 } from 'uuid';
 import { BUILTIN_THEMES, isValidName } from './validation.js';
@@ -23,13 +24,24 @@ export class MarpConverter {
     return filePath;
   }
 
+  /**
+   * Convert relative URLs in CSS to absolute file:// URLs
+   */
+  private resolveRelativeUrls(css: string, cssDir: string): string {
+    return css.replace(/url\(["']?(\.\.?\/[^"')]+)["']?\)/g, (_, relativePath) => {
+      const absolutePath = resolve(cssDir, relativePath);
+      const fileUrl = pathToFileURL(absolutePath).href;
+      return `url("${fileUrl}")`;
+    });
+  }
+
   private async cleanup(files: string[]) {
     await Promise.all(
       files.map(async (file) => {
         try {
           await fs.unlink(file);
-        } catch (e) {
-          console.error(`Failed to cleanup file ${file}:`, e);
+        } catch {
+          // Ignore cleanup errors
         }
       }),
     );
@@ -53,6 +65,7 @@ export class MarpConverter {
     const { markdown, format, theme } = options;
     const inputPath = await this.createTempFile(markdown, 'md');
     const outputPath = inputPath.replace(/\.md$/, `.${format}`);
+    const filesToCleanup = [inputPath, outputPath];
 
     try {
       // Locate the marp-cli.js script
@@ -80,7 +93,12 @@ export class MarpConverter {
             const themePath = resolve(process.cwd(), 'themes', `${theme}.css`);
             try {
               await access(themePath);
-              args.push('--theme-set', themePath);
+              // Read CSS and convert relative URLs to absolute file:// URLs
+              const cssContent = await fs.readFile(themePath, 'utf-8');
+              const resolvedCss = this.resolveRelativeUrls(cssContent, dirname(themePath));
+              const tempThemePath = await this.createTempFile(resolvedCss, 'css');
+              filesToCleanup.push(tempThemePath);
+              args.push('--theme-set', tempThemePath);
               args.push('--theme', theme);
             } catch {
               console.warn(`Theme file not found: ${themePath}`);
@@ -123,7 +141,7 @@ export class MarpConverter {
       console.error('Marp conversion failed:', error);
       throw error;
     } finally {
-      await this.cleanup([inputPath, outputPath]);
+      await this.cleanup(filesToCleanup);
     }
   }
 }
