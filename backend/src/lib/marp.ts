@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type { ExportFormat } from '@marp-editor/shared';
 import { v4 as uuidv4 } from 'uuid';
+import { BUILTIN_THEMES, isValidName } from './validation.js';
 
 export type { ExportFormat };
 
@@ -70,21 +71,18 @@ export class MarpConverter {
 
       if (theme) {
         // Check if it's a built-in theme
-        const builtInThemes = ['default', 'gaia', 'uncover'];
-        if (builtInThemes.includes(theme)) {
+        if (BUILTIN_THEMES.includes(theme as (typeof BUILTIN_THEMES)[number])) {
           args.push('--theme', theme);
         } else {
-          // Assume custom theme
-          // Validate theme name to prevent path traversal
-          const safeThemeName = theme.replace(/[^a-zA-Z0-9_\-]/g, '');
-          if (safeThemeName !== theme) {
+          // Custom theme - validate name to prevent path traversal
+          if (!isValidName(theme)) {
             console.warn(`Invalid theme name: ${theme}. Using default.`);
           } else {
-            const themePath = resolve(process.cwd(), 'themes', `${safeThemeName}.css`);
+            const themePath = resolve(process.cwd(), 'themes', `${theme}.css`);
             try {
               await access(themePath);
               args.push('--theme-set', themePath);
-              args.push('--theme', safeThemeName);
+              args.push('--theme', theme);
             } catch {
               console.warn(`Theme file not found: ${themePath}`);
             }

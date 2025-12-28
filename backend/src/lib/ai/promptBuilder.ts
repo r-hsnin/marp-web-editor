@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { isBuiltinTheme, isValidName } from '../validation.js';
 
 const GUIDELINES_DIR = join(process.cwd(), 'guidelines');
 
@@ -14,7 +15,18 @@ function loadBaseRules(): string {
 }
 
 function loadThemeGuideline(theme: string): string {
-  // 1. Try MD file first
+  // Validate theme name to prevent path traversal
+  if (!isValidName(theme)) {
+    console.warn(`[promptBuilder] Invalid theme name: ${theme}`);
+    return '';
+  }
+
+  // Built-in themes don't have custom guidelines (suppress warning)
+  if (isBuiltinTheme(theme)) {
+    return '';
+  }
+
+  // Try MD file for custom themes
   const mdPath = join(GUIDELINES_DIR, 'themes', `${theme}.md`);
   if (existsSync(mdPath)) {
     try {
@@ -22,11 +34,10 @@ function loadThemeGuideline(theme: string): string {
     } catch {
       console.warn(`[promptBuilder] Failed to load theme guideline: ${theme}`);
     }
+  } else {
+    console.warn(`[promptBuilder] No guideline found for theme: ${theme}`);
   }
 
-  // 2. Try extracting from CSS comments (future enhancement)
-  // For now, return empty if no MD file exists
-  console.warn(`[promptBuilder] No guideline found for theme: ${theme}`);
   return '';
 }
 
@@ -54,7 +65,8 @@ const AGENT_INSTRUCTIONS: Record<AgentType, string> = {
   general: `You are a helpful assistant for a Marp presentation editor.
 Answer questions, discuss content, and provide feedback about the presentation.
 Do NOT generate or modify slides directly - just have a conversation.
-When referring to slides, use 1-based numbering (Slide 1, Slide 2, etc.).`,
+When referring to slides, use 1-based numbering (Slide 1, Slide 2, etc.).
+When answering questions about theme classes or Marp syntax, refer to the Theme and Marp Guidelines sections below.`,
 
   architect: `You are the Architect Agent.
 Your goal is to design the structure of a presentation based on the user's request.
@@ -84,8 +96,10 @@ export function buildSystemPrompt(agentType: AgentType, context: string, theme?:
 ## Marp Guidelines
 ${baseRules}`;
 
-  // Add theme-specific guidelines for editor agent
-  if (agentType === 'editor' && theme) {
+  // Add theme-specific guidelines for editor and general agents
+  // - editor: needs theme info to generate appropriate slides
+  // - general: needs theme info to answer questions about theme classes
+  if ((agentType === 'editor' || agentType === 'general') && theme) {
     const themeGuideline = getThemeGuideline(theme);
     if (themeGuideline) {
       prompt += `

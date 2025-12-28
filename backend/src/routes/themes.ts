@@ -1,14 +1,11 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Hono } from 'hono';
+import { isValidName } from '../lib/validation.js';
 
 const app = new Hono();
 
 const THEMES_DIR = resolve(process.cwd(), 'themes');
-
-const isValidThemeName = (name: string): boolean => {
-  return /^[a-zA-Z0-9_\-]+$/.test(name);
-};
 
 app.get('/', async (c) => {
   try {
@@ -26,7 +23,7 @@ app.get('/', async (c) => {
 app.get('/:name', async (c) => {
   const themeName = c.req.param('name');
 
-  if (!isValidThemeName(themeName)) {
+  if (!isValidName(themeName)) {
     return c.text('Invalid theme name', 400);
   }
 

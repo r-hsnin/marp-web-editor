@@ -1,14 +1,11 @@
 import { access, readFile, readdir } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Hono } from 'hono';
+import { isValidName } from '../lib/validation.js';
 
 const app = new Hono();
 
 const TEMPLATES_DIR = resolve(process.cwd(), 'templates');
-
-const isValidTemplateName = (name: string): boolean => {
-  return /^[a-zA-Z0-9_\-]+$/.test(name);
-};
 
 app.get('/', async (c) => {
   try {
@@ -26,7 +23,7 @@ app.get('/', async (c) => {
 app.get('/:name', async (c) => {
   const templateName = c.req.param('name');
 
-  if (!isValidTemplateName(templateName)) {
+  if (!isValidName(templateName)) {
     return c.text('Invalid template name', 400);
   }
 
