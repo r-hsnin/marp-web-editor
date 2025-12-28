@@ -1,5 +1,5 @@
 import { type CoreMessage, stepCountIs, streamText } from 'ai';
-import { aiModel } from '../config.js';
+import { getRequiredModel } from '../config.js';
 import { buildSystemPrompt } from '../promptBuilder.js';
 import { proposePlanTool } from '../tools.js';
 
@@ -8,7 +8,7 @@ export const architectAgent = {
     const systemPrompt = buildSystemPrompt('architect', context);
 
     const result = streamText({
-      model: aiModel,
+      model: getRequiredModel(),
       system: systemPrompt,
       messages,
       tools: {

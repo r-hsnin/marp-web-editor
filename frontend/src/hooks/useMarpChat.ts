@@ -83,7 +83,6 @@ export function useMarpChat() {
   } = useChat({
     messages: initialMessages,
     transport,
-    // @ts-expect-error: Correcting signature based on lint error
     // biome-ignore lint/suspicious/noExplicitAny: Handling varied API response signatures
     onFinish: (result: any) => {
       const message = result.message || result;

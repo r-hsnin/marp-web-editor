@@ -2,12 +2,13 @@ import { bedrock } from '@ai-sdk/amazon-bedrock';
 import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
+import type { LanguageModel } from 'ai';
 
 export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock' | '';
 
 const provider = (Bun.env.AI_PROVIDER || '') as ModelProvider;
 
-function getModel() {
+function getModel(): LanguageModel | null {
   switch (provider) {
     case 'openai':
       return openai('gpt-4.1-mini');
@@ -24,3 +25,10 @@ function getModel() {
 
 export const aiModel = getModel();
 export const aiProvider = provider;
+
+export function getRequiredModel(): LanguageModel {
+  if (!aiModel) {
+    throw new Error('AI is not configured. Set AI_PROVIDER and corresponding API key.');
+  }
+  return aiModel;
+}

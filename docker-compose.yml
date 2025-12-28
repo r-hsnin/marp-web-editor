@@ -5,11 +5,7 @@ services:
       dockerfile: backend/Dockerfile
     ports:
       - "3001:3001"
-    environment:
-      - PORT=3001
-      - OPENAI_API_KEY=${OPENAI_API_KEY:-}
-      - ANTHROPIC_API_KEY=${ANTHROPIC_API_KEY:-}
-      - GOOGLE_GENERATIVE_AI_API_KEY=${GOOGLE_GENERATIVE_AI_API_KEY:-}
+    env_file: ./backend/.env
     init: true
     cap_add:
       - SYS_ADMIN

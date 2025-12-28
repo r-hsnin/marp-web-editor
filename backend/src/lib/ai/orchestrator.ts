@@ -3,7 +3,7 @@ import { z } from 'zod';
 import { architectAgent } from './agents/architect.js';
 import { editorAgent } from './agents/editor.js';
 import { generalAgent } from './agents/general.js';
-import { aiModel } from './config.js';
+import { getRequiredModel } from './config.js';
 
 export const IntentSchema = z.object({
   intent: z.enum(['architect', 'editor', 'general_chat']),
@@ -18,7 +18,7 @@ export const orchestrator = {
       const {
         object: { intent },
       } = await generateObject({
-        model: aiModel,
+        model: getRequiredModel(),
         system: `You are the Orchestrator of a presentation slide generator.
 Your job is to analyze the user's request and route it to the correct specialist agent.
 
