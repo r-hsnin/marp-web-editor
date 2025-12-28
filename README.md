@@ -14,6 +14,8 @@ Markdown でプレゼンテーションを作成する Web エディタ。
 
 ## Quick Start
 
+### ローカル開発
+
 ```bash
 # クローン
 git clone https://github.com/r-hsnin/marp-web-editor.git
@@ -33,17 +35,33 @@ cd frontend && bun run dev   # localhost:5173
 
 http://localhost:5173 を開く
 
+### Docker
+
+```bash
+git clone https://github.com/r-hsnin/marp-web-editor.git
+cd marp-web-editor
+
+# 環境変数（AI機能を使う場合）
+cp backend/.env.example backend/.env
+# backend/.env を編集
+
+docker-compose up --build
+```
+
+http://localhost:3000 を開く
+
 ---
 
 ## Features
 
-| 機能                   | 説明                                                                          |
-| ---------------------- | ----------------------------------------------------------------------------- |
-| リアルタイムプレビュー | Markdown 編集と同時にスライド確認、自動保存                                   |
-| AI 支援                | 指示でスライド改善、対話的な編集支援（OpenAI / Anthropic / Google / Bedrock） |
-| エクスポート           | PDF / PPTX / HTML / PNG / JPG（画像は先頭スライドのみ）                       |
-| テーマ                 | 3 種内蔵（default / gaia / uncover）+ カスタム（professional）                |
-| テンプレート           | 用途別テンプレートをワンクリック適用                                          |
+| 機能                   | 説明                                        |
+| ---------------------- | ------------------------------------------- |
+| リアルタイムプレビュー | Markdown 編集と同時にスライド確認、自動保存 |
+| AI 支援                | 指示でスライド改善、対話的な編集支援        |
+| 画像アップロード       | ローカル画像をドラッグ&ドロップで挿入       |
+| エクスポート           | PDF / PPTX / HTML / PNG / JPG               |
+| テーマ                 | デフォルトテーマ 3 種 + カスタムテーマ      |
+| テンプレート           | 用途別テンプレートをワンクリック適用        |
 
 ---
 
@@ -53,7 +71,6 @@ http://localhost:5173 を開く
 ┌─────────────────┐     ┌─────────────────┐
 │    Frontend     │────▶│     Backend     │
 │  Vite + React   │     │   Hono + Bun    │
-│  localhost:5173 │     │  localhost:3001 │
 └─────────────────┘     └─────────────────┘
                               │
                     ┌─────────┴─────────┐
@@ -70,24 +87,23 @@ http://localhost:5173 を開く
 
 ### Frontend (`frontend/`)
 
-| 技術                       | 用途              |
-| -------------------------- | ----------------- |
-| Vite 7 + React 19          | UI フレームワーク |
-| TypeScript 5.9             | 型安全            |
-| Tailwind CSS 4 + shadcn/ui | スタイリング      |
-| CodeMirror 6               | エディタ          |
-| Zustand                    | 状態管理          |
-| AI SDK                     | チャット UI       |
+| 技術                    | 用途              |
+| ----------------------- | ----------------- |
+| Vite + React            | UI フレームワーク |
+| TypeScript              | 型安全            |
+| Tailwind CSS + shadcn/ui | スタイリング      |
+| CodeMirror              | エディタ          |
+| Zustand                 | 状態管理          |
 
 ### Backend (`backend/`)
 
-| 技術         | 用途                                  |
-| ------------ | ------------------------------------- |
-| Hono 4 + Bun | API サーバー                          |
-| Marp CLI     | スライドレンダリング                  |
-| AI SDK       | AI 統合 (OpenAI / Anthropic / Google / Bedrock) |
-| Puppeteer    | PDF/PPTX 生成                         |
-| Zod          | バリデーション                        |
+| 技術         | 用途                 |
+| ------------ | -------------------- |
+| Hono + Bun   | API サーバー         |
+| Marp CLI     | スライドレンダリング |
+| AI SDK       | AI 統合              |
+| Puppeteer    | PDF/PPTX 生成        |
+| Zod          | バリデーション       |
 
 ---
 
@@ -95,24 +111,39 @@ http://localhost:5173 を開く
 
 ### AI 機能
 
-`backend/.env` でプロバイダーと API キーを設定します。
+`backend/.env` でプロバイダーと API キーを設定します。  
+未設定の場合、AI ボタンは非表示になります。
 
 ```env
-# プロバイダー選択: openai / anthropic / google / bedrock
+# プロバイダー選択（必須）: openai / anthropic / google / bedrock
 AI_PROVIDER=openai
 
-# 各プロバイダーの API キー（使用するものを設定）
+# 選択したプロバイダーの API キーを設定
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
 GOOGLE_GENERATIVE_AI_API_KEY=...
 
-# Bedrock 使用時（AWS 標準認証）
+# Bedrock 使用時（AWS 認証情報 or ~/.aws/credentials）
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
-AWS_REGION=us-east-1
 ```
 
 モデルを変更する場合は `backend/src/lib/ai/config.ts` を編集してください。
+
+### 画像ストレージ
+
+デフォルトはローカル保存。本番環境では S3 を推奨。
+
+```env
+# ストレージ選択: local / s3
+IMAGE_STORAGE=local
+
+# S3 使用時
+S3_BUCKET=your-bucket
+S3_REGION=ap-northeast-1
+```
+
+S3 使用時は AWS 認証情報が必要です（環境変数 or `~/.aws/credentials`）。
 
 ### カスタムテーマ
 
@@ -136,8 +167,11 @@ AI にテーマのクラスを認識させたい場合は、`backend/guidelines/
 ## Available Classes
 
 ### highlight
+
 <!-- _class: highlight -->
+
 # Title
+
 Use for: 強調スライド
 ```
 
