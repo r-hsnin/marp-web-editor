@@ -16,11 +16,12 @@
   "license": "ISC",
   "description": "",
   "dependencies": {
-    "@marp-editor/shared": "workspace:*",
+    "@ai-sdk/amazon-bedrock": "^3.0.72",
     "@ai-sdk/anthropic": "^2.0.49",
     "@ai-sdk/google": "^2.0.43",
     "@ai-sdk/openai": "^2.0.72",
     "@hono/zod-validator": "^0.7.5",
+    "@marp-editor/shared": "workspace:*",
     "@marp-team/marp-cli": "^4.2.3",
     "@types/uuid": "^10.0.0",
     "ai": "^5.0.102",
