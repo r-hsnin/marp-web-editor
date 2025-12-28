@@ -1,3 +1,6 @@
+import { LayoutTemplate, Loader2 } from 'lucide-react';
+import type React from 'react';
+import { useEffect, useState } from 'react';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -15,11 +18,8 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
-import { type Template, fetchTemplate, fetchTemplates } from '@/lib/api';
+import { fetchTemplate, fetchTemplates, type Template } from '@/lib/api';
 import { useEditorStore } from '@/lib/store';
-import { LayoutTemplate, Loader2 } from 'lucide-react';
-import type React from 'react';
-import { useEffect, useState } from 'react';
 
 export const TemplateSelector: React.FC = () => {
   const { setMarkdown } = useEditorStore();

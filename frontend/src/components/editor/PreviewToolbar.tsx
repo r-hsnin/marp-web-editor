@@ -1,7 +1,3 @@
-import { Button } from '@/components/ui/button';
-import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { cn } from '@/lib/utils';
 import {
   ChevronLeft,
   ChevronRight,
@@ -11,9 +7,12 @@ import {
   Presentation,
 } from 'lucide-react';
 import type React from 'react';
-
 import { ThemeSelector } from '@/components/editor/ThemeSelector';
 import { PaginationToggle } from '@/components/header/PaginationToggle';
+import { Button } from '@/components/ui/button';
+import { Separator } from '@/components/ui/separator';
+import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { cn } from '@/lib/utils';
 
 interface PreviewToolbarProps {
   viewMode: 'list' | 'slide';

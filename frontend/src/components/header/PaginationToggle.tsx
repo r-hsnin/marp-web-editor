@@ -1,8 +1,8 @@
+import { FileText } from 'lucide-react';
+import type React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { FileText } from 'lucide-react';
-import type React from 'react';
 
 interface PaginationToggleProps {
   enabled: boolean;

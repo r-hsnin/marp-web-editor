@@ -1,7 +1,10 @@
-import { Footer } from '@/components/Footer';
+import { Share2 } from 'lucide-react';
+import type React from 'react';
+import { useEffect } from 'react';
 import { ChatView } from '@/components/ai/ChatView';
 import { Editor } from '@/components/editor/Editor';
 import { Preview } from '@/components/editor/Preview';
+import { Footer } from '@/components/Footer';
 import { ExportMenu } from '@/components/header/ExportMenu';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Button } from '@/components/ui/button';
@@ -9,13 +12,10 @@ import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/compone
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
-import { useEditorStore } from '@/lib/store';
-import { Share2 } from 'lucide-react';
-import type React from 'react';
 
 import { fetchThemes } from '@/lib/api';
 import { useThemeStore } from '@/lib/marp/themeStore';
-import { useEffect } from 'react';
+import { useEditorStore } from '@/lib/store';
 
 export const MainLayout: React.FC = () => {
   const { setAvailableThemes } = useThemeStore();
@@ -70,7 +70,7 @@ export const MainLayout: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden bg-background">
-        <ResizablePanelGroup direction="horizontal" className="h-full w-full">
+        <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
           <ResizablePanel defaultSize={50} minSize={30} className="bg-background flex flex-col">
             <div className="flex-1 relative overflow-hidden">
               <Editor />

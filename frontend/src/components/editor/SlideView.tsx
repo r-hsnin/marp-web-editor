@@ -1,7 +1,7 @@
-import type { Slide } from '@/hooks/useSlides';
-import { cn } from '@/lib/utils';
 import { Presentation } from 'lucide-react';
 import type React from 'react';
+import type { Slide } from '@/hooks/useSlides';
+import { cn } from '@/lib/utils';
 
 interface SlideViewProps {
   slide: Slide | null;

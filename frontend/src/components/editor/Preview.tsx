@@ -1,3 +1,6 @@
+import clsx from 'clsx';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
+import React, { useEffect, useRef, useState } from 'react';
 import { MarpIsolatedStyle } from '@/components/editor/MarpIsolatedStyle';
 import { useTheme } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
@@ -5,9 +8,6 @@ import { useMarp } from '@/hooks/useMarp';
 import { useSlides } from '@/hooks/useSlides';
 import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
 import { useEditorStore } from '@/lib/store';
-import clsx from 'clsx';
-import { ChevronLeft, ChevronRight } from 'lucide-react';
-import React, { useEffect, useRef, useState } from 'react';
 import { PreviewToolbar } from './PreviewToolbar';
 import { SlideList } from './SlideList';
 import { SlideView } from './SlideView';

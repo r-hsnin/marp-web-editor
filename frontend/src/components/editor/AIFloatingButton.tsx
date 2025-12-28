@@ -1,8 +1,8 @@
+import { Wand2 } from 'lucide-react';
+import type React from 'react';
 import { Button } from '@/components/ui/button';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { cn } from '@/lib/utils';
-import { Wand2 } from 'lucide-react';
-import type React from 'react';
 
 interface AIFloatingButtonProps {
   onClick?: () => void;

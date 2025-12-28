@@ -3,7 +3,7 @@
  * Prevents path traversal attacks by enforcing a strict whitelist pattern.
  */
 
-const SAFE_NAME_PATTERN = /^[a-zA-Z0-9_\-]+$/;
+const SAFE_NAME_PATTERN = /^[a-zA-Z0-9_-]+$/;
 
 /**
  * Marp built-in themes that don't have custom guideline files.

@@ -1,4 +1,4 @@
-import { type UIMessage, getToolName, isToolUIPart } from 'ai';
+import { getToolName, isToolUIPart, type UIMessage } from 'ai';
 import { Bot, Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';

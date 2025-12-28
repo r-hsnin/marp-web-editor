@@ -1,17 +1,16 @@
-import { useTheme } from '@/components/theme-provider';
-import { useEditorStore } from '@/lib/store';
 import { markdown, markdownLanguage } from '@codemirror/lang-markdown';
 import { languages } from '@codemirror/language-data';
 import { oneDark } from '@codemirror/theme-one-dark';
+import { EditorView } from '@codemirror/view';
 import { githubLight } from '@uiw/codemirror-theme-github';
 import CodeMirror from '@uiw/react-codemirror';
 import React from 'react';
+import { AIFloatingButton } from '@/components/editor/AIFloatingButton';
 
 import { EditorToolbar } from '@/components/editor/EditorToolbar';
+import { useTheme } from '@/components/theme-provider';
 import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
-import { EditorView } from '@codemirror/view';
-
-import { AIFloatingButton } from '@/components/editor/AIFloatingButton';
+import { useEditorStore } from '@/lib/store';
 
 export const Editor: React.FC = () => {
   const { markdown: content, setMarkdown, fontSize, openChat } = useEditorStore();

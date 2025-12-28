@@ -1,6 +1,5 @@
 import { existsSync } from 'node:fs';
-import fs from 'node:fs/promises';
-import { access } from 'node:fs/promises';
+import fs, { access } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import type { ExportFormat } from '@marp-editor/shared';

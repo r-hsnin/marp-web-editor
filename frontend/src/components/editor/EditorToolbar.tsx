@@ -1,3 +1,24 @@
+import type { EditorView } from '@codemirror/view';
+import {
+  Bold,
+  CheckSquare,
+  ChevronDown,
+  Code,
+  Heading1,
+  Heading2,
+  Heading3,
+  Image,
+  Italic,
+  Link,
+  List,
+  ListOrdered,
+  MoreVertical,
+  Strikethrough,
+  Table,
+  Type,
+} from 'lucide-react';
+import type React from 'react';
+import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { TemplateSelector } from '@/components/editor/TemplateSelector';
 import { Button } from '@/components/ui/button';
 import {
@@ -22,27 +43,6 @@ import {
 } from '@/lib/editor-commands';
 import { useEditorStore } from '@/lib/store';
 import { cn } from '@/lib/utils';
-import type { EditorView } from '@codemirror/view';
-import {
-  Bold,
-  CheckSquare,
-  ChevronDown,
-  Code,
-  Heading1,
-  Heading2,
-  Heading3,
-  Image,
-  Italic,
-  Link,
-  List,
-  ListOrdered,
-  MoreVertical,
-  Strikethrough,
-  Table,
-  Type,
-} from 'lucide-react';
-import type React from 'react';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
 
 interface EditorToolbarProps {
   view: EditorView | null;

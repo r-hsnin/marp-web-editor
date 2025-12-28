@@ -1,5 +1,5 @@
-import type { Slide } from '@/hooks/useSlides';
 import type React from 'react';
+import type { Slide } from '@/hooks/useSlides';
 
 interface SlideListProps {
   slides: Slide[];
