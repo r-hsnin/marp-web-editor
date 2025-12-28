@@ -4,6 +4,7 @@ import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useMarpChat } from '../../hooks/useMarpChat';
+import { useThemeStore } from '../../lib/marp/themeStore';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -38,6 +39,7 @@ export function ChatView() {
   } = useMarpChat();
   const scrollRef = useRef<HTMLDivElement>(null);
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const { activeThemeId } = useThemeStore();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Need to scroll when messages change
   useEffect(() => {
@@ -56,6 +58,9 @@ export function ChatView() {
       <div className="p-4 border-b border-border flex items-center gap-2">
         <Bot className="w-5 h-5" />
         <h2 className="font-semibold">Marp AI</h2>
+        <Badge variant="outline" className="text-xs">
+          theme: {activeThemeId}
+        </Badge>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
