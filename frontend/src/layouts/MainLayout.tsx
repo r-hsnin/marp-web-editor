@@ -33,7 +33,11 @@ export const MainLayout: React.FC = () => {
       <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-indigo-600 text-primary-foreground shadow-lg shadow-primary/20 overflow-hidden ring-1 ring-white/10">
-            <img src={`${import.meta.env.BASE_URL}icon.png`} alt="Marp Web Editor" className="h-full w-full object-cover" />
+            <img
+              src={`${import.meta.env.BASE_URL}icon.png`}
+              alt="Marp Web Editor"
+              className="h-full w-full object-cover"
+            />
           </div>
           <div className="flex flex-col">
             <h1 className="text-sm font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
