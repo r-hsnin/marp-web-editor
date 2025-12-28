@@ -3,12 +3,12 @@ import { serveStatic } from 'hono/bun';
 import { cors } from 'hono/cors';
 import aiRoute from './routes/ai.js';
 import exportRoute from './routes/export.js';
+import imagesRoute from './routes/images.js';
 import templatesRoute from './routes/templates.js';
 import themesRoute from './routes/themes.js';
 
 const app = new Hono();
 
-// Configure CORS
 // Configure CORS
 app.use(
   '/*',
@@ -20,13 +20,13 @@ app.use(
   }),
 );
 
-// Serve static images
+// Serve static images (for themes)
 app.use(
-  '/api/images/*',
+  '/api/static/*',
   cors(),
   serveStatic({
     root: './images',
-    rewriteRequestPath: (path) => path.replace(/^\/api\/images\//, ''),
+    rewriteRequestPath: (path) => path.replace(/^\/api\/static\//, ''),
   }),
 );
 
@@ -39,7 +39,8 @@ const routes = app
   .route('/api/export', exportRoute)
   .route('/api/ai', aiRoute)
   .route('/api/themes', themesRoute)
-  .route('/api/templates', templatesRoute);
+  .route('/api/templates', templatesRoute)
+  .route('/api/images', imagesRoute);
 
 export type AppType = typeof routes;
 export default app;

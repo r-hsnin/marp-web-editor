@@ -37,7 +37,7 @@ app.get('/:name', async (c) => {
     // This ensures images in templates (like ./images/shika_senbei.png)
     // are displayed correctly in the frontend editor.
     const baseUrl = Bun.env.APP_BASE_URL || '';
-    const processedContent = content.replace(/\.\/images\//g, `${baseUrl}/api/images/`);
+    const processedContent = content.replace(/\.\/images\//g, `${baseUrl}/api/static/`);
 
     return c.text(processedContent, 200, {
       'Content-Type': 'text/markdown',

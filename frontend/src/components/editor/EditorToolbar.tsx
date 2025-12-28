@@ -18,7 +18,8 @@ import {
   Type,
 } from 'lucide-react';
 import type React from 'react';
-import { useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { ImageUpload } from '@/components/editor/ImageUpload';
 import { TemplateSelector } from '@/components/editor/TemplateSelector';
 import { Button } from '@/components/ui/button';
 import {
@@ -31,7 +32,6 @@ import { Separator } from '@/components/ui/separator';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import {
   insertCodeBlock,
-  insertImage,
   insertLink,
   toggleBold,
   toggleHeading,
@@ -52,6 +52,21 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ view }) => {
   const { fontSize, setFontSize } = useEditorStore();
   const toolbarRef = useRef<HTMLDivElement>(null);
   const [visibleCount, setVisibleCount] = useState(100);
+  const [isImageUploadOpen, setIsImageUploadOpen] = useState(false);
+
+  const handleImageInsert = useCallback(
+    (markdown: string) => {
+      if (!view) return;
+      const { state, dispatch } = view;
+      const selection = state.selection.main;
+      dispatch({
+        changes: { from: selection.from, to: selection.to, insert: markdown },
+        selection: { anchor: selection.from + markdown.length },
+      });
+      view.focus();
+    },
+    [view],
+  );
 
   const actions = useMemo(
     () => [
@@ -111,7 +126,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ view }) => {
       {
         label: 'Image',
         icon: Image,
-        action: () => view && insertImage(view),
+        action: () => setIsImageUploadOpen(true),
       },
       {
         label: 'Code Block',
@@ -308,6 +323,12 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ view }) => {
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
+
+      <ImageUpload
+        open={isImageUploadOpen}
+        onClose={() => setIsImageUploadOpen(false)}
+        onInsert={handleImageInsert}
+      />
     </div>
   );
 };

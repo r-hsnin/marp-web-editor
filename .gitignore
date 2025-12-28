@@ -21,3 +21,7 @@ Thumbs.db
 .vscode
 .idea
 *.swp
+
+# Uploads (keep .gitkeep)
+backend/uploads/*
+!backend/uploads/.gitkeep
