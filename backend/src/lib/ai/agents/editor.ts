@@ -4,12 +4,12 @@ import { buildSystemPrompt } from '../promptBuilder.js';
 import { proposeEditTool, proposeInsertTool, proposeReplaceTool } from '../tools.js';
 
 export const editorAgent = {
-  async run(messages: CoreMessage[], context: string, theme?: string, targetSlide?: number) {
+  async run(messages: CoreMessage[], context: string, theme?: string) {
     const systemPrompt = buildSystemPrompt('editor', context, theme);
 
     const result = streamText({
       model: aiModel,
-      system: `${systemPrompt}\n\nTarget Slide: ${targetSlide ?? 'All'}`,
+      system: systemPrompt,
       messages,
       tools: {
         propose_edit: proposeEditTool,

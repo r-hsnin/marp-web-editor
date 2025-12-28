@@ -7,18 +7,15 @@ import { aiModel } from './config.js';
 
 export const IntentSchema = z.object({
   intent: z.enum(['architect', 'editor', 'general_chat']),
-  targetSlide: z.number().nullish().describe('The slide number to edit, if applicable'),
 });
 
 export type Intent = z.infer<typeof IntentSchema>;
 
 export const orchestrator = {
   async run(messages: CoreMessage[], context: string, theme?: string): Promise<Response> {
-    const lastMessage = messages[messages.length - 1];
-
     // 1. Analyze Intent
     const {
-      object: { intent, targetSlide },
+      object: { intent },
     } = await generateObject({
       model: aiModel,
       system: `You are the Orchestrator of a presentation slide generator.
@@ -37,18 +34,17 @@ ${context}
       schema: IntentSchema,
     });
 
-    console.log(`[Orchestrator] Intent: ${intent}, TargetSlide: ${targetSlide}, Theme: ${theme}`);
+    console.log(`[Orchestrator] Intent: ${intent}, Theme: ${theme}`);
 
     // 2. Route to Specialist
     let response: Response;
-    const normalizedTargetSlide = targetSlide ?? undefined;
 
     switch (intent) {
       case 'architect':
-        response = await architectAgent.run(messages, context, theme);
+        response = await architectAgent.run(messages, context);
         break;
       case 'editor':
-        response = await editorAgent.run(messages, context, theme, normalizedTargetSlide);
+        response = await editorAgent.run(messages, context, theme);
         break;
       default:
         response = await generalAgent.run(messages, context, theme);

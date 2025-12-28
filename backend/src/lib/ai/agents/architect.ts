@@ -4,7 +4,7 @@ import { buildSystemPrompt } from '../promptBuilder.js';
 import { proposePlanTool } from '../tools.js';
 
 export const architectAgent = {
-  async run(messages: CoreMessage[], context: string, _theme?: string) {
+  async run(messages: CoreMessage[], context: string) {
     const systemPrompt = buildSystemPrompt('architect', context);
 
     const result = streamText({
