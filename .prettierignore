@@ -1,8 +1,0 @@
-node_modules
-.next
-.git
-*.lock
-*.log
-build
-dist
-coverage

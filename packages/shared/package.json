@@ -1,0 +1,14 @@
+{
+  "name": "@marp-editor/shared",
+  "version": "0.0.1",
+  "private": true,
+  "type": "module",
+  "exports": {
+    ".": "./src/api-types.ts"
+  },
+  "dependencies": {
+    "@hono/zod-validator": "^0.7.5",
+    "hono": "^4.11.3",
+    "zod": "^4.2.1"
+  }
+}
