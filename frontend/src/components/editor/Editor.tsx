@@ -13,9 +13,21 @@ import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
 import { useEditorStore } from '@/lib/store';
 
 export const Editor: React.FC = () => {
-  const { markdown: content, setMarkdown, fontSize, openChat } = useEditorStore();
+  const {
+    markdown: content,
+    setMarkdown,
+    fontSize,
+    openChat,
+    isAIAvailable,
+    checkAIStatus,
+  } = useEditorStore();
   const { resolvedTheme } = useTheme();
   const [view, setView] = React.useState<EditorView | null>(null);
+
+  // Check AI availability on mount
+  React.useEffect(() => {
+    checkAIStatus();
+  }, [checkAIStatus]);
 
   // Extract content for display
   const displayContent = React.useMemo(() => {
@@ -81,7 +93,7 @@ export const Editor: React.FC = () => {
         />
 
         <div className="absolute bottom-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
-          <AIFloatingButton onClick={openChat} />
+          {isAIAvailable && <AIFloatingButton onClick={openChat} />}
         </div>
       </div>
     </div>

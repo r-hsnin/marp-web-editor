@@ -3,12 +3,14 @@ import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
 
-export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock';
+export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock' | '';
 
-const provider = (Bun.env.AI_PROVIDER || 'openai') as ModelProvider;
+const provider = (Bun.env.AI_PROVIDER || '') as ModelProvider;
 
 function getModel() {
   switch (provider) {
+    case 'openai':
+      return openai('gpt-4.1-mini');
     case 'anthropic':
       return anthropic('claude-sonnet-4-20250514');
     case 'google':
@@ -16,7 +18,7 @@ function getModel() {
     case 'bedrock':
       return bedrock('anthropic.claude-sonnet-4-20250514-v1:0');
     default:
-      return openai('gpt-4.1-mini');
+      return null;
   }
 }
 

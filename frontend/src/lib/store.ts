@@ -1,6 +1,8 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 
+const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+
 interface EditorState {
   markdown: string;
   setMarkdown: (markdown: string) => void;
@@ -11,6 +13,8 @@ interface EditorState {
   isChatOpen: boolean;
   openChat: () => void;
   closeChat: () => void;
+  isAIAvailable: boolean;
+  checkAIStatus: () => Promise<void>;
 }
 
 const DEFAULT_MARKDOWN = `# Marp Slide Example
@@ -61,6 +65,16 @@ export const useEditorStore = create<EditorState>()(
       isChatOpen: false,
       openChat: () => set({ isChatOpen: true }),
       closeChat: () => set({ isChatOpen: false }),
+      isAIAvailable: false,
+      checkAIStatus: async () => {
+        try {
+          const res = await fetch(`${API_BASE}/api/ai/status`);
+          const { available } = await res.json();
+          set({ isAIAvailable: available });
+        } catch {
+          set({ isAIAvailable: false });
+        }
+      },
     }),
     {
       name: 'marp-editor-storage',
