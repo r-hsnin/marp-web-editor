@@ -3,6 +3,8 @@
 Markdown でプレゼンテーションを作成する Web エディタ。  
 リアルタイムプレビューと AI 支援機能を搭載。
 
+🌐 **[Demo](https://r-hsnin.github.io/marp-web-editor/)**
+
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
 ![Hono](https://img.shields.io/badge/Hono-4-E36002?style=flat-square)
