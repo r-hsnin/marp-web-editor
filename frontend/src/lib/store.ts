@@ -17,22 +17,47 @@ interface EditorState {
   checkAIStatus: () => Promise<void>;
 }
 
-const DEFAULT_MARKDOWN = `# Marp Slide Example
+const DEFAULT_MARKDOWN = `# Welcome to Marp Web Editor!
+
+Markdown でプレゼンテーションを作成しよう
 
 ---
 
-## Slide 1
+## 主な機能
 
-- Bullet 1
-- Bullet 2
+- **リアルタイムプレビュー** - 編集内容を即座に確認
+- **AI アシスタント** - スライド作成をサポート
+- **画像アップロード** - ドラッグ&ドロップで挿入
+- **エクスポート** - PDF / PPTX / HTML / PNG
 
 ---
 
-## Slide 2
+## テーマとテンプレート
 
-![bg right](https://picsum.photos/800/600)
+- **テーマ** - 3種類のデフォルトテーマ + カスタムテーマ
+- **テンプレート** - 用途別テンプレートをワンクリック適用
 
-Content on the left
+ツールバーから選択できます
+
+---
+
+## 使い方
+
+1. 左のエディタで Markdown を編集
+2. \`---\` でスライドを区切る
+3. 右のプレビューで確認
+4. 完成したらエクスポート
+
+---
+
+## Marp 記法の例
+
+\`\`\`markdown
+![bg right](画像URL)  <!-- 背景画像 -->
+<!-- _class: lead -->  <!-- スライドクラス -->
+\`\`\`
+
+詳しくは [Marp 公式ドキュメント](https://marpit.marp.app/) をご覧ください
 `;
 
 // Debounced storage to avoid performance issues on every keystroke
