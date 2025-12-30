@@ -5,11 +5,9 @@ import { editorAgent } from './agents/editor.js';
 import { generalAgent } from './agents/general.js';
 import { getRequiredModel } from './config.js';
 
-export const IntentSchema = z.object({
+const IntentSchema = z.object({
   intent: z.enum(['architect', 'editor', 'general_chat']),
 });
-
-export type Intent = z.infer<typeof IntentSchema>;
 
 export const orchestrator = {
   async run(messages: ModelMessage[], context: string, theme?: string): Promise<Response> {

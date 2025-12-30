@@ -9,12 +9,8 @@ export const generateSchema = z.object({
   ),
 });
 
-// UIMessage format from AI SDK v5
 export const chatSchema = z.object({
   messages: z.array(z.any()), // Accept UIMessage format with flexible structure
   context: z.string().default(''),
   theme: z.string().optional(),
 });
-
-export type GenerateRequest = z.infer<typeof generateSchema>;
-export type ChatRequest = z.infer<typeof chatSchema>;

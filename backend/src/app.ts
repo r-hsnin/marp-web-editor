@@ -35,12 +35,11 @@ app.get('/health', (c) => {
   return c.json({ status: 'ok' });
 });
 
-const routes = app
+app
   .route('/api/export', exportRoute)
   .route('/api/ai', aiRoute)
   .route('/api/themes', themesRoute)
   .route('/api/templates', templatesRoute)
   .route('/api/images', imagesRoute);
 
-export type AppType = typeof routes;
 export default app;

@@ -5,7 +5,7 @@ import { z } from 'zod';
  * Schema for propose_edit tool
  * Used by Editor agent to suggest changes to existing slides
  */
-export const proposeEditSchema = z.object({
+const proposeEditSchema = z.object({
   slideIndex: z.number().describe('The 0-based index from the context (e.g., [0], [1], [2])'),
   newMarkdown: z
     .string()
@@ -17,7 +17,7 @@ export const proposeEditSchema = z.object({
  * Schema for propose_insert tool
  * Used by Editor agent to insert new slides
  */
-export const proposeInsertSchema = z.object({
+const proposeInsertSchema = z.object({
   insertAfter: z
     .number()
     .describe('Insert after this slide index. Use -1 to insert at the beginning.'),
@@ -33,7 +33,7 @@ export const proposeInsertSchema = z.object({
  * Schema for propose_replace tool
  * Used by Editor agent to replace all slides
  */
-export const proposeReplaceSchema = z.object({
+const proposeReplaceSchema = z.object({
   newMarkdown: z
     .string()
     .describe(
@@ -46,7 +46,7 @@ export const proposeReplaceSchema = z.object({
  * Schema for propose_plan tool
  * Used by Architect agent to suggest presentation structure
  */
-export const proposePlanSchema = z.object({
+const proposePlanSchema = z.object({
   title: z.string().describe('The presentation title'),
   outline: z.array(z.string()).describe('List of slide titles/topics'),
 });
