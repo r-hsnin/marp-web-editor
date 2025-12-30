@@ -15,7 +15,7 @@ export interface ConvertOptions {
   theme?: string;
 }
 
-export class MarpConverter {
+class MarpConverter {
   private async createTempFile(content: string, extension = 'md'): Promise<string> {
     const tempDir = tmpdir();
     const fileName = `${uuidv4()}.${extension}`;

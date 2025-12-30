@@ -1,0 +1,18 @@
+{
+  "$schema": "https://unpkg.com/knip@5/schema.json",
+  "workspaces": {
+    ".": {},
+    "frontend": {
+      "entry": ["src/main.tsx"],
+      "project": ["src/**/*.{ts,tsx}"],
+      "ignore": ["src/components/ui/**"]
+    },
+    "backend": {
+      "entry": ["src/index.ts"],
+      "project": ["src/**/*.ts"]
+    },
+    "packages/shared": {}
+  },
+  "ignoreDependencies": ["@marp-team/marp-cli", "puppeteer-core", "source-map-js", "lint-staged"],
+  "ignoreExportsUsedInFile": true
+}

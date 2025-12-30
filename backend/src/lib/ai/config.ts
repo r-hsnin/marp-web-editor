@@ -24,7 +24,6 @@ function getModel(): LanguageModel | null {
 }
 
 export const aiModel = getModel();
-export const aiProvider = provider;
 
 export function getRequiredModel(): LanguageModel {
   if (!aiModel) {

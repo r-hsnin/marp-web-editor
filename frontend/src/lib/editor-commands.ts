@@ -178,5 +178,4 @@ export const toggleTaskList = (view: EditorView) => {
 };
 
 export const insertLink = (view: EditorView) => toggleFormat(view, '[', '](url)', 'link text');
-export const insertImage = (view: EditorView) => toggleFormat(view, '![', '](url)', 'alt text');
 export const insertCodeBlock = (view: EditorView) => toggleFormat(view, '```\n', '\n```', 'code');
