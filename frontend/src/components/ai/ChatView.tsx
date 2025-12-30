@@ -1,4 +1,4 @@
-import { getToolName, isToolUIPart, type UIMessage } from 'ai';
+import { getToolName, isToolUIPart, type ToolUIPart, type UIMessage } from 'ai';
 import { Bot, Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -18,9 +18,8 @@ import {
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
-import { AddProposalCard } from './AddProposalCard';
 import { InteractiveComponent } from './InteractiveComponent';
-import { ProposalCard } from './ProposalCard';
+import { ProposalCarousel } from './ProposalCarousel';
 
 export function ChatView() {
   const {
@@ -33,6 +32,7 @@ export function ChatView() {
     handleApplyProposal,
     handleApplyInsertProposal,
     handleApplyReplaceProposal,
+    handleApplyAllProposals,
     handleDiscardProposal,
     clearHistory,
     getSlideContent,
@@ -99,87 +99,90 @@ export function ChatView() {
                     </Badge>
                   </div>
                 )}
-                {parts.map((part) => {
-                  if (part.type === 'text') {
+                {(() => {
+                  const textParts = parts.filter((p) => p.type === 'text');
+                  const toolParts = parts.filter((p) => isToolUIPart(p)) as ToolUIPart[];
+                  const proposalTools = toolParts.filter((p) => {
+                    const name = getToolName(p);
                     return (
-                      <div
-                        key={`text-${part.text.slice(0, 20)}`}
-                        className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]"
-                      >
-                        <ReactMarkdown remarkPlugins={[remarkGfm]}>{part.text}</ReactMarkdown>
-                      </div>
+                      name === 'propose_edit' ||
+                      name === 'propose_insert' ||
+                      name === 'propose_replace'
                     );
-                  }
-                  if (isToolUIPart(part)) {
-                    const toolName = getToolName(part);
+                  });
+                  const otherTools = toolParts.filter((p) => {
+                    const name = getToolName(p);
+                    return (
+                      name !== 'propose_edit' &&
+                      name !== 'propose_insert' &&
+                      name !== 'propose_replace'
+                    );
+                  });
 
-                    return (
-                      <div key={part.toolCallId} className="mt-2 w-full">
-                        {toolName === 'propose_edit' ? (
-                          <ProposalCard
-                            toolCallId={part.toolCallId}
-                            input={
-                              part.input as
-                                | { slideIndex: number; newMarkdown: string; reason: string }
-                                | undefined
-                            }
-                            output={part.output as string | undefined}
-                            state={part.state}
-                            onApply={handleApplyProposal}
-                            onDiscard={handleDiscardProposal}
-                            currentContent={
-                              (part.input as { slideIndex?: number } | undefined)?.slideIndex !==
-                              undefined
-                                ? getSlideContent((part.input as { slideIndex: number }).slideIndex)
-                                : ''
-                            }
-                          />
-                        ) : toolName === 'propose_insert' || toolName === 'propose_replace' ? (
-                          <AddProposalCard
-                            toolCallId={part.toolCallId}
-                            toolType={toolName}
-                            input={
-                              part.input as
-                                | { insertAfter?: number; newMarkdown: string; reason: string }
-                                | undefined
-                            }
-                            output={part.output as string | undefined}
-                            state={part.state}
-                            onApplyInsert={handleApplyInsertProposal}
-                            onApplyReplace={handleApplyReplaceProposal}
-                            onDiscard={handleDiscardProposal}
-                          />
-                        ) : toolName === 'propose_plan' && part.input ? (
-                          <div className="p-3 border rounded-lg bg-muted/50">
-                            <div className="font-semibold text-sm mb-2">
-                              {(part.input as { title?: string }).title ?? 'Planning...'}
-                            </div>
-                            <ul className="text-xs space-y-1">
-                              {((part.input as { outline?: string[] }).outline ?? []).map(
-                                (item, i) => (
-                                  // biome-ignore lint/suspicious/noArrayIndexKey: Outline order is stable
-                                  <li key={i} className="pl-2 border-l-2 border-primary/50">
-                                    {item}
-                                  </li>
-                                ),
-                              )}
-                            </ul>
-                          </div>
-                        ) : (
-                          <>
-                            <div className="text-xs opacity-70 mb-1">Tool: {toolName}</div>
-                            {part.state === 'output-available' ? (
-                              <InteractiveComponent toolName={toolName} data={part.output} />
+                  return (
+                    <>
+                      {/* Text parts */}
+                      {textParts.map((part) => (
+                        <div
+                          key={`text-${part.type === 'text' ? part.text.slice(0, 20) : ''}`}
+                          className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]"
+                        >
+                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                            {part.type === 'text' ? part.text : ''}
+                          </ReactMarkdown>
+                        </div>
+                      ))}
+
+                      {/* Proposal tools as carousel */}
+                      {proposalTools.length > 0 && (
+                        <ProposalCarousel
+                          proposals={proposalTools}
+                          onApplyEdit={handleApplyProposal}
+                          onApplyInsert={handleApplyInsertProposal}
+                          onApplyReplace={handleApplyReplaceProposal}
+                          onApplyAll={handleApplyAllProposals}
+                          onDiscard={handleDiscardProposal}
+                          getSlideContent={getSlideContent}
+                        />
+                      )}
+
+                      {/* Other tools (propose_plan, etc.) */}
+                      {otherTools.map((part) => {
+                        const toolName = getToolName(part);
+                        return (
+                          <div key={part.toolCallId} className="mt-2 w-full">
+                            {toolName === 'propose_plan' && part.input ? (
+                              <div className="p-3 border rounded-lg bg-muted/50">
+                                <div className="font-semibold text-sm mb-2">
+                                  {(part.input as { title?: string }).title ?? 'Planning...'}
+                                </div>
+                                <ul className="text-xs space-y-1">
+                                  {((part.input as { outline?: string[] }).outline ?? []).map(
+                                    (item, i) => (
+                                      // biome-ignore lint/suspicious/noArrayIndexKey: Outline order is stable
+                                      <li key={i} className="pl-2 border-l-2 border-primary/50">
+                                        {item}
+                                      </li>
+                                    ),
+                                  )}
+                                </ul>
+                              </div>
                             ) : (
-                              <div className="animate-pulse text-xs">Running...</div>
+                              <>
+                                <div className="text-xs opacity-70 mb-1">Tool: {toolName}</div>
+                                {part.state === 'output-available' ? (
+                                  <InteractiveComponent toolName={toolName} data={part.output} />
+                                ) : (
+                                  <div className="animate-pulse text-xs">Running...</div>
+                                )}
+                              </>
                             )}
-                          </>
-                        )}
-                      </div>
-                    );
-                  }
-                  return null;
-                })}
+                          </div>
+                        );
+                      })}
+                    </>
+                  );
+                })()}
               </div>
             </div>
           );

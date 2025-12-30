@@ -265,6 +265,74 @@ export function useMarpChat() {
     [markdown],
   );
 
+  const handleApplyAllProposals = useCallback(
+    (
+      proposals: Array<{
+        toolCallId: string;
+        toolName: 'propose_edit' | 'propose_insert' | 'propose_replace';
+        input: { slideIndex?: number; insertAfter?: number; newMarkdown: string };
+      }>,
+    ) => {
+      let slides = markdown.split(/\n---\n/);
+
+      // Separate by type
+      const edits = proposals.filter((p) => p.toolName === 'propose_edit');
+      const inserts = proposals.filter((p) => p.toolName === 'propose_insert');
+      const replaces = proposals.filter((p) => p.toolName === 'propose_replace');
+
+      // Apply edits first
+      for (const p of edits) {
+        const slideIndex = p.input.slideIndex ?? 0;
+        if (slides[slideIndex] !== undefined) {
+          const isFirst = slideIndex === 0;
+          const isLast = slideIndex === slides.length - 1;
+          const prefix = isFirst ? '' : '\n';
+          const suffix = isLast ? '' : '\n';
+          slides[slideIndex] = `${prefix}${p.input.newMarkdown.trim()}${suffix}`;
+        }
+        addToolOutput({
+          tool: 'propose_edit',
+          toolCallId: p.toolCallId,
+          output: 'Applied successfully',
+        });
+      }
+
+      // Apply inserts in descending order
+      inserts.sort((a, b) => (b.input.insertAfter ?? -1) - (a.input.insertAfter ?? -1));
+      for (const p of inserts) {
+        const insertAfter = p.input.insertAfter ?? -1;
+        const cleanedMarkdown = p.input.newMarkdown.trim().replace(/^---\n/, '');
+        const newSlides = cleanedMarkdown.split(/\n---\n/);
+        const insertIndex = insertAfter + 1;
+        const formattedNewSlides = newSlides.map((s, i) => {
+          const isFirst = insertIndex === 0 && i === 0;
+          const prefix = isFirst ? '' : '\n';
+          return `${prefix}${s.trim()}\n`;
+        });
+        slides.splice(insertIndex, 0, ...formattedNewSlides);
+        addToolOutput({
+          tool: 'propose_insert',
+          toolCallId: p.toolCallId,
+          output: 'Slides added successfully',
+        });
+      }
+
+      // Apply replaces last (overwrites everything)
+      for (const p of replaces) {
+        const cleaned = p.input.newMarkdown.trim().replace(/^---\n/, '');
+        slides = cleaned.split(/\n---\n/);
+        addToolOutput({
+          tool: 'propose_replace',
+          toolCallId: p.toolCallId,
+          output: 'All slides replaced successfully',
+        });
+      }
+
+      setMarkdown(slides.join('\n---\n'));
+    },
+    [markdown, setMarkdown, addToolOutput],
+  );
+
   return {
     messages,
     input,
@@ -276,6 +344,7 @@ export function useMarpChat() {
     handleApplyProposal,
     handleApplyInsertProposal,
     handleApplyReplaceProposal,
+    handleApplyAllProposals,
     handleDiscardProposal,
     clearHistory,
     getSlideContent,
