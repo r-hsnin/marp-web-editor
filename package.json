@@ -7,6 +7,7 @@
     "build": "bun run --filter frontend build",
     "start": "bun run --filter frontend start",
     "check": "biome check .",
+    "knip": "knip",
     "prepare": "husky"
   },
   "lint-staged": {
@@ -23,6 +24,7 @@
     "@biomejs/biome": "2.3.10",
     "@types/node": "^24.10.4",
     "husky": "^9.1.7",
+    "knip": "^5.78.0",
     "lint-staged": "^16.2.7",
     "typescript": "^5.8.3"
   }

@@ -228,6 +228,7 @@ marp-web-editor/
 # 全体
 bun install          # 依存関係インストール
 bun run check        # Biomeでコード品質チェック
+bun run knip         # 未使用コード検出
 
 # Frontend
 cd frontend
