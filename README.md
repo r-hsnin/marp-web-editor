@@ -87,25 +87,14 @@ http://localhost:3000 を開く
 
 ## Tech Stack
 
-### Frontend (`frontend/`)
+| Frontend | Backend |
+|----------|---------|
+| Vite + React | Hono + Bun |
+| TypeScript | Marp CLI |
+| Tailwind CSS + shadcn/ui | AI SDK |
+| CodeMirror | Puppeteer |
 
-| 技術                    | 用途              |
-| ----------------------- | ----------------- |
-| Vite + React            | UI フレームワーク |
-| TypeScript              | 型安全            |
-| Tailwind CSS + shadcn/ui | スタイリング      |
-| CodeMirror              | エディタ          |
-| Zustand                 | 状態管理          |
-
-### Backend (`backend/`)
-
-| 技術         | 用途                 |
-| ------------ | -------------------- |
-| Hono + Bun   | API サーバー         |
-| Marp CLI     | スライドレンダリング |
-| AI SDK       | AI 統合              |
-| Puppeteer    | PDF/PPTX 生成        |
-| Zod          | バリデーション       |
+詳細は [ARCHITECTURE.md](./docs/ARCHITECTURE.md) を参照。
 
 ---
 
@@ -225,19 +214,23 @@ marp-web-editor/
 ## Development
 
 ```bash
-# 全体
 bun install          # 依存関係インストール
 bun run check        # Biomeでコード品質チェック
-bun run knip         # 未使用コード検出
 
-# Frontend
-cd frontend
-bun run dev          # 開発サーバー (5173)
-bun run build        # 本番ビルド
-bun run typecheck    # 型チェック
-
-# Backend
-cd backend
-bun run dev          # 開発サーバー (3001)
-bun run typecheck    # 型チェック
+# 起動
+cd frontend && bun run dev   # 開発サーバー (5173)
+cd backend && bun run dev    # 開発サーバー (3001)
 ```
+
+詳細は [DEVELOPMENT.md](./docs/DEVELOPMENT.md) を参照。
+
+---
+
+## Documentation
+
+| ドキュメント | 内容 |
+|-------------|------|
+| [Development Guide](./docs/DEVELOPMENT.md) | 開発環境構築・トラブルシューティング |
+| [Architecture](./docs/ARCHITECTURE.md) | システム設計・技術スタック |
+| [AI Feature](./docs/AI.md) | AI機能の実装 |
+| [Docker](./docs/DOCKER.md) | Docker環境 |
