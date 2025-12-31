@@ -1,9 +1,10 @@
 import { getToolName, isToolUIPart, type ToolUIPart, type UIMessage } from 'ai';
-import { Bot, Send, Trash2 } from 'lucide-react';
+import { Bot, History, Plus, Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useMarpChat } from '../../hooks/useMarpChat';
+import { useChatStore } from '../../lib/chatStore';
 import { useThemeStore } from '../../lib/marp/themeStore';
 import {
   AlertDialog,
@@ -18,14 +19,69 @@ import {
 import { Badge } from '../ui/badge';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { InteractiveComponent } from './InteractiveComponent';
 import { ProposalCarousel } from './ProposalCarousel';
 
-export function ChatView() {
+function ChatHistory({ onClose }: { onClose: () => void }) {
+  const { sessions, activeSessionId, switchSession, deleteSession, createSession } = useChatStore();
+
+  const handleNewChat = () => {
+    createSession();
+    onClose();
+  };
+
+  const handleSelect = (id: string) => {
+    switchSession(id);
+    onClose();
+  };
+
+  return (
+    <div className="flex flex-col h-full">
+      <Button onClick={handleNewChat} className="mb-4 w-full" variant="outline">
+        <Plus className="w-4 h-4 mr-2" />
+        New Chat
+      </Button>
+      <div className="flex-1 overflow-y-auto space-y-2">
+        {sessions.length === 0 && (
+          <p className="text-sm text-muted-foreground text-center py-4">No chat history</p>
+        )}
+        {sessions.map((session) => (
+          <button
+            type="button"
+            key={session.id}
+            className={`p-3 rounded-lg cursor-pointer flex items-center justify-between group w-full text-left ${
+              session.id === activeSessionId ? 'bg-primary/10' : 'hover:bg-muted'
+            }`}
+            onClick={() => handleSelect(session.id)}
+          >
+            <div className="flex-1 min-w-0">
+              <p className="text-sm font-medium truncate">{session.title}</p>
+              <p className="text-xs text-muted-foreground">
+                {new Date(session.createdAt).toLocaleDateString()}
+              </p>
+            </div>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="h-8 w-8 opacity-0 group-hover:opacity-100"
+              onClick={(e) => {
+                e.stopPropagation();
+                deleteSession(session.id);
+              }}
+            >
+              <Trash2 className="w-4 h-4" />
+            </Button>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
+function ChatContent() {
   const {
     messages,
-    input,
-    handleInputChange,
     sendMessage,
     isLoading,
     agentIntents,
@@ -38,8 +94,11 @@ export function ChatView() {
     getSlideContent,
   } = useMarpChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const [input, setInput] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
+  const [historyOpen, setHistoryOpen] = useState(false);
   const { activeThemeId } = useThemeStore();
+  const { createSession, activeSessionId } = useChatStore();
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Need to scroll when messages change
   useEffect(() => {
@@ -48,6 +107,20 @@ export function ChatView() {
     }
   }, [messages]);
 
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!input.trim()) return;
+
+    // Create session if none exists
+    if (!activeSessionId) {
+      createSession();
+    }
+
+    const text = input;
+    setInput('');
+    await sendMessage(text);
+  };
+
   const handleClearHistory = () => {
     clearHistory();
     setShowClearConfirm(false);
@@ -55,12 +128,29 @@ export function ChatView() {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="p-4 border-b border-border flex items-center gap-2">
+      <div className="p-4 pr-12 border-b border-border flex items-center gap-2">
         <Bot className="w-5 h-5" />
         <h2 className="font-semibold">Marp AI</h2>
         <Badge variant="outline" className="text-xs">
           theme: {activeThemeId}
         </Badge>
+        <div className="flex-1" />
+        <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
+          <SheetTrigger asChild>
+            <Button variant="ghost" size="sm" className="h-7" title="Chat history">
+              <History className="w-4 h-4 mr-1" />
+              History
+            </Button>
+          </SheetTrigger>
+          <SheetContent side="right" className="w-80">
+            <SheetHeader className="pr-10">
+              <SheetTitle>Chat History</SheetTitle>
+            </SheetHeader>
+            <div className="mt-4 h-[calc(100%-4rem)]">
+              <ChatHistory onClose={() => setHistoryOpen(false)} />
+            </div>
+          </SheetContent>
+        </Sheet>
       </div>
 
       <div className="flex-1 min-h-0 overflow-y-auto p-4 space-y-4" ref={scrollRef}>
@@ -121,7 +211,6 @@ export function ChatView() {
 
                   return (
                     <>
-                      {/* Text parts */}
                       {textParts.map((part) => (
                         <div
                           key={`text-${part.type === 'text' ? part.text.slice(0, 20) : ''}`}
@@ -133,7 +222,6 @@ export function ChatView() {
                         </div>
                       ))}
 
-                      {/* Proposal tools as carousel */}
                       {proposalTools.length > 0 && (
                         <ProposalCarousel
                           proposals={proposalTools}
@@ -146,7 +234,6 @@ export function ChatView() {
                         />
                       )}
 
-                      {/* Other tools (propose_plan, etc.) */}
                       {otherTools.map((part) => {
                         const toolName = getToolName(part);
                         return (
@@ -194,7 +281,7 @@ export function ChatView() {
         )}
       </div>
 
-      <form onSubmit={sendMessage} className="p-4 border-t border-border flex gap-2">
+      <form onSubmit={handleSubmit} className="p-4 border-t border-border flex gap-2">
         {messages.length > 0 && (
           <Button
             type="button"
@@ -209,7 +296,7 @@ export function ChatView() {
         )}
         <Input
           value={input}
-          onChange={handleInputChange}
+          onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
           className="flex-1"
         />
@@ -239,4 +326,11 @@ export function ChatView() {
       </AlertDialog>
     </div>
   );
+}
+
+export function ChatView() {
+  const { activeSessionId } = useChatStore();
+
+  // key でセッション切り替え時に再マウント
+  return <ChatContent key={activeSessionId ?? 'no-session'} />;
 }
