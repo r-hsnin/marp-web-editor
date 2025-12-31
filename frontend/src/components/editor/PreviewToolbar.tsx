@@ -45,7 +45,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
 }) => {
   return (
     <div className="flex items-center justify-between p-1 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-10 z-10 relative">
-      <div className="flex items-center gap-2 px-3">
+      <div className="hidden md:flex items-center gap-2 px-3">
         <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
           Preview
         </span>

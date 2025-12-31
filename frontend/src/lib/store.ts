@@ -3,6 +3,8 @@ import { persist } from 'zustand/middleware';
 
 const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 
+type MobileView = 'editor' | 'preview';
+
 interface EditorState {
   markdown: string;
   setMarkdown: (markdown: string) => void;
@@ -15,6 +17,8 @@ interface EditorState {
   closeChat: () => void;
   isAIAvailable: boolean;
   checkAIStatus: () => Promise<void>;
+  mobileView: MobileView;
+  setMobileView: (view: MobileView) => void;
 }
 
 const DEFAULT_MARKDOWN = `# Welcome to Marp Web Editor!
@@ -100,6 +104,8 @@ export const useEditorStore = create<EditorState>()(
           set({ isAIAvailable: false });
         }
       },
+      mobileView: 'editor',
+      setMobileView: (mobileView) => set({ mobileView }),
     }),
     {
       name: 'marp-editor-storage',

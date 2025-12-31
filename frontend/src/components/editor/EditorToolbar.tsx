@@ -215,10 +215,10 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ view }) => {
     <div className="flex items-center p-1 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 h-10 w-full z-10 relative">
       {/* Title Section */}
       <div className="flex items-center gap-2 px-3 shrink-0">
-        <span className="text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+        <span className="hidden md:inline text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
           Editor
         </span>
-        <Separator orientation="vertical" className="h-3 bg-border/50" />
+        <Separator orientation="vertical" className="hidden md:block h-3 bg-border/50" />
         <TemplateSelector />
         <Separator orientation="vertical" className="h-3 bg-border/50" />
       </div>

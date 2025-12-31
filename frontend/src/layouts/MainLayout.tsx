@@ -1,5 +1,6 @@
 import type React from 'react';
 import { useEffect } from 'react';
+import { useMediaQuery } from 'usehooks-ts';
 import { ChatView } from '@/components/ai/ChatView';
 import { Editor } from '@/components/editor/Editor';
 import { Preview } from '@/components/editor/Preview';
@@ -8,6 +9,7 @@ import { ExportMenu } from '@/components/header/ExportMenu';
 import { ModeToggle } from '@/components/mode-toggle';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
+import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { fetchThemes } from '@/lib/api';
@@ -16,7 +18,8 @@ import { useEditorStore } from '@/lib/store';
 
 export const MainLayout: React.FC = () => {
   const { setAvailableThemes } = useThemeStore();
-  const { isChatOpen, closeChat } = useEditorStore();
+  const { isChatOpen, closeChat, mobileView, setMobileView } = useEditorStore();
+  const isMobile = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
     fetchThemes()
@@ -36,12 +39,38 @@ export const MainLayout: React.FC = () => {
               className="h-full w-full object-cover"
             />
           </div>
-          <div className="flex flex-col">
-            <h1 className="text-sm font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-              Marp Web Editor
-            </h1>
-          </div>
+          {!isMobile && (
+            <div className="flex flex-col">
+              <h1 className="text-sm font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
+                Marp Web Editor
+              </h1>
+            </div>
+          )}
         </div>
+
+        {isMobile && (
+          <ToggleGroup
+            type="single"
+            value={mobileView}
+            onValueChange={(v) => v && setMobileView(v as 'editor' | 'preview')}
+            className="bg-muted rounded-lg p-1"
+          >
+            <ToggleGroupItem
+              value="editor"
+              aria-label="Editor mode"
+              className="rounded-md px-4 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
+            >
+              Editor
+            </ToggleGroupItem>
+            <ToggleGroupItem
+              value="preview"
+              aria-label="Preview mode"
+              className="rounded-md px-4 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
+            >
+              Preview
+            </ToggleGroupItem>
+          </ToggleGroup>
+        )}
 
         <div className="flex items-center gap-3">
           <TooltipProvider delayDuration={300}>
@@ -56,24 +85,32 @@ export const MainLayout: React.FC = () => {
 
       {/* Main Content */}
       <div className="flex-1 overflow-hidden bg-background">
-        <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
-          <ResizablePanel defaultSize={50} minSize={30} className="bg-background flex flex-col">
-            <div className="flex-1 relative overflow-hidden">
-              <Editor />
-            </div>
-          </ResizablePanel>
+        {isMobile ? (
+          mobileView === 'editor' ? (
+            <Editor />
+          ) : (
+            <Preview />
+          )
+        ) : (
+          <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
+            <ResizablePanel defaultSize={50} minSize={30} className="bg-background flex flex-col">
+              <div className="flex-1 relative overflow-hidden">
+                <Editor />
+              </div>
+            </ResizablePanel>
 
-          <ResizableHandle
-            withHandle
-            className="bg-border hover:bg-primary/50 transition-colors w-px data-[resize-handle-active]:bg-primary data-[resize-handle-active]:w-1"
-          />
+            <ResizableHandle
+              withHandle
+              className="bg-border hover:bg-primary/50 transition-colors w-px data-[resize-handle-active]:bg-primary data-[resize-handle-active]:w-1"
+            />
 
-          <ResizablePanel defaultSize={50} minSize={30} className="bg-muted/10 flex flex-col">
-            <div className="flex-1 p-0 bg-muted/10 relative overflow-hidden">
-              <Preview />
-            </div>
-          </ResizablePanel>
-        </ResizablePanelGroup>
+            <ResizablePanel defaultSize={50} minSize={30} className="bg-muted/10 flex flex-col">
+              <div className="flex-1 p-0 bg-muted/10 relative overflow-hidden">
+                <Preview />
+              </div>
+            </ResizablePanel>
+          </ResizablePanelGroup>
+        )}
       </div>
 
       <Footer />
