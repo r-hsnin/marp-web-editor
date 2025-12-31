@@ -26,6 +26,6 @@
     "husky": "^9.1.7",
     "knip": "^5.78.0",
     "lint-staged": "^16.2.7",
-    "typescript": "^5.8.3"
+    "typescript": "~5.9.3"
   }
 }
