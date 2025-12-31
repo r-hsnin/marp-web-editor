@@ -12,6 +12,40 @@ import { useTheme } from '@/components/theme-provider';
 import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
 import { useEditorStore } from '@/lib/store';
 
+// Define extensions outside component to avoid re-creation on every render
+const extensions = [
+  markdown({ base: markdownLanguage, codeLanguages: languages }),
+  EditorView.lineWrapping,
+];
+
+// Define basicSetup options as a constant
+const basicSetupOptions = {
+  lineNumbers: true,
+  highlightActiveLineGutter: true,
+  highlightSpecialChars: true,
+  history: true,
+  foldGutter: true,
+  drawSelection: true,
+  dropCursor: true,
+  allowMultipleSelections: true,
+  indentOnInput: true,
+  syntaxHighlighting: true,
+  bracketMatching: true,
+  closeBrackets: true,
+  autocompletion: true,
+  rectangularSelection: true,
+  crosshairCursor: true,
+  highlightActiveLine: true,
+  highlightSelectionMatches: true,
+  closeBracketsKeymap: true,
+  defaultKeymap: true,
+  searchKeymap: true,
+  historyKeymap: true,
+  foldKeymap: true,
+  completionKeymap: true,
+  lintKeymap: true,
+} as const;
+
 export const Editor: React.FC = () => {
   const {
     markdown: content,
@@ -23,6 +57,12 @@ export const Editor: React.FC = () => {
   } = useEditorStore();
   const { resolvedTheme } = useTheme();
   const [view, setView] = React.useState<EditorView | null>(null);
+
+  // Keep content in ref to avoid onChange dependency on content
+  const contentRef = React.useRef(content);
+  React.useLayoutEffect(() => {
+    contentRef.current = content;
+  }, [content]);
 
   // Check AI availability on mount
   React.useEffect(() => {
@@ -38,10 +78,13 @@ export const Editor: React.FC = () => {
   const onChange = React.useCallback(
     (value: string) => {
       // Merge new content with existing frontmatter
-      const newMarkdown = FrontmatterProcessor.mergeContentWithFrontmatter(content, value);
+      const newMarkdown = FrontmatterProcessor.mergeContentWithFrontmatter(
+        contentRef.current,
+        value,
+      );
       setMarkdown(newMarkdown);
     },
-    [content, setMarkdown],
+    [setMarkdown],
   );
 
   const onCreateEditor = React.useCallback((view: EditorView) => {
@@ -55,41 +98,13 @@ export const Editor: React.FC = () => {
         <CodeMirror
           value={displayContent}
           height="100%"
-          extensions={[
-            markdown({ base: markdownLanguage, codeLanguages: languages }),
-            EditorView.lineWrapping,
-          ]}
+          extensions={extensions}
           onChange={onChange}
           onCreateEditor={onCreateEditor}
           theme={resolvedTheme === 'dark' ? oneDark : githubLight}
           className="h-full"
           style={{ fontSize: `${fontSize}px` }}
-          basicSetup={{
-            lineNumbers: true,
-            highlightActiveLineGutter: true,
-            highlightSpecialChars: true,
-            history: true,
-            foldGutter: true,
-            drawSelection: true,
-            dropCursor: true,
-            allowMultipleSelections: true,
-            indentOnInput: true,
-            syntaxHighlighting: true,
-            bracketMatching: true,
-            closeBrackets: true,
-            autocompletion: true,
-            rectangularSelection: true,
-            crosshairCursor: true,
-            highlightActiveLine: true,
-            highlightSelectionMatches: true,
-            closeBracketsKeymap: true,
-            defaultKeymap: true,
-            searchKeymap: true,
-            historyKeymap: true,
-            foldKeymap: true,
-            completionKeymap: true,
-            lintKeymap: true,
-          }}
+          basicSetup={basicSetupOptions}
         />
 
         <div className="absolute bottom-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
