@@ -1,3 +1,8 @@
+---
+marp: true
+theme: polygon
+---
+
 <!-- _class: cover -->
 
 # プロジェクト名

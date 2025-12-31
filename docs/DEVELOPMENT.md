@@ -218,17 +218,17 @@ bun run check
 **1. テーマファイルの存在確認**:
 ```bash
 ls backend/themes/
-# professional.css が存在するか
+# polygon.css が存在するか
 ```
 
 **2. API動作確認**:
 ```bash
 # テーマリスト取得
 curl http://localhost:3001/api/themes
-# 期待値: {"themes":["professional"]}
+# 期待値: {"themes":["polygon"]}
 
 # テーマCSS取得
-curl http://localhost:3001/api/themes/professional
+curl http://localhost:3001/api/themes/polygon
 # 期待値: CSSコンテンツ
 ```
 
