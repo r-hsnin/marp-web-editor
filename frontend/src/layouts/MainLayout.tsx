@@ -52,7 +52,7 @@ export const MainLayout: React.FC = () => {
           <ToggleGroup
             type="single"
             value={mobileView}
-            onValueChange={(v) => v && setMobileView(v as 'editor' | 'preview')}
+            onValueChange={(v: string) => v && setMobileView(v as 'editor' | 'preview')}
             className="bg-muted rounded-lg p-1"
           >
             <ToggleGroupItem

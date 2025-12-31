@@ -11,6 +11,7 @@ Markdown でプレゼンテーションを作成する Web エディタ。
 ![Bun](https://img.shields.io/badge/Bun-1.3-000?style=flat-square&logo=bun)
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
+[![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/r-hsnin/marp-web-editor)
 
 ---
 
