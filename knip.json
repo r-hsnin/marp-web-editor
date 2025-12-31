@@ -13,6 +13,14 @@
     },
     "packages/shared": {}
   },
-  "ignoreDependencies": ["@marp-team/marp-cli", "puppeteer-core", "source-map-js", "lint-staged"],
+  "ignoreDependencies": [
+    "@marp-team/marp-cli",
+    "puppeteer-core",
+    "source-map-js",
+    "lint-staged",
+    "tailwindcss",
+    "tailwindcss-animate",
+    "@tailwindcss/typography"
+  ],
   "ignoreExportsUsedInFile": true
 }
