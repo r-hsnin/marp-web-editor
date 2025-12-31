@@ -1,4 +1,6 @@
+import browser from '@marp-team/marp-core/browser';
 import type React from 'react';
+import { useEffect, useRef } from 'react';
 import type { Slide } from '@/hooks/useSlides';
 
 interface SlideListProps {
@@ -7,8 +9,17 @@ interface SlideListProps {
 }
 
 export const SlideList: React.FC<SlideListProps> = ({ slides, onSlideClick }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Re-run browser() when slides content changes
+  useEffect(() => {
+    if (containerRef.current) {
+      browser(containerRef.current);
+    }
+  }, [slides]);
+
   return (
-    <div className="max-w-6xl mx-auto p-8">
+    <div ref={containerRef} className="max-w-6xl mx-auto p-8">
       <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
         {slides.map((slide, index) => (
           <button

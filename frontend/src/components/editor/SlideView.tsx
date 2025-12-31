@@ -1,5 +1,7 @@
+import browser from '@marp-team/marp-core/browser';
 import { Presentation } from 'lucide-react';
 import type React from 'react';
+import { useEffect, useRef } from 'react';
 import type { Slide } from '@/hooks/useSlides';
 import { cn } from '@/lib/utils';
 
@@ -9,6 +11,15 @@ interface SlideViewProps {
 }
 
 export const SlideView: React.FC<SlideViewProps> = ({ slide, isFullscreen }) => {
+  const containerRef = useRef<HTMLDivElement>(null);
+
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Re-run browser() when slide content changes
+  useEffect(() => {
+    if (containerRef.current) {
+      browser(containerRef.current);
+    }
+  }, [slide]);
+
   if (!slide) {
     return (
       <div className="flex flex-col items-center gap-3 text-muted-foreground animate-in fade-in zoom-in duration-300">
@@ -21,6 +32,7 @@ export const SlideView: React.FC<SlideViewProps> = ({ slide, isFullscreen }) => 
   return (
     <div className="h-full w-full flex items-center justify-center p-4 md:p-8 overflow-hidden">
       <div
+        ref={containerRef}
         className={cn(
           'marp-content-isolated bg-white transition-all duration-500 ease-out transform-gpu',
           isFullscreen ? 'w-full h-full' : 'rounded-xl',
