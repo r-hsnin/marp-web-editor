@@ -177,7 +177,9 @@ Use for: 強調スライド
   "id": "my-template",
   "name": "テンプレート名",
   "description": "説明文",
-  "icon": "📝"
+  "icon": "📝",
+  "category": "template",
+  "theme": "default"
 }
 ```
 

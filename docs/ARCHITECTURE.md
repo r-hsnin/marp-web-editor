@@ -187,14 +187,20 @@ frontend/
 │   │   │   ├── PreviewToolbar.tsx
 │   │   │   ├── ThemeSelector.tsx
 │   │   │   ├── TemplateSelector.tsx
-│   │   │   └── AIFloatingButton.tsx
+│   │   │   ├── AIFloatingButton.tsx
+│   │   │   ├── ImageUpload.tsx
+│   │   │   ├── SlideList.tsx
+│   │   │   ├── SlideView.tsx
+│   │   │   └── MarpIsolatedStyle.tsx
 │   │   ├── header/         # ヘッダー
 │   │   │   ├── ExportMenu.tsx
 │   │   │   └── PaginationToggle.tsx
 │   │   └── ai/             # AI関連UI
 │   │       ├── ChatView.tsx
-│   │       ├── SlidePlanView.tsx
-│   │       └── InteractiveComponent.tsx
+│   │       ├── InteractiveComponent.tsx
+│   │       ├── ProposalCard.tsx
+│   │       ├── ProposalCarousel.tsx
+│   │       └── AddProposalCard.tsx
 │   ├── hooks/              # カスタムフック
 │   │   ├── useMarp.ts      # Marpインスタンス管理
 │   │   ├── useMarpChat.ts  # AI チャット
@@ -205,6 +211,9 @@ frontend/
 │   ├── lib/                # ユーティリティ
 │   │   ├── api.ts          # Hono RPC クライアント
 │   │   ├── store.ts        # Zustand store
+│   │   ├── chatStore.ts    # チャット状態管理
+│   │   ├── editor-commands.ts  # エディタコマンド
+│   │   ├── utils.ts        # ユーティリティ関数
 │   │   └── marp/           # Marp関連ロジック
 │   │       ├── themeStore.ts      # テーマ状態管理
 │   │       ├── frontmatterProcessor.ts
@@ -223,10 +232,15 @@ backend/
 │   │   ├── ai.ts           # AI生成API
 │   │   ├── export.ts       # エクスポートAPI
 │   │   ├── themes.ts       # テーマAPI
-│   │   └── templates.ts    # テンプレートAPI
+│   │   ├── templates.ts    # テンプレートAPI
+│   │   └── images.ts       # 画像API
 │   ├── lib/                # ビジネスロジック
 │   │   ├── marp.ts         # Marp CLI ラッパー
 │   │   ├── validation.ts   # 共通バリデーション
+│   │   ├── storage/        # ストレージ抽象化
+│   │   │   ├── index.ts
+│   │   │   ├── local.ts
+│   │   │   └── s3.ts
 │   │   └── ai/             # AI関連
 │   │       ├── config.ts       # モデル設定
 │   │       ├── orchestrator.ts # Intent分析・ルーティング
@@ -244,13 +258,18 @@ backend/
 ├── guidelines/             # AIガイドライン
 │   ├── base-rules.md       # 基本ルール
 │   └── themes/             # テーマ別ガイドライン
-│       └── polygon.md
+│       ├── polygon.md
+│       └── midnight.md
 ├── themes/                 # テーマCSSファイル
-│   └── polygon.css
+│   ├── polygon.css
+│   └── midnight.css
 ├── templates/              # テンプレートファイル
 │   ├── templates.json      # テンプレート定義
-│   └── *.md                # テンプレートMarkdown
-│   └── themes.md
+│   ├── marp-basic-manual.md
+│   ├── polygon-theme-manual.md
+│   ├── midnight-theme-manual.md
+│   ├── business-presentation.md
+│   └── tech-presentation.md
 ├── tests/                  # テストファイル
 └── package.json
 ```
@@ -407,7 +426,8 @@ export const exportSlide = async (
 
 ```
 backend/themes/
-  └── polygon.css  ← Single Source of Truth
+  ├── polygon.css   ← Single Source of Truth
+  └── midnight.css
 
 backend/src/routes/themes.ts
   ├── GET /api/themes          → テーマ名リスト
@@ -428,7 +448,7 @@ frontend/src/hooks/useThemeLoader.ts
 **Response**:
 ```json
 {
-  "themes": ["polygon"]
+  "themes": ["polygon", "midnight"]
 }
 ```
 
@@ -456,7 +476,8 @@ Marp公式テーマ (Marp Core に含まれる):
 
 #### Custom Themes
 `backend/themes/` に配置されたCSSファイル:
-- `polygon` (現在実装済み)
+- `polygon`: ビジネス向けテーマ
+- `midnight`: コード重視のダークテーマ
 - 管理者が追加可能
 
 ### Adding Custom Themes
@@ -489,10 +510,12 @@ section {
 
 ```
 backend/templates/
-  ├── business-presentation.md
-  ├── tech-presentation.md
-  ├── marp-basic-manual.md
-  └── polygon-theme-manual.md
+  ├── templates.json           # テンプレート定義
+  ├── marp-basic-manual.md     # Marp基本マニュアル
+  ├── polygon-theme-manual.md  # Polygonテーママニュアル
+  ├── midnight-theme-manual.md # Midnightテーママニュアル
+  ├── business-presentation.md # ビジネスプレゼン
+  └── tech-presentation.md     # LTテンプレート
 
 backend/src/routes/templates.ts
   ├── GET /api/templates          → テンプレート一覧
@@ -510,8 +533,11 @@ backend/src/routes/templates.ts
   "templates": [
     {
       "id": "business-presentation",
-      "name": "ビジネスプレゼンテーション",
-      "description": "ビジネス向けプレゼンテーション"
+      "name": "ビジネスプレゼン",
+      "description": "会社紹介・提案書向け",
+      "icon": "📊",
+      "category": "template",
+      "theme": "Polygon"
     }
   ]
 }
