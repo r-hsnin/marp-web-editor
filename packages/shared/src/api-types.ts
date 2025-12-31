@@ -31,6 +31,8 @@ export interface Template {
   name: string;
   description: string;
   icon: string;
+  category?: 'manual' | 'template';
+  theme?: string;
 }
 
 // Hono RPC type definition
