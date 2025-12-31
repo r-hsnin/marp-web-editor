@@ -1,6 +1,8 @@
 import clsx from 'clsx';
 import { ChevronLeft, ChevronRight } from 'lucide-react';
 import React, { useEffect, useRef, useState } from 'react';
+import { useSwipeable } from 'react-swipeable';
+import { useMediaQuery } from 'usehooks-ts';
 import { MarpIsolatedStyle } from '@/components/editor/MarpIsolatedStyle';
 import { useTheme } from '@/components/theme-provider';
 import { Button } from '@/components/ui/button';
@@ -30,6 +32,15 @@ export const Preview: React.FC = () => {
   const containerRef = useRef<HTMLDivElement>(null);
   const [viewMode, setViewMode] = useState<'list' | 'slide'>('list');
   const [isFullscreen, setIsFullscreen] = useState(false);
+  const isMobile = useMediaQuery('(max-width: 767px)');
+
+  const swipeHandlers = useSwipeable({
+    onSwipedLeft: () => goToNextSlide(),
+    onSwipedRight: () => goToPrevSlide(),
+    trackMouse: false,
+    trackTouch: true,
+    delta: 50,
+  });
 
   // Parse current settings from markdown
   const currentSettings = React.useMemo(() => {
@@ -111,6 +122,7 @@ export const Preview: React.FC = () => {
 
       <div
         ref={containerRef}
+        {...(isMobile && viewMode === 'slide' ? swipeHandlers : {})}
         className={clsx(
           'flex-1 overflow-y-auto transition-colors duration-300 relative scroll-smooth',
           resolvedTheme === 'dark' ? 'bg-zinc-950/30' : 'bg-slate-50/50',
