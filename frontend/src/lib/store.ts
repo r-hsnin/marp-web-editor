@@ -75,7 +75,7 @@ const debouncedStorage = {
       if (timeoutId) clearTimeout(timeoutId);
       timeoutId = setTimeout(() => {
         localStorage.setItem(name, JSON.stringify(value));
-      }, 5000); // Save after 5 seconds of inactivity
+      }, 1500); // Save after 1.5 seconds of inactivity
     };
   })(),
   removeItem: (name: string) => localStorage.removeItem(name),
