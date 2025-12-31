@@ -52,8 +52,7 @@ frontend/
 │   └── index.css           # グローバルスタイル
 ├── public/                 # 公開ファイル
 ├── index.html              # HTMLテンプレート
-├── vite.config.ts          # Vite設定
-├── tailwind.config.js      # Tailwind CSS設定
+├── vite.config.ts          # Vite設定（Tailwind CSS含む）
 ├── tsconfig.json           # TypeScript設定
 └── package.json            # 依存関係
 ```
