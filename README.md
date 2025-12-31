@@ -1,10 +1,5 @@
 # Marp Web Editor
 
-Markdown でプレゼンテーションを作成する Web エディタ。  
-リアルタイムプレビューと AI 支援機能を搭載。
-
-🌐 **[Demo](https://r-hsnin.github.io/marp-web-editor/)**
-
 ![Vite](https://img.shields.io/badge/Vite-7-646CFF?style=flat-square&logo=vite)
 ![React](https://img.shields.io/badge/React-19-61DAFB?style=flat-square&logo=react)
 ![Hono](https://img.shields.io/badge/Hono-4-E36002?style=flat-square)
@@ -12,6 +7,13 @@ Markdown でプレゼンテーションを作成する Web エディタ。
 ![TypeScript](https://img.shields.io/badge/TypeScript-5.9-3178C6?style=flat-square&logo=typescript)
 ![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)
 [![Ask DeepWiki](https://deepwiki.com/badge.svg)](https://deepwiki.com/r-hsnin/marp-web-editor)
+
+Markdown でプレゼンテーションを作成する Web エディタ。  
+リアルタイムプレビューと AI 支援機能を搭載。
+
+🌐 **[Demo](https://r-hsnin.github.io/marp-web-editor/)**
+
+![Marp Web Editor](docs/images/screenshot.png)
 
 ---
 
