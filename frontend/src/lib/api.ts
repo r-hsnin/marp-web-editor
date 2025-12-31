@@ -1,7 +1,8 @@
 import type { AppType, ExportFormat, Template } from '@marp-editor/shared';
 import { hc } from 'hono/client';
+import { API_BASE } from './config';
 
-const client = hc<AppType>('/');
+const client = hc<AppType>(`${API_BASE}/`);
 
 export type { ExportFormat, Template };
 

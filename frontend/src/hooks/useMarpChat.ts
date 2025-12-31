@@ -3,6 +3,7 @@ import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChatStore } from '../lib/chatStore';
+import { API_BASE } from '../lib/config';
 import { useThemeStore } from '../lib/marp/themeStore';
 import { useEditorStore } from '../lib/store';
 
@@ -43,7 +44,7 @@ export function useMarpChat() {
   const transport = useMemo(
     () =>
       new DefaultChatTransport({
-        api: '/api/ai/chat',
+        api: `${API_BASE}/api/ai/chat`,
         prepareSendMessagesRequest({ messages }) {
           return {
             body: {

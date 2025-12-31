@@ -1,4 +1,5 @@
 import { useEffect, useState } from 'react';
+import { API_BASE } from '../lib/config';
 import { useThemeStore } from '../lib/marp/themeStore';
 
 const BUILTIN_THEMES = ['default', 'gaia', 'uncover'];
@@ -21,7 +22,7 @@ export const useThemeLoader = () => {
 
       // 2. External Theme (from backend API)
       try {
-        const res = await fetch(`/api/themes/${activeThemeId}`);
+        const res = await fetch(`${API_BASE}/api/themes/${activeThemeId}`);
         if (!res.ok) throw new Error('Failed to load theme');
         const css = await res.text();
         setLoadedCss(css);
