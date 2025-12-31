@@ -1,4 +1,3 @@
-import { Share2 } from 'lucide-react';
 import type React from 'react';
 import { useEffect } from 'react';
 import { ChatView } from '@/components/ai/ChatView';
@@ -7,11 +6,9 @@ import { Preview } from '@/components/editor/Preview';
 import { Footer } from '@/components/Footer';
 import { ExportMenu } from '@/components/header/ExportMenu';
 import { ModeToggle } from '@/components/mode-toggle';
-import { Button } from '@/components/ui/button';
 import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
-import { Separator } from '@/components/ui/separator';
-import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
+import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { fetchThemes } from '@/lib/api';
 import { useThemeStore } from '@/lib/marp/themeStore';
@@ -49,21 +46,6 @@ export const MainLayout: React.FC = () => {
         <div className="flex items-center gap-3">
           <TooltipProvider delayDuration={300}>
             <div className="flex items-center gap-1 rounded-full border border-border/50 bg-secondary/30 p-1 backdrop-blur-sm">
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <Button
-                    variant="ghost"
-                    size="icon"
-                    className="h-7 w-7 rounded-full text-muted-foreground hover:bg-background hover:text-foreground hover:shadow-sm transition-all"
-                  >
-                    <Share2 className="h-3.5 w-3.5" />
-                  </Button>
-                </TooltipTrigger>
-                <TooltipContent>Share</TooltipContent>
-              </Tooltip>
-
-              <Separator orientation="vertical" className="h-4 bg-border/50" />
-
               <ModeToggle />
             </div>
 
@@ -97,7 +79,7 @@ export const MainLayout: React.FC = () => {
       <Footer />
 
       <Dialog open={isChatOpen} onOpenChange={closeChat}>
-        <DialogContent className="sm:max-w-4xl h-[80vh] flex flex-col p-0 gap-0 overflow-hidden">
+        <DialogContent className="sm:max-w-5xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
           <DialogTitle className="sr-only">AI Assistant</DialogTitle>
           <DialogDescription className="sr-only">
             Chat with AI Assistant to generate slides

@@ -1,29 +1,10 @@
-import { type UIMessage, useChat } from '@ai-sdk/react';
+import type { UIMessage } from '@ai-sdk/react';
+import { useChat } from '@ai-sdk/react';
 import { DefaultChatTransport } from 'ai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { useChatStore } from '../lib/chatStore';
 import { useThemeStore } from '../lib/marp/themeStore';
 import { useEditorStore } from '../lib/store';
-
-const CHAT_STORAGE_KEY = 'marp-chat-history';
-const INTENTS_STORAGE_KEY = 'marp-chat-intents';
-
-function loadMessagesFromStorage(): UIMessage[] {
-  try {
-    const stored = localStorage.getItem(CHAT_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : [];
-  } catch {
-    return [];
-  }
-}
-
-function loadIntentsFromStorage(): Record<string, string> {
-  try {
-    const stored = localStorage.getItem(INTENTS_STORAGE_KEY);
-    return stored ? JSON.parse(stored) : {};
-  } catch {
-    return {};
-  }
-}
 
 function formatContextWithIndices(markdown: string): string {
   const slides = markdown.split(/\n---\n/);
@@ -33,12 +14,23 @@ function formatContextWithIndices(markdown: string): string {
 export function useMarpChat() {
   const { markdown, setMarkdown } = useEditorStore();
   const { activeThemeId } = useThemeStore();
-  const [input, setInput] = useState('');
-  const [agentIntents, setAgentIntents] = useState<Record<string, string>>(loadIntentsFromStorage);
+  const { getActiveSession, updateSession, activeSessionId } = useChatStore();
+
+  const [agentIntents, setAgentIntents] = useState<Record<string, string>>({});
   const currentIntentRef = useRef<string | null>(null);
   const markdownRef = useRef(markdown);
   const themeRef = useRef(activeThemeId);
-  const initialMessages = useMemo(() => loadMessagesFromStorage(), []);
+
+  const activeSession = getActiveSession();
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only re-compute when session ID changes
+  const initialMessages = useMemo(() => activeSession?.messages ?? [], [activeSession?.id]);
+  // biome-ignore lint/correctness/useExhaustiveDependencies: Only re-compute when session ID changes
+  const initialIntents = useMemo(() => activeSession?.intents ?? {}, [activeSession?.id]);
+
+  // Initialize intents from session
+  useEffect(() => {
+    setAgentIntents(initialIntents);
+  }, [initialIntents]);
 
   useEffect(() => {
     markdownRef.current = markdown;
@@ -81,11 +73,11 @@ export function useMarpChat() {
     setMessages,
     addToolOutput,
   } = useChat({
+    id: activeSessionId ?? undefined,
     messages: initialMessages,
     transport,
-    // biome-ignore lint/suspicious/noExplicitAny: Handling varied API response signatures
-    onFinish: (result: any) => {
-      const message = result.message || result;
+    onFinish: (result: { message?: UIMessage } | UIMessage) => {
+      const message = ('message' in result ? result.message : result) as UIMessage;
       const intent = currentIntentRef.current;
       if (message.role === 'assistant' && intent) {
         setAgentIntents((prev) => ({
@@ -96,7 +88,6 @@ export function useMarpChat() {
     },
     onError: (error) => {
       console.error('Chat error:', error);
-      // Extract user-friendly message, hide sensitive details
       let displayMessage = 'Connection failed. Please try again.';
       const msg = error.message || '';
       if (msg.includes('API key')) {
@@ -125,18 +116,14 @@ export function useMarpChat() {
 
   const isLoading = status === 'submitted' || (status === 'streaming' && !lastMessageHasContent);
 
+  // Sync messages to chatStore
   useEffect(() => {
-    if (messages.length > 0) {
-      localStorage.setItem(CHAT_STORAGE_KEY, JSON.stringify(messages));
+    if (activeSessionId && messages.length > 0) {
+      updateSession(activeSessionId, messages, agentIntents);
     }
-  }, [messages]);
+  }, [messages, agentIntents, activeSessionId, updateSession]);
 
-  useEffect(() => {
-    if (Object.keys(agentIntents).length > 0) {
-      localStorage.setItem(INTENTS_STORAGE_KEY, JSON.stringify(agentIntents));
-    }
-  }, [agentIntents]);
-
+  // Sync intent on streaming
   useEffect(() => {
     const lastMessage = messages[messages.length - 1];
     const intent = currentIntentRef.current;
@@ -149,29 +136,25 @@ export function useMarpChat() {
   }, [messages]);
 
   const handleInputChange = useCallback(
-    (e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
-      setInput(e.target.value);
+    (_e: React.ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
+      // This is now handled in ChatView directly
     },
     [],
   );
 
   const sendMessage = useCallback(
-    async (e?: React.FormEvent<HTMLFormElement>) => {
-      if (e) e.preventDefault();
-      if (!input.trim()) return;
-
-      const userMessage = input;
-      setInput('');
+    async (text: string) => {
+      if (!text.trim()) return;
       currentIntentRef.current = null;
 
       if (sendChatRequest) {
         await sendChatRequest({
           role: 'user',
-          parts: [{ type: 'text', text: userMessage }],
+          parts: [{ type: 'text', text }],
         });
       }
     },
-    [sendChatRequest, input],
+    [sendChatRequest],
   );
 
   const handleApplyProposal = useCallback(
@@ -198,7 +181,6 @@ export function useMarpChat() {
   const handleApplyInsertProposal = useCallback(
     (toolCallId: string, insertAfter: number, newMarkdown: string) => {
       const existingSlides = markdown.split(/\n---\n/);
-      // Remove leading --- if present
       const cleanedMarkdown = newMarkdown.trim().replace(/^---\n/, '');
       const newSlides = cleanedMarkdown.split(/\n---\n/);
       const insertIndex = insertAfter + 1;
@@ -223,7 +205,6 @@ export function useMarpChat() {
 
   const handleApplyReplaceProposal = useCallback(
     (toolCallId: string, newMarkdown: string) => {
-      // Remove leading --- if present (prevents first slide becoming frontmatter)
       const cleaned = newMarkdown.trim().replace(/^---\n/, '');
       setMarkdown(cleaned);
 
@@ -253,9 +234,10 @@ export function useMarpChat() {
   const clearHistory = useCallback(() => {
     setMessages([]);
     setAgentIntents({});
-    localStorage.removeItem(CHAT_STORAGE_KEY);
-    localStorage.removeItem(INTENTS_STORAGE_KEY);
-  }, [setMessages]);
+    if (activeSessionId) {
+      updateSession(activeSessionId, [], {});
+    }
+  }, [setMessages, activeSessionId, updateSession]);
 
   const getSlideContent = useCallback(
     (slideIndex: number): string => {
@@ -275,12 +257,10 @@ export function useMarpChat() {
     ) => {
       let slides = markdown.split(/\n---\n/);
 
-      // Separate by type
       const edits = proposals.filter((p) => p.toolName === 'propose_edit');
       const inserts = proposals.filter((p) => p.toolName === 'propose_insert');
       const replaces = proposals.filter((p) => p.toolName === 'propose_replace');
 
-      // Apply edits first
       for (const p of edits) {
         const slideIndex = p.input.slideIndex ?? 0;
         if (slides[slideIndex] !== undefined) {
@@ -297,7 +277,6 @@ export function useMarpChat() {
         });
       }
 
-      // Apply inserts in descending order
       inserts.sort((a, b) => (b.input.insertAfter ?? -1) - (a.input.insertAfter ?? -1));
       for (const p of inserts) {
         const insertAfter = p.input.insertAfter ?? -1;
@@ -317,7 +296,6 @@ export function useMarpChat() {
         });
       }
 
-      // Apply replaces last (overwrites everything)
       for (const p of replaces) {
         const cleaned = p.input.newMarkdown.trim().replace(/^---\n/, '');
         slides = cleaned.split(/\n---\n/);
@@ -335,7 +313,6 @@ export function useMarpChat() {
 
   return {
     messages,
-    input,
     handleInputChange,
     sendMessage,
     isLoading,
