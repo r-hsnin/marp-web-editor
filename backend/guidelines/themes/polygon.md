@@ -1,4 +1,4 @@
-# Professional Theme
+# Polygon Theme
 
 ## Available Classes
 

@@ -244,9 +244,9 @@ backend/
 ├── guidelines/             # AIガイドライン
 │   ├── base-rules.md       # 基本ルール
 │   └── themes/             # テーマ別ガイドライン
-│       └── professional.md
+│       └── polygon.md
 ├── themes/                 # テーマCSSファイル
-│   └── professional.css
+│   └── polygon.css
 ├── templates/              # テンプレートファイル
 │   ├── templates.json      # テンプレート定義
 │   └── *.md                # テンプレートMarkdown
@@ -407,7 +407,7 @@ export const exportSlide = async (
 
 ```
 backend/themes/
-  └── professional.css  ← Single Source of Truth
+  └── polygon.css  ← Single Source of Truth
 
 backend/src/routes/themes.ts
   ├── GET /api/themes          → テーマ名リスト
@@ -428,7 +428,7 @@ frontend/src/hooks/useThemeLoader.ts
 **Response**:
 ```json
 {
-  "themes": ["professional"]
+  "themes": ["polygon"]
 }
 ```
 
@@ -456,7 +456,7 @@ Marp公式テーマ (Marp Core に含まれる):
 
 #### Custom Themes
 `backend/themes/` に配置されたCSSファイル:
-- `professional` (現在実装済み)
+- `polygon` (現在実装済み)
 - 管理者が追加可能
 
 ### Adding Custom Themes
@@ -492,7 +492,7 @@ backend/templates/
   ├── business-presentation.md
   ├── tech-presentation.md
   ├── marp-basic-manual.md
-  └── professional-theme-manual.md
+  └── polygon-theme-manual.md
 
 backend/src/routes/templates.ts
   ├── GET /api/templates          → テンプレート一覧

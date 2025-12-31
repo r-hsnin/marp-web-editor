@@ -31,6 +31,16 @@ export function createIsolatedMarpCSS(css: string): string {
     .marp-content-isolated ol ul {
       margin-left: 1.5em !important;
     }
+
+    /* Twemoji emoji fix - prevent line break */
+    .marp-content-isolated img.emoji,
+    .marp-content-isolated img[data-marp-twemoji] {
+      display: inline !important;
+      vertical-align: -0.1em !important;
+      height: 1em !important;
+      width: 1em !important;
+      margin: 0 0.05em 0 0.1em !important;
+    }
   `;
 }
 

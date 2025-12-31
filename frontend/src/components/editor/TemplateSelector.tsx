@@ -16,13 +16,17 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { fetchTemplate, fetchTemplates, type Template } from '@/lib/api';
+import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
+import { useThemeStore } from '@/lib/marp/themeStore';
 import { useEditorStore } from '@/lib/store';
 
 export const TemplateSelector: React.FC = () => {
   const { setMarkdown } = useEditorStore();
+  const { setActiveTheme, availableThemes } = useThemeStore();
   const [templates, setTemplates] = useState<Template[]>([]);
   const [isLoading, setIsLoading] = useState(false);
   const [isApplying, setIsApplying] = useState(false);
@@ -51,6 +55,12 @@ export const TemplateSelector: React.FC = () => {
     try {
       const content = await fetchTemplate(selectedTemplateId);
       setMarkdown(content);
+
+      // テンプレートのフロントマターからテーマを取得して切り替え
+      const settings = FrontmatterProcessor.parseSettings(content);
+      if (settings.theme && availableThemes.includes(settings.theme)) {
+        setActiveTheme(settings.theme);
+      }
     } catch (error) {
       console.error('Failed to apply template:', error);
     } finally {
@@ -62,6 +72,9 @@ export const TemplateSelector: React.FC = () => {
   if (templates.length === 0 && !isLoading) {
     return null;
   }
+
+  const manuals = templates.filter((t) => t.category === 'manual');
+  const templateItems = templates.filter((t) => t.category === 'template');
 
   return (
     <>
@@ -81,25 +94,50 @@ export const TemplateSelector: React.FC = () => {
             Templates
           </Button>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-60">
+        <DropdownMenuContent align="end" className="w-64">
           {isLoading ? (
             <DropdownMenuItem disabled>Loading...</DropdownMenuItem>
           ) : (
-            templates.map((template) => (
-              <DropdownMenuItem
-                key={template.id}
-                onClick={() => setSelectedTemplateId(template.id)}
-                className="gap-2 cursor-pointer p-2 items-start"
-              >
-                <span className="text-base leading-none mt-0.5">{template.icon}</span>
-                <div className="flex flex-col">
-                  <span className="font-medium text-xs">{template.name}</span>
-                  <span className="text-[10px] text-muted-foreground leading-tight">
-                    {template.description}
-                  </span>
-                </div>
-              </DropdownMenuItem>
-            ))
+            <>
+              {manuals.map((template) => (
+                <DropdownMenuItem
+                  key={template.id}
+                  onClick={() => setSelectedTemplateId(template.id)}
+                  className="gap-2 cursor-pointer p-2 items-start"
+                >
+                  <span className="text-base leading-none mt-0.5">{template.icon}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-xs">{template.name}</span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">
+                      {template.description}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+              {manuals.length > 0 && templateItems.length > 0 && <DropdownMenuSeparator />}
+              {templateItems.map((template) => (
+                <DropdownMenuItem
+                  key={template.id}
+                  onClick={() => setSelectedTemplateId(template.id)}
+                  className="gap-2 cursor-pointer p-2 items-start"
+                >
+                  <span className="text-base leading-none mt-0.5">{template.icon}</span>
+                  <div className="flex flex-col">
+                    <span className="font-medium text-xs">
+                      {template.name}
+                      {template.theme && (
+                        <span className="text-muted-foreground font-normal ml-1">
+                          ({template.theme})
+                        </span>
+                      )}
+                    </span>
+                    <span className="text-[10px] text-muted-foreground leading-tight">
+                      {template.description}
+                    </span>
+                  </div>
+                </DropdownMenuItem>
+              ))}
+            </>
           )}
         </DropdownMenuContent>
       </DropdownMenu>
