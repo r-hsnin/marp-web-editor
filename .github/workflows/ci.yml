@@ -56,7 +56,7 @@ jobs:
 
   build-frontend:
     needs: changes
-    if: needs.changes.outputs.frontend == 'true'
+    if: github.event_name == 'pull_request' && needs.changes.outputs.frontend == 'true'
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
