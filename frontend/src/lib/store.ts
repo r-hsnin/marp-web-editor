@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
-
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
+import { API_BASE } from './config';
 
 type MobileView = 'editor' | 'preview';
 

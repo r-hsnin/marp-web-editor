@@ -9,8 +9,8 @@ import {
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
+import { API_BASE } from '@/lib/config';
 
-const API_BASE = import.meta.env.VITE_API_BASE_URL || 'http://localhost:3001';
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 
