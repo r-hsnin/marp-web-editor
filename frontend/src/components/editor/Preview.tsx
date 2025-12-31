@@ -35,12 +35,23 @@ export const Preview: React.FC = () => {
   const isMobile = useMediaQuery('(max-width: 767px)');
 
   const swipeHandlers = useSwipeable({
-    onSwipedLeft: () => goToNextSlide(),
-    onSwipedRight: () => goToPrevSlide(),
+    onSwipedLeft: () => {
+      if (isMobile && viewMode === 'slide') goToNextSlide();
+    },
+    onSwipedRight: () => {
+      if (isMobile && viewMode === 'slide') goToPrevSlide();
+    },
     trackMouse: false,
     trackTouch: true,
     delta: 50,
   });
+
+  // Ref passthrough pattern (official recommendation)
+  // https://commerce.nearform.com/open-source/react-swipeable/docs/faq
+  const refPassthrough = (el: HTMLDivElement | null) => {
+    swipeHandlers.ref(el);
+    containerRef.current = el;
+  };
 
   // Parse current settings from markdown
   const currentSettings = React.useMemo(() => {
@@ -121,8 +132,7 @@ export const Preview: React.FC = () => {
       />
 
       <div
-        ref={containerRef}
-        {...(isMobile && viewMode === 'slide' ? swipeHandlers : {})}
+        ref={refPassthrough}
         className={clsx(
           'flex-1 overflow-y-auto transition-colors duration-300 relative scroll-smooth',
           resolvedTheme === 'dark' ? 'bg-zinc-950/30' : 'bg-slate-50/50',
