@@ -81,7 +81,7 @@ marp-web-editor/
 | **shadcn/ui** | - | Radix UIベースの高品質コンポーネント |
 | **Lucide React** | 0.554.0 | アイコン |
 
-**Tailwind CSS v4**: `@tailwindcss/postcss` プラグイン使用
+**Tailwind CSS v4**: `@tailwindcss/vite` プラグイン使用
 
 #### State Management
 
