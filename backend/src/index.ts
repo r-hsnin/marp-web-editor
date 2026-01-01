@@ -1,7 +1,9 @@
 import app from './app.js';
+import { logger } from './lib/logger.js';
 
 const port = Number(Bun.env.PORT) || 3001;
-console.log(`Server is running on ${Bun.env.APP_BASE_URL || `http://localhost:${port}`}`);
+const url = Bun.env.APP_BASE_URL || `http://localhost:${port}`;
+logger.info({ port, url, env: Bun.env.NODE_ENV || 'development' }, 'Server started');
 
 export default {
   fetch: app.fetch,

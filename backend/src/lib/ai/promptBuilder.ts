@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
+import { logger } from '../logger.js';
 import { isBuiltinTheme, isValidName } from '../validation.js';
 
 const GUIDELINES_DIR = join(process.cwd(), 'guidelines');
@@ -9,7 +10,7 @@ function loadBaseRules(): string {
   try {
     return readFileSync(path, 'utf-8');
   } catch {
-    console.warn('[promptBuilder] Failed to load base-rules.md');
+    logger.warn({ file: 'base-rules.md' }, 'Failed to load guideline');
     return '';
   }
 }
@@ -17,7 +18,6 @@ function loadBaseRules(): string {
 function loadThemeGuideline(theme: string): string {
   // Validate theme name to prevent path traversal
   if (!isValidName(theme)) {
-    console.warn(`[promptBuilder] Invalid theme name: ${theme}`);
     return '';
   }
 
@@ -32,10 +32,10 @@ function loadThemeGuideline(theme: string): string {
     try {
       return readFileSync(mdPath, 'utf-8');
     } catch {
-      console.warn(`[promptBuilder] Failed to load theme guideline: ${theme}`);
+      logger.warn({ theme }, 'Failed to load theme guideline');
     }
   } else {
-    console.warn(`[promptBuilder] No guideline found for theme: ${theme}`);
+    logger.warn({ theme }, 'No guideline found for theme');
   }
 
   return '';

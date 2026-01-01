@@ -1,6 +1,7 @@
 import { access, readdir, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Hono } from 'hono';
+import { logger } from '../lib/logger.js';
 import { isValidName } from '../lib/validation.js';
 
 const app = new Hono();
@@ -15,7 +16,7 @@ app.get('/', async (c) => {
       .map((file) => file.replace(/\.css$/, ''));
     return c.json({ themes });
   } catch (error) {
-    console.error('Failed to list themes:', error);
+    logger.warn({ err: error }, 'Failed to list themes');
     return c.json({ themes: [] });
   }
 });
@@ -44,7 +45,7 @@ app.get('/:name', async (c) => {
       'Cache-Control': 'public, max-age=3600',
     });
   } catch (error) {
-    console.error(`Failed to load theme ${themeName}:`, error);
+    logger.warn({ theme: themeName, err: error }, 'Failed to load theme');
     return c.text('Theme not found', 404);
   }
 });

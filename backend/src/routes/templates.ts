@@ -1,6 +1,7 @@
 import { access, readFile } from 'node:fs/promises';
 import { join, resolve } from 'node:path';
 import { Hono } from 'hono';
+import { logger } from '../lib/logger.js';
 import { isValidName } from '../lib/validation.js';
 
 const app = new Hono();
@@ -15,7 +16,7 @@ app.get('/', async (c) => {
     const templates = JSON.parse(content);
     return c.json({ templates });
   } catch (error) {
-    console.error('Failed to list templates:', error);
+    logger.warn({ err: error }, 'Failed to list templates');
     return c.json({ templates: [] });
   }
 });
@@ -44,7 +45,7 @@ app.get('/:name', async (c) => {
       'Cache-Control': 'public, max-age=3600',
     });
   } catch (error) {
-    console.error(`Failed to load template ${templateName}:`, error);
+    logger.warn({ template: templateName, err: error }, 'Failed to load template');
     return c.text('Template not found', 404);
   }
 });

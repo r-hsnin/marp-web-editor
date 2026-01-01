@@ -5,6 +5,7 @@ import { dirname, join, resolve } from 'node:path';
 import { pathToFileURL } from 'node:url';
 import type { ExportFormat } from '@marp-editor/shared';
 import { v4 as uuidv4 } from 'uuid';
+import { logger } from './logger.js';
 import { BUILTIN_THEMES, isValidName } from './validation.js';
 
 export type { ExportFormat };
@@ -88,7 +89,7 @@ class MarpConverter {
         } else {
           // Custom theme - validate name to prevent path traversal
           if (!isValidName(theme)) {
-            console.warn(`Invalid theme name: ${theme}. Using default.`);
+            logger.warn({ theme, reason: 'invalid name' }, 'Invalid theme');
           } else {
             const themePath = resolve(process.cwd(), 'themes', `${theme}.css`);
             try {
@@ -101,7 +102,7 @@ class MarpConverter {
               args.push('--theme-set', tempThemePath);
               args.push('--theme', theme);
             } catch {
-              console.warn(`Theme file not found: ${themePath}`);
+              logger.warn({ theme, path: themePath }, 'Theme file not found');
             }
           }
         }
@@ -113,11 +114,8 @@ class MarpConverter {
       };
 
       if (browserPath) {
-        console.log(`Using browser at: ${browserPath}`);
         env.CHROME_PATH = browserPath;
       }
-
-      console.log(`Running Marp CLI: ${args.join(' ')}`);
 
       const proc = Bun.spawn(args, {
         env,
@@ -130,16 +128,12 @@ class MarpConverter {
       const exitCode = await proc.exited;
 
       if (exitCode !== 0) {
-        console.error('Marp CLI stdout:', stdout);
-        console.error('Marp CLI stderr:', stderr);
+        logger.error({ exitCode, stdout, stderr }, 'Marp CLI failed');
         throw new Error(`Marp CLI failed with exit code ${exitCode}: ${stderr}`);
       }
 
       const outputBuffer = await fs.readFile(outputPath);
       return outputBuffer;
-    } catch (error) {
-      console.error('Marp conversion failed:', error);
-      throw error;
     } finally {
       await this.cleanup(filesToCleanup);
     }

@@ -5,6 +5,7 @@ import { openai } from '@ai-sdk/openai';
 import { zValidator } from '@hono/zod-validator';
 import { streamText } from 'ai';
 import { Hono } from 'hono';
+import type { Env } from 'hono-pino';
 import { orchestrator } from '../lib/ai/orchestrator.js';
 import { chatSchema, generateSchema } from '../schemas/ai.js';
 
@@ -35,7 +36,7 @@ interface InputMessage {
   parts?: MessagePart[];
 }
 
-const aiRoute = new Hono();
+const aiRoute = new Hono<Env>();
 
 // GET /api/ai/status - AI 機能の利用可否
 aiRoute.get('/status', (c) => {
@@ -56,7 +57,7 @@ aiRoute.post('/generate', zValidator('json', generateSchema), async (c) => {
 
     return result.toTextStreamResponse();
   } catch (error) {
-    console.error('AI generation error:', error);
+    c.var.logger.error({ err: error }, 'AI processing failed');
     return c.json({ error: 'Failed to generate response' }, 500);
   }
 });
@@ -65,8 +66,6 @@ aiRoute.post('/chat', zValidator('json', chatSchema), async (c) => {
   const { messages, context, theme } = c.req.valid('json');
 
   try {
-    console.log('Received chat request messages count:', messages.length);
-
     // Convert UIMessage format (parts array) to CoreMessage format (content string)
     const coreMessages = (messages as InputMessage[]).map((m) => {
       let content: string;
@@ -98,7 +97,7 @@ aiRoute.post('/chat', zValidator('json', chatSchema), async (c) => {
 
     return await orchestrator.run(coreMessages, context, theme);
   } catch (error) {
-    console.error('AI chat error:', error);
+    c.var.logger.error({ err: error }, 'AI processing failed');
     const message = error instanceof Error ? error.message : String(error);
     return c.json(
       {

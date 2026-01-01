@@ -1,14 +1,14 @@
 import { zValidator } from '@hono/zod-validator';
 import { Hono } from 'hono';
+import type { Env } from 'hono-pino';
 import { type ExportFormat, marpConverter } from '../lib/marp.js';
 import { exportSchema } from '../schemas/export.js';
 
-const exportRoute = new Hono();
+const exportRoute = new Hono<Env>();
 
 exportRoute.post('/', zValidator('json', exportSchema), async (c) => {
-  console.log('Received export request');
   const { markdown, format, theme } = c.req.valid('json');
-  console.log(`Exporting format: ${format}, theme: ${theme}`);
+  const startTime = Date.now();
 
   try {
     const buffer = await marpConverter.convert({
@@ -28,9 +28,10 @@ exportRoute.post('/', zValidator('json', exportSchema), async (c) => {
     c.header('Content-Type', contentTypes[format]);
     c.header('Content-Disposition', `attachment; filename="presentation.${format}"`);
 
+    c.var.logger.info({ format, theme, durationMs: Date.now() - startTime }, 'Export completed');
     return c.body(buffer as unknown as ArrayBuffer);
   } catch (error) {
-    console.error('Export error:', error);
+    c.var.logger.error({ err: error, format, theme }, 'Export failed');
     return c.json({ error: 'Failed to generate export' }, 500);
   }
 });

@@ -1,5 +1,6 @@
 import { generateObject, type ModelMessage } from 'ai';
 import { z } from 'zod';
+import { logger } from '../logger.js';
 import { architectAgent } from './agents/architect.js';
 import { editorAgent } from './agents/editor.js';
 import { generalAgent } from './agents/general.js';
@@ -33,8 +34,6 @@ ${context}
         schema: IntentSchema,
       });
 
-      console.log(`[Orchestrator] Intent: ${intent}, Theme: ${theme}`);
-
       // 2. Route to Specialist
       let response: Response;
 
@@ -54,7 +53,7 @@ ${context}
       response.headers.set('X-Agent-Intent', intent);
       return response;
     } catch (error) {
-      console.error('[Orchestrator] Error:', error);
+      logger.error({ err: error }, 'AI processing failed');
       const message = error instanceof Error ? error.message : 'Unknown error';
       return new Response(JSON.stringify({ error: 'AI processing failed', details: message }), {
         status: 500,
