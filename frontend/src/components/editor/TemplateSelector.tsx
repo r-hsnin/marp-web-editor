@@ -20,6 +20,7 @@ import {
   DropdownMenuTrigger,
 } from '@/components/ui/dropdown-menu';
 import { fetchTemplate, fetchTemplates, type Template } from '@/lib/api';
+import { logger } from '@/lib/logger';
 import { FrontmatterProcessor } from '@/lib/marp/frontmatterProcessor';
 import { useThemeStore } from '@/lib/marp/themeStore';
 import { useEditorStore } from '@/lib/store';
@@ -39,7 +40,7 @@ export const TemplateSelector: React.FC = () => {
         const list = await fetchTemplates();
         setTemplates(list);
       } catch (error) {
-        console.error('Failed to load templates:', error);
+        logger.warn('Failed to load templates:', error);
       } finally {
         setIsLoading(false);
       }
@@ -62,7 +63,7 @@ export const TemplateSelector: React.FC = () => {
         setActiveTheme(settings.theme);
       }
     } catch (error) {
-      console.error('Failed to apply template:', error);
+      logger.warn('Failed to apply template:', error);
     } finally {
       setIsApplying(false);
       setSelectedTemplateId(null);

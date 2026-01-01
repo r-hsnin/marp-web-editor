@@ -1,5 +1,6 @@
 import { useEffect, useState } from 'react';
 import { API_BASE } from '../lib/config';
+import { logger } from '../lib/logger';
 import { useThemeStore } from '../lib/marp/themeStore';
 
 const BUILTIN_THEMES = ['default', 'gaia', 'uncover'];
@@ -27,7 +28,7 @@ export const useThemeLoader = () => {
         const css = await res.text();
         setLoadedCss(css);
       } catch (error) {
-        console.error(`Failed to load theme ${activeThemeId}:`, error);
+        logger.warn(`Failed to load theme ${activeThemeId}:`, error);
         setLoadedCss(null);
       } finally {
         setIsLoading(false);

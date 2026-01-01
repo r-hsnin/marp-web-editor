@@ -1,3 +1,4 @@
+import { logger } from '../logger';
 import type { FrontmatterExtraction, MarpSettings } from './settingsTypes';
 
 export const FrontmatterProcessor = {
@@ -51,7 +52,7 @@ export const FrontmatterProcessor = {
         hasManualFrontmatter: true,
       };
     } catch (error) {
-      console.warn('Failed to extract frontmatter:', error);
+      logger.warn('Failed to parse frontmatter:', error);
       return {
         frontmatter: '',
         content: markdown || '',
@@ -94,7 +95,7 @@ export const FrontmatterProcessor = {
 
       return settings;
     } catch (error) {
-      console.warn('Failed to parse settings:', error);
+      logger.warn('Failed to parse frontmatter:', error);
       return {};
     }
   },

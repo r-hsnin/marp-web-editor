@@ -1,5 +1,6 @@
 import { Marp } from '@marp-team/marp-core';
 import { useEffect, useMemo, useState } from 'react';
+import { logger } from '../lib/logger';
 import { useThemeLoader } from './useThemeLoader';
 
 export const useMarp = (markdown: string) => {
@@ -24,7 +25,7 @@ export const useMarp = (markdown: string) => {
         const addedTheme = instance.themeSet.add(loadedCss);
         instance.themeSet.default = addedTheme;
       } catch (e) {
-        console.error('Failed to apply loaded theme:', e);
+        logger.warn('Failed to apply theme:', e);
       }
     } else if (!isLoading && ['default', 'gaia', 'uncover'].includes(activeThemeId)) {
       // Built-in themes
@@ -54,7 +55,7 @@ export const useMarp = (markdown: string) => {
       setCss(css);
       setComments(comments);
     } catch (e) {
-      console.error('Marp rendering failed:', e);
+      logger.error('Marp rendering failed:', e);
     }
   }, [markdown, marp, isLoading]);
 

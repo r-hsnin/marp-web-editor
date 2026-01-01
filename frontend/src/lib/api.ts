@@ -1,6 +1,7 @@
 import type { AppType, ExportFormat, Template } from '@marp-editor/shared';
 import { hc } from 'hono/client';
 import { API_BASE } from './config';
+import { logger } from './logger';
 
 const client = hc<AppType>(`${API_BASE}/`);
 
@@ -48,7 +49,7 @@ export const exportSlide = async (
     a.remove();
     window.URL.revokeObjectURL(url);
   } catch (error) {
-    console.error('Export error:', error);
+    logger.error('Export failed:', error);
     throw error;
   }
 };
@@ -62,7 +63,7 @@ export const fetchThemes = async (): Promise<string[]> => {
     const data = await response.json();
     return data.themes;
   } catch (error) {
-    console.error('Failed to fetch themes:', error);
+    logger.warn('Failed to fetch themes:', error);
     return [];
   }
 };
@@ -76,7 +77,7 @@ export const fetchTemplates = async (): Promise<Template[]> => {
     const data = await response.json();
     return data.templates;
   } catch (error) {
-    console.error('Failed to fetch templates:', error);
+    logger.warn('Failed to fetch templates:', error);
     return [];
   }
 };
@@ -91,7 +92,7 @@ export const fetchTemplate = async (name: string): Promise<string> => {
     }
     return await response.text();
   } catch (error) {
-    console.error(`Failed to fetch template ${name}:`, error);
+    logger.warn('Failed to fetch template:', error);
     throw error;
   }
 };

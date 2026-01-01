@@ -33,6 +33,7 @@
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
     "hono": "^4.11.3",
+    "loglevel": "^1.9.2",
     "lucide-react": "^0.562.0",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",

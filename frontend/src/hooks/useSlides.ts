@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from 'react';
+import { logger } from '../lib/logger';
 
 export interface Slide {
   id: number;
@@ -80,7 +81,7 @@ export const useSlides = (html: string): SlidesNavigation => {
         };
       });
     } catch (error) {
-      console.error('Failed to parse slides from HTML', error);
+      logger.warn('Failed to parse slides:', error);
       return [];
     }
   }, [html]);

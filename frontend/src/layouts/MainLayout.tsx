@@ -13,6 +13,7 @@ import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { TooltipProvider } from '@/components/ui/tooltip';
 
 import { fetchThemes } from '@/lib/api';
+import { logger } from '@/lib/logger';
 import { useThemeStore } from '@/lib/marp/themeStore';
 import { useEditorStore } from '@/lib/store';
 
@@ -24,7 +25,7 @@ export const MainLayout: React.FC = () => {
   useEffect(() => {
     fetchThemes()
       .then(setAvailableThemes)
-      .catch((err) => console.error('Failed to fetch themes:', err));
+      .catch((err) => logger.warn('Failed to fetch themes:', err));
   }, [setAvailableThemes]);
 
   return (

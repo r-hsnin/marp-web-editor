@@ -29,9 +29,8 @@ export const ExportMenu: React.FC = () => {
     setIsExporting(true);
     try {
       await exportSlide(markdown, format, activeThemeId);
-    } catch (error) {
-      console.error('Failed to export:', error);
-      alert('Failed to export presentation. Please check the console for details.');
+    } catch {
+      alert('Failed to export presentation. Please try again.');
     } finally {
       setIsExporting(false);
     }
