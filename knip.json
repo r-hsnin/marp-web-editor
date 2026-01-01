@@ -20,7 +20,8 @@
     "lint-staged",
     "tailwindcss",
     "tailwindcss-animate",
-    "@tailwindcss/typography"
+    "@tailwindcss/typography",
+    "pino-pretty"
   ],
   "ignoreExportsUsedInFile": true
 }

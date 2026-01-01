@@ -1,12 +1,13 @@
 import { createReadStream } from 'node:fs';
 import { Hono } from 'hono';
 import { stream } from 'hono/streaming';
+import type { Env } from 'hono-pino';
 import { storage } from '../lib/storage/index.js';
 
 const ALLOWED_TYPES = ['image/png', 'image/jpeg', 'image/gif', 'image/webp'];
 const MAX_SIZE = 5 * 1024 * 1024; // 5MB
 
-const imagesRoute = new Hono();
+const imagesRoute = new Hono<Env>();
 
 // POST /api/images - アップロード
 imagesRoute.post('/', async (c) => {
@@ -29,7 +30,7 @@ imagesRoute.post('/', async (c) => {
     const result = await storage.upload(file);
     return c.json(result);
   } catch (error) {
-    console.error('Upload error:', error);
+    c.var.logger.error({ err: error }, 'Image upload failed');
     return c.json({ error: 'Upload failed' }, 500);
   }
 });

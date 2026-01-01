@@ -4,6 +4,7 @@ import { DefaultChatTransport } from 'ai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChatStore } from '../lib/chatStore';
 import { API_BASE } from '../lib/config';
+import { logger } from '../lib/logger';
 import { useThemeStore } from '../lib/marp/themeStore';
 import { useEditorStore } from '../lib/store';
 
@@ -88,7 +89,7 @@ export function useMarpChat() {
       }
     },
     onError: (error) => {
-      console.error('Chat error:', error);
+      logger.error('Chat error:', error);
       let displayMessage = 'Connection failed. Please try again.';
       const msg = error.message || '';
       if (msg.includes('API key')) {
