@@ -120,6 +120,12 @@ const client = hc<AppType>('/');
 | **@ai-sdk/react** | 2.0.118 | React統合 |
 | **ai** | 5.0.116 | AI SDK |
 
+#### Logging
+
+| 技術 | バージョン | 用途 |
+|------|-----------|------|
+| **loglevel** | 1.9.2 | 軽量ログライブラリ (~1.5KB) |
+
 ---
 
 ### Backend (`backend/`)
@@ -142,6 +148,15 @@ const client = hc<AppType>('/');
 | 技術 | バージョン | 用途 |
 |------|-----------|------|
 | **Zod** | 4.2.1 | スキーマバリデーション |
+
+#### Logging
+
+| 技術 | バージョン | 用途 |
+|------|-----------|------|
+| **pino** | 9.7.0 | 構造化ログ、高速出力 |
+| **hono-pino** | 0.7.0 | Hono middleware統合 |
+
+**ログレベル**: error / warn / info のみ（debug 不使用）
 
 #### Slide Engine
 

@@ -42,6 +42,8 @@ Frontend (React) → Hono RPC → Backend (Hono/Bun)
 - Use Hono RPC for frontend-backend communication (no direct fetch)
 - Validate all backend inputs with Zod
 - Add `.js` extension to relative imports in backend
+- Use pino (backend) / loglevel (frontend) for logging
+- Use error/warn/info log levels only (no debug)
 
 ### Don't
 
@@ -50,6 +52,7 @@ Frontend (React) → Hono RPC → Backend (Hono/Bun)
 - Use `any` type
 - Hardcode secrets (use `.env` + `Bun.env`)
 - Leave unused exports (run `bun run knip` to detect)
+- Log sensitive data (API keys, Markdown content)
 
 ## UI/UX Decisions
 
