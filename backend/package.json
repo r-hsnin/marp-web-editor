@@ -23,6 +23,7 @@
     "@hono/zod-validator": "^0.7.5",
     "@marp-editor/shared": "workspace:*",
     "@marp-team/marp-cli": "^4.2.3",
+    "@openrouter/ai-sdk-provider": "^1.5.4",
     "ai": "5.0.116",
     "hono": "^4.11.3",
     "hono-pino": "^0.10.3",

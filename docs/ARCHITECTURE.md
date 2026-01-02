@@ -616,7 +616,9 @@ cd backend && bun run dev
 ### Environment Variables
 
 Backend (`backend/.env`):
-- `AI_PROVIDER`: AIプロバイダー選択（openai / anthropic / google / bedrock）
+- `AI_PROVIDER`: AIプロバイダー選択（openai / anthropic / google / bedrock / openrouter）
+- `AI_MODEL`: AIモデル（必須、例: `gpt-4.1-mini`, `openai/gpt-4.1-mini`）
+- `OPENROUTER_API_KEY`: OpenRouter API キー
 - `OPENAI_API_KEY`: OpenAI API キー
 - `ANTHROPIC_API_KEY`: Anthropic API キー
 - `GOOGLE_GENERATIVE_AI_API_KEY`: Google AI API キー
@@ -637,7 +639,7 @@ Backend (`backend/.env`):
 - ✅ テンプレート機能
 - ✅ AI機能 (Orchestrator + 3 Agents)
 - ✅ Theme-Aware Generation
-- ✅ Multi-model Support (OpenAI, Anthropic, Google, Bedrock)
+- ✅ Multi-model Support (OpenAI, Anthropic, Google, Bedrock, OpenRouter)
 - ✅ Docker対応 (開発環境向け)
 
 ---
