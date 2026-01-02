@@ -4,7 +4,7 @@ import { logger } from '../logger.js';
 import { architectAgent } from './agents/architect.js';
 import { editorAgent } from './agents/editor.js';
 import { generalAgent } from './agents/general.js';
-import { getRequiredModel } from './config.js';
+import { getRequiredModel, providerOptions } from './config.js';
 
 const IntentSchema = z.object({
   intent: z.enum(['architect', 'editor', 'general_chat']),
@@ -32,6 +32,7 @@ ${context}
 `,
         messages,
         schema: IntentSchema,
+        providerOptions,
       });
 
       // 2. Route to Specialist

@@ -1,5 +1,5 @@
 import { type ModelMessage, stepCountIs, streamText } from 'ai';
-import { getRequiredModel } from '../config.js';
+import { getRequiredModel, providerOptions } from '../config.js';
 import { buildSystemPrompt } from '../promptBuilder.js';
 import { proposeEditTool, proposeInsertTool, proposeReplaceTool } from '../tools.js';
 
@@ -17,6 +17,7 @@ export const editorAgent = {
         propose_replace: proposeReplaceTool,
       },
       stopWhen: stepCountIs(5),
+      providerOptions,
     });
     return result.toUIMessageStreamResponse();
   },

@@ -1,5 +1,5 @@
 import { type ModelMessage, streamText } from 'ai';
-import { getRequiredModel } from '../config.js';
+import { getRequiredModel, providerOptions } from '../config.js';
 import { buildSystemPrompt } from '../promptBuilder.js';
 
 export const generalAgent = {
@@ -10,6 +10,7 @@ export const generalAgent = {
       model: getRequiredModel(),
       system: systemPrompt,
       messages,
+      providerOptions,
     });
     return result.toUIMessageStreamResponse();
   },
