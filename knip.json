@@ -21,6 +21,7 @@
     "tailwindcss",
     "tailwindcss-animate",
     "@tailwindcss/typography",
+    "@fontsource-variable/inter",
     "pino-pretty"
   ],
   "ignoreExportsUsedInFile": true

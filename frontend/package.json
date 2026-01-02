@@ -16,6 +16,7 @@
     "@codemirror/state": "^6.5.3",
     "@codemirror/theme-one-dark": "^6.1.3",
     "@codemirror/view": "^6.39.7",
+    "@fontsource-variable/inter": "^5.2.8",
     "@marp-editor/shared": "workspace:*",
     "@marp-team/marp-core": "^4.2.0",
     "@radix-ui/react-alert-dialog": "^1.1.15",

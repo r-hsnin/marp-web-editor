@@ -1,6 +1,6 @@
 import type { UIMessage } from '@ai-sdk/react';
 import { useChat } from '@ai-sdk/react';
-import { DefaultChatTransport } from 'ai';
+import { DefaultChatTransport, isToolUIPart } from 'ai';
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChatStore } from '../lib/chatStore';
 import { API_BASE } from '../lib/config';
@@ -110,13 +110,15 @@ export function useMarpChat() {
     },
   });
 
-  const lastMessage = messages[messages.length - 1];
-  const lastMessageIsAssistant = lastMessage?.role === 'assistant';
-  const lastMessageHasContent =
-    lastMessageIsAssistant &&
-    lastMessage?.parts.some((p) => p.type === 'text' && p.text.length > 0);
+  const isStreaming = status !== 'ready';
 
-  const isLoading = status === 'submitted' || (status === 'streaming' && !lastMessageHasContent);
+  const lastMessage = messages[messages.length - 1];
+  const lastMessageHasVisibleContent =
+    lastMessage?.role === 'assistant' &&
+    lastMessage?.parts.some((p) => (p.type === 'text' && p.text.length > 0) || isToolUIPart(p));
+
+  const isThinking =
+    status === 'submitted' || (status === 'streaming' && !lastMessageHasVisibleContent);
 
   // Sync messages to chatStore
   useEffect(() => {
@@ -317,7 +319,8 @@ export function useMarpChat() {
     messages,
     handleInputChange,
     sendMessage,
-    isLoading,
+    isStreaming,
+    isThinking,
     stop,
     agentIntents,
     handleApplyProposal,
