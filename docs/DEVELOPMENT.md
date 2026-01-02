@@ -106,6 +106,20 @@ bun run check
 bun run knip
 ```
 
+### Eval (`eval/`)
+
+```bash
+cd eval
+
+# AI機能のE2E評価実行（要: backend起動）
+bun run eval
+
+# 結果をWebUIで確認
+bun run eval:view
+```
+
+詳細は [AI-EVAL.md](./AI-EVAL.md) を参照。
+
 ---
 - `backend/tests/export.test.ts`: Marpエクスポート機能
 ## Troubleshooting
@@ -349,6 +363,27 @@ OPENROUTER_API_KEY=sk-or-...
 **API Key 無効**:
 - 各プロバイダーのダッシュボードで Key を確認
 - 新しい Key を生成して `.env` を更新
+
+---
+
+### Issue 8: ログ確認方法
+
+#### Backend ログ
+```bash
+cd backend && bun run dev
+# 構造化JSON出力（pino）
+# デフォルト: info レベル
+```
+
+#### Frontend ログ
+ブラウザ DevTools → Console で確認。
+
+#### ログレベル変更
+```bash
+LOG_LEVEL=warn bun run dev
+```
+
+詳細は [LOGGING.md](./LOGGING.md) を参照。
 
 ---
 
