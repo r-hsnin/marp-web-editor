@@ -9,6 +9,9 @@ export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock' | 'ope
 
 const provider = (Bun.env.AI_PROVIDER || '') as ModelProvider;
 const modelId = Bun.env.AI_MODEL;
+const reasoningMaxTokens = Bun.env.AI_REASONING_MAX_TOKENS
+  ? Number.parseInt(Bun.env.AI_REASONING_MAX_TOKENS, 10)
+  : undefined;
 
 function getModel(): LanguageModel | null {
   if (!modelId) return null;
@@ -37,3 +40,9 @@ export function getRequiredModel(): LanguageModel {
   }
   return aiModel;
 }
+
+// OpenRouter reasoning config (only applied when AI_REASONING_MAX_TOKENS is set)
+export const providerOptions =
+  provider === 'openrouter' && reasoningMaxTokens
+    ? { openrouter: { reasoning: { max_tokens: reasoningMaxTokens } } }
+    : undefined;
