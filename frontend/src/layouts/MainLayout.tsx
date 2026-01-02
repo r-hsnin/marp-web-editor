@@ -31,7 +31,7 @@ export const MainLayout: React.FC = () => {
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground font-sans selection:bg-primary/20">
       {/* Header */}
-      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border/40 bg-background/80 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
+      <header className="sticky top-0 z-50 flex h-14 items-center justify-between border-b border-border bg-background/80 px-4 backdrop-blur-xl supports-[backdrop-filter]:bg-background/60">
         <div className="flex items-center gap-3">
           <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary to-indigo-600 text-primary-foreground shadow-lg shadow-primary/20 overflow-hidden ring-1 ring-white/10">
             <img
@@ -42,9 +42,7 @@ export const MainLayout: React.FC = () => {
           </div>
           {!isMobile && (
             <div className="flex flex-col">
-              <h1 className="text-sm font-bold tracking-tight bg-gradient-to-r from-foreground to-foreground/70 bg-clip-text text-transparent">
-                Marp Web Editor
-              </h1>
+              <h1 className="text-lg font-bold tracking-tight">Marp Web Editor</h1>
             </div>
           )}
         </div>
