@@ -1,0 +1,18 @@
+# yaml-language-server: $schema=https://promptfoo.dev/config-schema.json
+description: Marp AI Evaluation - E2E via Backend API
+
+prompts:
+  - id: chat
+    label: Chat Request
+    raw: "{{userMessage}}"
+
+providers:
+  - id: file://providers/backend-api.ts
+    label: Backend API
+
+tests:
+  - file://tests/intent/basic.yaml
+  - file://tests/tools/editor.yaml
+  - file://tests/tools/architect.yaml
+  - file://tests/conversation/multi-turn.yaml
+  - file://tests/quality/markdown.yaml

@@ -1,0 +1,36 @@
+# Multi-turn Conversation Tests
+# Evaluates context retention across conversation turns
+
+- description: Follow-up edit references previous context
+  vars:
+    userMessage: "もっと短くして"
+    context: "[0] # タイトル\n\n[1] ## 内容\n長い説明文"
+    history:
+      - role: "user"
+        content: "スライド2を改善して"
+      - role: "assistant"
+        content: "スライド2を改善しました。"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        return result.toolCalls?.some(t => t.name === 'propose_edit') || 
+               result.textContent.length > 0;
+
+- description: Clarification after vague request
+  vars:
+    userMessage: "3枚で"
+    context: ""
+    history:
+      - role: "user"
+        content: "プレゼンを作って"
+      - role: "assistant"
+        content: "どのようなテーマのプレゼンを作成しますか？"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        // Should ask for more info or create generic slides
+        return result.toolCalls?.length > 0 || result.textContent.length > 0;

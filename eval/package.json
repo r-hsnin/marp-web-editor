@@ -1,0 +1,13 @@
+{
+  "name": "marp-ai-eval",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "eval": "promptfoo eval",
+    "eval:view": "promptfoo view",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "promptfoo": "^0.120.0"
+  }
+}

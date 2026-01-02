@@ -1,0 +1,14 @@
+# Architect Agent Tool Calling Tests
+# Evaluates propose_plan tool output quality (intent routing tested in intent/basic.yaml)
+
+- description: Plan has title and non-empty outline
+  vars:
+    userMessage: "環境問題についてのプレゼンの構成を提案して"
+    context: ""
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const planCall = result.toolCalls?.find(t => t.name === 'propose_plan');
+        return planCall && planCall.args?.title && planCall.args?.outline?.length > 0;
