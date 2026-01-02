@@ -83,7 +83,8 @@ function ChatContent() {
   const {
     messages,
     sendMessage,
-    isLoading,
+    isStreaming,
+    isThinking,
     agentIntents,
     handleApplyProposal,
     handleApplyInsertProposal,
@@ -94,11 +95,18 @@ function ChatContent() {
     getSlideContent,
   } = useMarpChat();
   const scrollRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
   const [input, setInput] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
   const { activeThemeId } = useThemeStore();
   const { createSession, activeSessionId } = useChatStore();
+
+  useEffect(() => {
+    if (!isStreaming) {
+      inputRef.current?.focus();
+    }
+  }, [isStreaming]);
 
   // biome-ignore lint/correctness/useExhaustiveDependencies: Need to scroll when messages change
   useEffect(() => {
@@ -274,7 +282,7 @@ function ChatContent() {
             </div>
           );
         })}
-        {isLoading && (
+        {isThinking && (
           <div className="flex items-start gap-2">
             <div className="bg-muted p-3 rounded-lg text-sm animate-pulse">Thinking...</div>
           </div>
@@ -290,23 +298,31 @@ function ChatContent() {
             onClick={() => setShowClearConfirm(true)}
             title="Clear chat history"
             className="text-muted-foreground hover:text-destructive"
+            disabled={isStreaming}
           >
             <Trash2 className="w-4 h-4" />
           </Button>
         )}
         <Input
+          ref={inputRef}
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder="Type a message..."
           className="flex-1"
+          disabled={isStreaming}
         />
-        <Button type="submit" size="icon" disabled={isLoading}>
+        <Button type="submit" size="icon" disabled={isStreaming}>
           <Send className="w-4 h-4" />
         </Button>
       </form>
 
       <AlertDialog open={showClearConfirm} onOpenChange={setShowClearConfirm}>
-        <AlertDialogContent>
+        <AlertDialogContent
+          onCloseAutoFocus={(e) => {
+            e.preventDefault();
+            inputRef.current?.focus();
+          }}
+        >
           <AlertDialogHeader>
             <AlertDialogTitle>Clear chat history?</AlertDialogTitle>
             <AlertDialogDescription>
