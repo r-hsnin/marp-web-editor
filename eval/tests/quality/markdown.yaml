@@ -1,0 +1,102 @@
+# Markdown Quality Tests
+# Evaluates the quality of generated slide content (tool-agnostic)
+
+# Helper: Extract markdown from any tool call
+# Usage: getMarkdown(result) returns the newMarkdown from any propose_* tool
+
+- description: Valid JSON response
+  vars:
+    userMessage: "タイトルスライドを作成して"
+    context: ""
+  assert:
+    - type: javascript
+      value: |
+        try {
+          JSON.parse(output);
+          return true;
+        } catch {
+          return false;
+        }
+
+- description: Generated markdown uses slide separator
+  vars:
+    userMessage: "自己紹介スライドを3枚作成して"
+    context: ""
+  assert:
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const call = result.toolCalls?.find(t => 
+          ['propose_replace', 'propose_insert'].includes(t.name)
+        );
+        if (!call) return false;
+        const markdown = call.args?.newMarkdown || '';
+        return markdown.includes('---');
+
+- description: Generated markdown has headings
+  vars:
+    userMessage: "プロジェクト概要のスライドを作成して"
+    context: ""
+  assert:
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const call = result.toolCalls?.find(t => 
+          ['propose_replace', 'propose_insert', 'propose_edit'].includes(t.name)
+        );
+        if (!call) return false;
+        const markdown = call.args?.newMarkdown || '';
+        return markdown.includes('#');
+
+- description: Edit does not include separator
+  vars:
+    userMessage: "スライド1を改善して"
+    context: "[0] # タイトル\n\n[1] ## 内容"
+  assert:
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const editCall = result.toolCalls?.find(t => t.name === 'propose_edit');
+        if (!editCall) return true; // Skip if no edit call
+        const markdown = editCall.args?.newMarkdown || '';
+        return !markdown.startsWith('---');
+
+- description: Each slide has one H1 heading (one message per slide)
+  vars:
+    userMessage: "AIについてのスライドを3枚作成して"
+    context: ""
+  assert:
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const call = result.toolCalls?.find(t => 
+          ['propose_replace', 'propose_insert'].includes(t.name)
+        );
+        if (!call) return false;
+        const markdown = call.args?.newMarkdown || '';
+        const slides = markdown.split('---').filter(s => s.trim());
+        if (slides.length === 0) return false;
+        return slides.every(slide => {
+          const h1Count = (slide.match(/^# /gm) || []).length;
+          return h1Count === 1;
+        });
+
+- description: Slide content length is appropriate (not too long)
+  vars:
+    userMessage: "機械学習の概要スライドを作成して"
+    context: ""
+  assert:
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const call = result.toolCalls?.find(t => 
+          ['propose_replace', 'propose_insert', 'propose_edit'].includes(t.name)
+        );
+        if (!call) return false;
+        const markdown = call.args?.newMarkdown || '';
+        const slides = markdown.split('---').filter(s => s.trim());
+        if (slides.length === 0) return false;
+        return slides.every(slide => {
+          const text = slide.replace(/[#*`\-\[\]()]/g, '').replace(/\s+/g, ' ').trim();
+          return text.length <= 500;
+        });

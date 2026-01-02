@@ -1,0 +1,44 @@
+- description: Edit request → editor
+  vars:
+    userMessage: "スライド2を短くして"
+    context: "[0] Title slide\n[1] Content slide\n[2] Summary"
+  assert:
+    - type: contains-json
+    - type: javascript
+      value: JSON.parse(output).intent === 'editor'
+
+- description: Create request → editor
+  vars:
+    userMessage: "機械学習についてのスライドを5枚作って"
+    context: ""
+  assert:
+    - type: contains-json
+    - type: javascript
+      value: JSON.parse(output).intent === 'editor'
+
+- description: Planning request → architect
+  vars:
+    userMessage: "AIについてのプレゼンを作りたいんだけど、どんな構成がいいかな？"
+    context: ""
+  assert:
+    - type: contains-json
+    - type: javascript
+      value: JSON.parse(output).intent === 'architect'
+
+- description: Question → general_chat
+  vars:
+    userMessage: "Marpでカードレイアウトを使うにはどうすればいいですか？"
+    context: "[0] # タイトル"
+  assert:
+    - type: contains-json
+    - type: javascript
+      value: JSON.parse(output).intent === 'general_chat'
+
+- description: Greeting → general_chat
+  vars:
+    userMessage: "こんにちは"
+    context: ""
+  assert:
+    - type: contains-json
+    - type: javascript
+      value: JSON.parse(output).intent === 'general_chat'

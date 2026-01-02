@@ -141,6 +141,15 @@ S3_REGION=ap-northeast-1
 
 S3 使用時は AWS 認証情報が必要です（環境変数 or `~/.aws/credentials`）。
 
+### ログ設定
+
+```env
+# ログレベル（デフォルト: info）
+LOG_LEVEL=info
+```
+
+詳細は [LOGGING.md](./docs/LOGGING.md) を参照。
+
 ### カスタムテーマ
 
 `backend/themes/` に CSS ファイルを配置します。
@@ -240,4 +249,6 @@ cd backend && bun run dev    # 開発サーバー (3001)
 | [Development Guide](./docs/DEVELOPMENT.md) | 開発環境構築・トラブルシューティング |
 | [Architecture](./docs/ARCHITECTURE.md) | システム設計・技術スタック |
 | [AI Feature](./docs/AI.md) | AI機能の実装 |
+| [AI Evaluation](./docs/AI-EVAL.md) | AI機能のE2E評価環境 |
+| [Logging](./docs/LOGGING.md) | ロギング設定・実装詳細 |
 | [Docker](./docs/DOCKER.md) | Docker環境 |

@@ -1,0 +1,47 @@
+# Editor Agent Tool Calling Tests
+# Evaluates whether the editor agent calls the correct tools
+
+- description: Edit existing slide → propose_edit
+  vars:
+    userMessage: "スライド2を短くして"
+    context: "[0] # タイトル\n\n[1] ## 内容\n長い説明文がここにあります。\n\n[2] ## まとめ"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        return result.toolCalls?.some(t => t.name === 'propose_edit');
+
+- description: Insert new slide → propose_insert
+  vars:
+    userMessage: "スライド2の後にまとめスライドを追加して"
+    context: "[0] # タイトル\n\n[1] ## 内容1\n\n[2] ## 内容2"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        return result.toolCalls?.some(t => t.name === 'propose_insert');
+
+- description: Create new presentation → propose_replace
+  vars:
+    userMessage: "機械学習についてのスライドを3枚作成して"
+    context: ""
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        return result.toolCalls?.some(t => t.name === 'propose_replace');
+
+- description: Edit with specific index
+  vars:
+    userMessage: "スライド1のタイトルを「AI入門」に変更して"
+    context: "[0] # プレゼンテーション\n\n[1] ## 内容"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const editCall = result.toolCalls?.find(t => t.name === 'propose_edit');
+        return editCall && editCall.args?.slideIndex === 0;
