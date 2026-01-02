@@ -11,15 +11,6 @@ export const exportSchema = z.object({
 
 export type ExportFormat = z.infer<typeof exportSchema>['format'];
 
-export const generateSchema = z.object({
-  messages: z.array(
-    z.object({
-      role: z.enum(['user', 'assistant', 'system']),
-      content: z.string(),
-    }),
-  ),
-});
-
 export const chatSchema = z.object({
   messages: z.array(z.any()),
   context: z.string().default(''),
@@ -47,13 +38,9 @@ const routes = app
   )
   .route(
     '/api/ai',
-    new Hono()
-      .post('/generate', zValidator('json', generateSchema), (_c) => {
-        return new Response();
-      })
-      .post('/chat', zValidator('json', chatSchema), (_c) => {
-        return new Response();
-      }),
+    new Hono().post('/chat', zValidator('json', chatSchema), (_c) => {
+      return new Response();
+    }),
   )
   .route(
     '/api/themes',

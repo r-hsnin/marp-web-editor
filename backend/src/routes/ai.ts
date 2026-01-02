@@ -1,16 +1,17 @@
 import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
-import { openai } from '@ai-sdk/openai';
 import { zValidator } from '@hono/zod-validator';
-import { streamText } from 'ai';
 import { Hono } from 'hono';
 import type { Env } from 'hono-pino';
 import { orchestrator } from '../lib/ai/orchestrator.js';
-import { chatSchema, generateSchema } from '../schemas/ai.js';
+import { chatSchema } from '../schemas/ai.js';
 
 function isAIAvailable(): boolean {
   const provider = Bun.env.AI_PROVIDER || '';
+  const model = Bun.env.AI_MODEL || '';
+  if (!model) return false;
+
   switch (provider) {
     case 'openai':
       return !!Bun.env.OPENAI_API_KEY;
@@ -20,6 +21,8 @@ function isAIAvailable(): boolean {
       return !!Bun.env.GOOGLE_GENERATIVE_AI_API_KEY;
     case 'bedrock':
       return !!Bun.env.AWS_ACCESS_KEY_ID || existsSync(join(homedir(), '.aws', 'credentials'));
+    case 'openrouter':
+      return !!Bun.env.OPENROUTER_API_KEY;
     default:
       return false;
   }
@@ -41,25 +44,6 @@ const aiRoute = new Hono<Env>();
 // GET /api/ai/status - AI 機能の利用可否
 aiRoute.get('/status', (c) => {
   return c.json({ available: isAIAvailable() });
-});
-
-aiRoute.post('/generate', zValidator('json', generateSchema), async (c) => {
-  const { messages } = c.req.valid('json');
-
-  try {
-    const result = streamText({
-      model: openai('gpt-4o'),
-      messages: (messages as InputMessage[]).map((m) => ({
-        role: m.role as 'user' | 'assistant' | 'system',
-        content: typeof m.content === 'string' ? m.content : JSON.stringify(m.content),
-      })),
-    });
-
-    return result.toTextStreamResponse();
-  } catch (error) {
-    c.var.logger.error({ err: error }, 'AI processing failed');
-    return c.json({ error: 'Failed to generate response' }, 500);
-  }
 });
 
 aiRoute.post('/chat', zValidator('json', chatSchema), async (c) => {

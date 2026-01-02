@@ -72,14 +72,15 @@ backend/src/lib/ai/
 
 AI SDK v5 を使用したマルチプロバイダー対応。
 
-| Provider | Model |
-|----------|-------|
-| openai | gpt-4.1-mini |
+| Provider | Model Example |
+|----------|---------------|
+| openrouter | openai/gpt-4.1-mini, anthropic/claude-sonnet-4 |
+| openai | gpt-4.1-mini, gpt-4o |
 | anthropic | claude-sonnet-4-20250514 |
 | google | gemini-2.5-flash |
 | bedrock | anthropic.claude-sonnet-4-20250514-v1:0 |
 
-環境変数 `AI_PROVIDER` で切替可能。詳細は [ARCHITECTURE.md](./ARCHITECTURE.md#ai-integration) を参照。
+環境変数 `AI_PROVIDER` と `AI_MODEL` で設定。詳細は [ARCHITECTURE.md](./ARCHITECTURE.md#ai-integration) を参照。
 
 ---
 

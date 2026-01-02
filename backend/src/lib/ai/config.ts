@@ -2,22 +2,28 @@ import { bedrock } from '@ai-sdk/amazon-bedrock';
 import { anthropic } from '@ai-sdk/anthropic';
 import { google } from '@ai-sdk/google';
 import { openai } from '@ai-sdk/openai';
+import { openrouter } from '@openrouter/ai-sdk-provider';
 import type { LanguageModel } from 'ai';
 
-export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock' | '';
+export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock' | 'openrouter' | '';
 
 const provider = (Bun.env.AI_PROVIDER || '') as ModelProvider;
+const modelId = Bun.env.AI_MODEL;
 
 function getModel(): LanguageModel | null {
+  if (!modelId) return null;
+
   switch (provider) {
+    case 'openrouter':
+      return openrouter(modelId);
     case 'openai':
-      return openai('gpt-4.1-mini');
+      return openai(modelId);
     case 'anthropic':
-      return anthropic('claude-sonnet-4-20250514');
+      return anthropic(modelId);
     case 'google':
-      return google('gemini-2.5-flash');
+      return google(modelId);
     case 'bedrock':
-      return bedrock('anthropic.claude-sonnet-4-20250514-v1:0');
+      return bedrock(modelId);
     default:
       return null;
   }
@@ -27,7 +33,7 @@ export const aiModel = getModel();
 
 export function getRequiredModel(): LanguageModel {
   if (!aiModel) {
-    throw new Error('AI is not configured. Set AI_PROVIDER and corresponding API key.');
+    throw new Error('AI is not configured. Set AI_PROVIDER and AI_MODEL environment variables.');
   }
   return aiModel;
 }
