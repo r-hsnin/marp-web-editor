@@ -23,9 +23,9 @@ http://localhost:3000 でアクセス
 | コンテナ | ベースイメージ | ポート |
 |---------|---------------|--------|
 | frontend | nginx:alpine | 3000 |
-| backend | oven/bun:1-debian | 3001 |
+| backend | oven/bun:1-slim | 3001 |
 
-Backend には Node.js（Puppeteer用）、Chromium、日本語フォントが含まれます。
+Backend には Node.js（Marp CLI 用）、Chromium、日本語フォントが含まれます。
 
 ---
 

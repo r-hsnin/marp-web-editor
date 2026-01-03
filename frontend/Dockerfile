@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:1-debian AS builder
+FROM oven/bun:1-slim AS builder
 
 WORKDIR /app
 
