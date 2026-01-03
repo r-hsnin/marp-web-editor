@@ -1,5 +1,5 @@
 # Build stage
-FROM oven/bun:1-debian AS builder
+FROM oven/bun:1-slim AS builder
 
 WORKDIR /app
 
@@ -10,7 +10,7 @@ COPY backend/package.json ./backend/
 COPY frontend/package.json ./frontend/
 
 # Install all dependencies
-RUN bun install
+RUN bun install --frozen-lockfile
 
 # Copy source
 COPY packages/shared ./packages/shared
@@ -21,30 +21,17 @@ WORKDIR /app/backend
 RUN bun run build
 
 # Production stage
-FROM oven/bun:1-debian AS runner
+FROM oven/bun:1-slim AS runner
 
 # Create non-root user
 RUN groupadd -r marp && useradd -r -g marp -m marp
 
-# Install Node.js for Playwright installation
+# Install Chromium, Node.js, Japanese fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    chromium \
     nodejs \
-    npm \
-    && rm -rf /var/lib/apt/lists/*
-
-# Install Chromium via Playwright (for ARM64 support)
-RUN mkdir -p /tmp/playwright && \
-    cd /tmp/playwright && \
-    npm i playwright@latest && \
-    PLAYWRIGHT_BROWSERS_PATH=/usr/local/bin/pw-browsers npx playwright install --with-deps chromium && \
-    ln -s $(find /usr/local/bin/pw-browsers -name "chrome" -executable | head -n 1) /usr/local/bin/chrome && \
-    cd / && \
-    rm -rf /tmp/playwright && \
-    npm cache clean --force
-
-# Install Japanese fonts and runtime dependencies
-RUN apt-get update && apt-get install -y --no-install-recommends \
     dumb-init \
+    curl \
     fonts-noto-cjk \
     fonts-noto-cjk-extra \
     fonts-noto-color-emoji \
@@ -52,7 +39,6 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     fonts-dejavu-core \
     fontconfig \
     locales \
-    curl \
     && echo "ja_JP.UTF-8 UTF-8" >> /etc/locale.gen \
     && locale-gen ja_JP.UTF-8 \
     && fc-cache -fv \
@@ -73,9 +59,8 @@ WORKDIR /app/backend
 ENV NODE_ENV=production \
     LANG=ja_JP.UTF-8 \
     LC_ALL=ja_JP.UTF-8 \
-    CHROME_PATH=/usr/local/bin/chrome \
-    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true \
-    PUPPETEER_EXECUTABLE_PATH=/usr/local/bin/chrome
+    PUPPETEER_EXECUTABLE_PATH=/usr/bin/chromium \
+    PUPPETEER_SKIP_CHROMIUM_DOWNLOAD=true
 
 EXPOSE 3001
 
