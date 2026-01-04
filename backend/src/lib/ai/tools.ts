@@ -57,20 +57,22 @@ const proposePlanSchema = z.object({
  * No 'execute' function = AI SDK will emit tool calls for frontend handling
  */
 export const proposeEditTool = tool({
-  description: 'Propose edits to an existing slide. Use this when modifying a single slide.',
+  description:
+    'Propose edits to a specific slide. Call multiple times when editing multiple slides. Other slides remain unchanged.',
   inputSchema: proposeEditSchema,
   outputSchema: z.string(),
 });
 
 export const proposeInsertTool = tool({
-  description: 'Propose inserting new slides. Use this when adding slides to the presentation.',
+  description:
+    'Propose inserting new slide(s) at a specific position. Existing slides remain unchanged.',
   inputSchema: proposeInsertSchema,
   outputSchema: z.string(),
 });
 
 export const proposeReplaceTool = tool({
   description:
-    'Propose replacing all slides. Use this when creating a new presentation or completely restructuring.',
+    'Propose replacing ALL slides with new content. Use ONLY when creating from scratch or the user explicitly wants to rewrite everything.',
   inputSchema: proposeReplaceSchema,
   outputSchema: z.string(),
 });

@@ -45,3 +45,41 @@
         const result = JSON.parse(output);
         const editCall = result.toolCalls?.find(t => t.name === 'propose_edit');
         return editCall && editCall.args?.slideIndex === 0;
+
+# Multiple slide editing tests (key improvement area)
+
+- description: Edit multiple specific slides → multiple propose_edit calls
+  vars:
+    userMessage: "スライド2と3を短くして"
+    context: "[0] # タイトル\n\n[1] ## 内容1\n長い説明文があります。\n\n[2] ## 内容2\n長い説明文があります。\n\n[3] ## まとめ"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const editCalls = result.toolCalls?.filter(t => t.name === 'propose_edit') || [];
+        return editCalls.length >= 2;
+
+- description: Edit slide range → multiple propose_edit calls (not replace)
+  vars:
+    userMessage: "Translate slides 2-4 to English"
+    context: "[0] # タイトル\n\n[1] ## 概要\n説明文\n\n[2] ## 詳細\n詳細説明\n\n[3] ## 結論\n結論文\n\n[4] ## 参考"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const editCalls = result.toolCalls?.filter(t => t.name === 'propose_edit') || [];
+        const hasReplace = result.toolCalls?.some(t => t.name === 'propose_replace');
+        return editCalls.length >= 3 && !hasReplace;
+
+- description: Rewrite everything → propose_replace
+  vars:
+    userMessage: "このプレゼンを全部書き直して、もっとシンプルにして"
+    context: "[0] # 古いタイトル\n\n[1] ## 古い内容1\n\n[2] ## 古い内容2"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        return result.toolCalls?.some(t => t.name === 'propose_replace');
