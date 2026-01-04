@@ -214,14 +214,15 @@ marp-web-editor/
 ├── backend/                # Hono API
 │   ├── src/
 │   │   ├── routes/         # APIエンドポイント
-│   │   ├── lib/ai/         # AIエージェント・ツール
-│   │   └── schemas/        # Zodスキーマ
+│   │   └── lib/ai/         # AIエージェント・ツール
 │   ├── guidelines/         # AI用ガイドライン
-│   │   ├── base-rules.md   # 基本ルール
-│   │   └── themes/         # テーマ別ガイドライン
 │   ├── templates/          # スライドテンプレート
 │   └── themes/             # カスタムテーマCSS
 │
+├── packages/shared/        # 共有型定義 (Hono RPC)
+├── cdk/                    # AWS CDK デプロイ
+├── eval/                   # AI 評価環境 (promptfoo)
+├── docs/                   # ドキュメント
 └── biome.json              # Linter/Formatter設定
 ```
 
@@ -248,6 +249,7 @@ cd backend && bun run dev    # 開発サーバー (3001)
 |-------------|------|
 | [Development Guide](./docs/DEVELOPMENT.md) | 開発環境構築・トラブルシューティング |
 | [Architecture](./docs/ARCHITECTURE.md) | システム設計・技術スタック |
+| [Deploy](./docs/DEPLOY.md) | AWS デプロイ設計 |
 | [AI Feature](./docs/AI.md) | AI機能の実装 |
 | [AI Evaluation](./docs/AI-EVAL.md) | AI機能のE2E評価環境 |
 | [Logging](./docs/LOGGING.md) | ロギング設定・実装詳細 |
