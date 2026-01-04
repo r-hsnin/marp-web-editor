@@ -5,6 +5,10 @@ node_modules
 dist
 *.tsbuildinfo
 
+# CDK
+cdk/cdk.out
+cdk/cdk.context.json
+
 # Environment files
 .env
 .env.local

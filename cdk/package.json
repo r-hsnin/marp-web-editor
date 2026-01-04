@@ -1,0 +1,25 @@
+{
+  "name": "marp-editor-cdk",
+  "version": "1.0.0",
+  "type": "module",
+  "scripts": {
+    "build": "tsc",
+    "typecheck": "tsc --noEmit",
+    "test": "bun test",
+    "cdk": "cdk",
+    "deploy": "cdk deploy --require-approval never",
+    "destroy": "cdk destroy",
+    "diff": "cdk diff",
+    "synth": "cdk synth"
+  },
+  "devDependencies": {
+    "@types/node": "^24.10.4",
+    "aws-cdk": "^2.233.0",
+    "tsx": "^4.19.0",
+    "typescript": "~5.9.3"
+  },
+  "dependencies": {
+    "aws-cdk-lib": "^2.233.0",
+    "constructs": "^10.4.4"
+  }
+}

@@ -110,6 +110,7 @@ marp-web-editor/
 │   ├── templates/      # Slide templates (.md + templates.json)
 │   └── guidelines/     # AI generation guidelines (base-rules.md, themes/)
 ├── packages/shared/    # Hono RPC type definitions
+├── cdk/                # AWS CDK deployment (EC2 + Docker + CloudFront)
 ├── biome.json          # Linter/Formatter config (root only)
 └── package.json        # Bun workspaces config
 ```
@@ -123,5 +124,6 @@ marp-web-editor/
 For detailed information:
 - [DEVELOPMENT.md](./docs/DEVELOPMENT.md) - Setup & troubleshooting
 - [ARCHITECTURE.md](./docs/ARCHITECTURE.md) - System design
+- [DEPLOY.md](./docs/DEPLOY.md) - AWS deployment design
 - [AI.md](./docs/AI.md) - AI implementation
 - [DOCKER.md](./docs/DOCKER.md) - Docker environment
