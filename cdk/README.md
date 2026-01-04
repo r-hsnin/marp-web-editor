@@ -55,18 +55,20 @@ bun run cdk bootstrap
 |------|-----------|------|
 | `ENVIRONMENT` | prod | 環境名 |
 | `IDLE_MINUTES` | 15 | 自動停止までのアイドル時間（分） |
-| `AI_PROVIDER` | - | AI プロバイダー |
+| `AI_PROVIDER` | - | AI プロバイダー (openrouter/openai/anthropic/google/bedrock) |
 | `AI_MODEL` | - | AI モデル |
+| `AI_API_KEY` | - | API キー |
 
 ### AI 機能を有効にする場合
 
 ```bash
-export AI_PROVIDER=openrouter
-export AI_MODEL=openai/gpt-4.1-mini
+AI_PROVIDER=openrouter \
+AI_MODEL=openai/gpt-4.1-mini \
+AI_API_KEY=sk-or-... \
 ./deploy.sh
 ```
 
-**注意**: API キーは CDK でデプロイされません。Secrets Manager または手動で EC2 環境変数に設定してください。
+deploy.sh が Parameter Store に自動登録します。API キーは SecureString で暗号化されます。
 
 ---
 
@@ -95,17 +97,8 @@ docker tag marp-editor:latest "$ECR_URI:latest"
 docker push "$ECR_URI:latest"
 
 # EC2 でコンテナ更新 (SSM 経由)
-INSTANCE_ID=$(aws cloudformation describe-stacks \
-  --stack-name MarpEditorComputeStack \
-  --region us-east-1 \
-  --query "Stacks[0].Outputs[?OutputKey=='InstanceId'].OutputValue" \
-  --output text)
-
-aws ssm send-command \
-  --instance-ids "$INSTANCE_ID" \
-  --document-name "AWS-RunShellScript" \
-  --parameters 'commands=["source /etc/marp-editor.env && docker pull $ECR_URI:latest && docker stop marp-editor && docker rm marp-editor && docker run -d --name marp-editor --restart=always -p 3001:3001 $DOCKER_ENV $ECR_URI:latest"]' \
-  --region us-east-1
+# ※ deploy.sh を使うことを推奨（Parameter Store から AI 設定を取得するため）
+./deploy.sh
 ```
 
 ### フロントエンド更新

@@ -13,8 +13,6 @@ const env = {
 // Context values from CLI or cdk.json
 const environment = app.node.tryGetContext('environment') ?? 'prod';
 const idleMinutes = Number(app.node.tryGetContext('idleMinutes')) || 30;
-const aiProvider = app.node.tryGetContext('aiProvider') ?? '';
-const aiModel = app.node.tryGetContext('aiModel') ?? '';
 
 const statefulStack = new StatefulStack(app, 'MarpEditorStatefulStack', {
   env,
@@ -25,8 +23,6 @@ new ComputeStack(app, 'MarpEditorComputeStack', {
   env,
   environment,
   idleMinutes,
-  aiProvider,
-  aiModel,
   imageBucket: statefulStack.imageBucket,
   ecrRepository: statefulStack.ecrRepository,
 });
