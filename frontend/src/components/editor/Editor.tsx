@@ -107,7 +107,7 @@ export const Editor: React.FC = () => {
           basicSetup={basicSetupOptions}
         />
 
-        <div className="absolute bottom-6 right-6 z-50 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+        <div className="absolute bottom-6 right-6 z-50 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
           {isAIAvailable && <AIFloatingButton onClick={openChat} />}
         </div>
       </div>
