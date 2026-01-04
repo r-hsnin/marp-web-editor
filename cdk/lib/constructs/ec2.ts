@@ -13,8 +13,6 @@ export interface Ec2ConstructProps {
   ecrRepositoryUri: string;
   instanceType: string;
   instanceTagName: string;
-  aiProvider?: string;
-  aiModel?: string;
 }
 
 export class Ec2Construct extends Construct {
@@ -32,8 +30,6 @@ export class Ec2Construct extends Construct {
       ecrRepositoryUri,
       instanceType,
       instanceTagName,
-      aiProvider,
-      aiModel,
     } = props;
 
     const stack = cdk.Stack.of(this);
@@ -75,24 +71,36 @@ export class Ec2Construct extends Construct {
     // CloudWatch Logs access
     this.logGroup.grantWrite(role);
 
+    // SSM Parameter Store access for AI settings
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['ssm:GetParameter', 'ssm:GetParametersByPath'],
+        resources: [`arn:aws:ssm:${stack.region}:${stack.account}:parameter/marp-editor/*`],
+      }),
+    );
+
+    // Bedrock access for AI features
+    role.addToPolicy(
+      new iam.PolicyStatement({
+        actions: ['bedrock:InvokeModel', 'bedrock:InvokeModelWithResponseStream'],
+        resources: ['*'],
+      }),
+    );
+
     // Instance Profile
     const instanceProfile = new iam.CfnInstanceProfile(this, 'InstanceProfile', {
       roles: [role.roleName],
     });
 
-    // Build environment variables for container
-    const envVars: string[] = [
+    // Base environment variables for container
+    const baseEnvVars = [
       '-e NODE_ENV=production',
       '-e IMAGE_STORAGE=s3',
       `-e S3_BUCKET=${imageBucket.bucketName}`,
       `-e S3_REGION=${stack.region}`,
       '-e TMPDIR=/tmp',
       '-e HOME=/tmp',
-    ];
-    if (aiProvider) envVars.push(`-e AI_PROVIDER=${aiProvider}`);
-    if (aiModel) envVars.push(`-e AI_MODEL=${aiModel}`);
-
-    const dockerEnvStr = envVars.join(' ');
+    ].join(' ');
 
     // User Data
     const userData = ec2.UserData.forLinux();
@@ -105,10 +113,33 @@ export class Ec2Construct extends Construct {
       'systemctl enable docker',
       'systemctl start docker',
       '',
+      '# Function to get SSM parameter (returns empty string if not found)',
+      'get_ssm_param() {',
+      `  aws ssm get-parameter --name "$1" --with-decryption --region ${stack.region} --query "Parameter.Value" --output text 2>/dev/null || echo ""`,
+      '}',
+      '',
+      '# Get AI settings from Parameter Store',
+      'AI_PROVIDER=$(get_ssm_param "/marp-editor/ai-provider")',
+      'AI_MODEL=$(get_ssm_param "/marp-editor/ai-model")',
+      'OPENROUTER_API_KEY=$(get_ssm_param "/marp-editor/OPENROUTER_API_KEY")',
+      'OPENAI_API_KEY=$(get_ssm_param "/marp-editor/OPENAI_API_KEY")',
+      'ANTHROPIC_API_KEY=$(get_ssm_param "/marp-editor/ANTHROPIC_API_KEY")',
+      'GOOGLE_GENERATIVE_AI_API_KEY=$(get_ssm_param "/marp-editor/GOOGLE_GENERATIVE_AI_API_KEY")',
+      '',
+      '# Build Docker environment variables',
+      `DOCKER_ENV="${baseEnvVars}"`,
+      '[ -n "$AI_PROVIDER" ] && DOCKER_ENV="$DOCKER_ENV -e AI_PROVIDER=$AI_PROVIDER"',
+      '[ -n "$AI_MODEL" ] && DOCKER_ENV="$DOCKER_ENV -e AI_MODEL=$AI_MODEL"',
+      '[ -n "$OPENROUTER_API_KEY" ] && DOCKER_ENV="$DOCKER_ENV -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY"',
+      '[ -n "$OPENAI_API_KEY" ] && DOCKER_ENV="$DOCKER_ENV -e OPENAI_API_KEY=$OPENAI_API_KEY"',
+      '[ -n "$ANTHROPIC_API_KEY" ] && DOCKER_ENV="$DOCKER_ENV -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY"',
+      '[ -n "$GOOGLE_GENERATIVE_AI_API_KEY" ] && DOCKER_ENV="$DOCKER_ENV -e GOOGLE_GENERATIVE_AI_API_KEY=$GOOGLE_GENERATIVE_AI_API_KEY"',
+      '',
       '# Save config for future deploys',
       `echo 'ECR_URI=${ecrRepositoryUri}' > /etc/marp-editor.env`,
-      `echo 'DOCKER_ENV="${dockerEnvStr}"' >> /etc/marp-editor.env`,
       `echo 'LOG_GROUP=${this.logGroup.logGroupName}' >> /etc/marp-editor.env`,
+      `echo 'AWS_REGION=${stack.region}' >> /etc/marp-editor.env`,
+      `echo 'BASE_DOCKER_ENV="${baseEnvVars}"' >> /etc/marp-editor.env`,
       '',
       '# ECR Login',
       `aws ecr get-login-password --region ${stack.region} | docker login --username AWS --password-stdin ${ecrRepositoryUri.split('/')[0]}`,
@@ -129,7 +160,7 @@ export class Ec2Construct extends Construct {
       `  --log-opt awslogs-region=${stack.region} \\`,
       `  --log-opt awslogs-group=${this.logGroup.logGroupName} \\`,
       '  --log-opt awslogs-stream=docker \\',
-      `  ${dockerEnvStr} \\`,
+      '  $DOCKER_ENV \\',
       `  ${ecrRepositoryUri}:latest`,
     );
 

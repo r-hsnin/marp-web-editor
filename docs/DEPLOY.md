@@ -249,18 +249,14 @@ securityGroup.addIngressRule(cfPrefixList, ec2.Port.tcp(3001));
 
 ### コンテナ更新
 
-デプロイ時は SSM Run Command で EC2 上のコンテナを更新:
+デプロイ時は `deploy.sh` が SSM Run Command で EC2 上のコンテナを更新。Parameter Store から AI 設定を取得して Docker に渡します。
 
 ```bash
-aws ssm send-command \
-  --instance-ids "$INSTANCE_ID" \
-  --document-name "AWS-RunShellScript" \
-  --parameters 'commands=[
-    "docker pull $ECR_URI:latest",
-    "docker stop marp-editor",
-    "docker rm marp-editor",
-    "docker run -d --name marp-editor --restart=always ..."
-  ]'
+# 推奨: deploy.sh を使用
+./deploy.sh
+
+# AI 設定を変更する場合
+AI_PROVIDER=openrouter AI_MODEL=... AI_API_KEY=... ./deploy.sh
 ```
 
 ---

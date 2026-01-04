@@ -13,8 +13,6 @@ interface ComputeStackProps extends cdk.StackProps {
   environment?: string;
   instanceType?: string;
   idleMinutes?: number;
-  aiProvider?: string;
-  aiModel?: string;
   imageBucket: s3.IBucket;
   ecrRepository: ecr.IRepository;
 }
@@ -53,8 +51,6 @@ export class ComputeStack extends cdk.Stack {
       ecrRepositoryUri: props.ecrRepository.repositoryUri,
       instanceType,
       instanceTagName,
-      aiProvider: props.aiProvider,
-      aiModel: props.aiModel,
     });
 
     // CloudFront

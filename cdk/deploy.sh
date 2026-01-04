@@ -8,6 +8,7 @@ IDLE_MINUTES="${IDLE_MINUTES:-15}"
 # AI settings (optional)
 AI_PROVIDER="${AI_PROVIDER:-}"
 AI_MODEL="${AI_MODEL:-}"
+AI_API_KEY="${AI_API_KEY:-}"
 
 cd "$(dirname "$0")"
 
@@ -26,13 +27,30 @@ get_output() {
     --output text 2>/dev/null || echo ""
 }
 
+# Register AI settings to Parameter Store (if provided)
+if [ -n "$AI_PROVIDER" ]; then
+  echo "Registering AI settings to Parameter Store..."
+  aws ssm put-parameter --name "/marp-editor/ai-provider" --value "$AI_PROVIDER" --type String --overwrite --region "$REGION" > /dev/null
+  aws ssm put-parameter --name "/marp-editor/ai-model" --value "$AI_MODEL" --type String --overwrite --region "$REGION" > /dev/null
+  if [ -n "$AI_API_KEY" ]; then
+    case "$AI_PROVIDER" in
+      bedrock) ;; # No API key needed (uses IAM role)
+      openrouter) KEY_NAME="OPENROUTER_API_KEY" ;;
+      openai) KEY_NAME="OPENAI_API_KEY" ;;
+      anthropic) KEY_NAME="ANTHROPIC_API_KEY" ;;
+      google) KEY_NAME="GOOGLE_GENERATIVE_AI_API_KEY" ;;
+      *) KEY_NAME="${AI_PROVIDER^^}_API_KEY" ;;
+    esac
+    [ -n "$KEY_NAME" ] && aws ssm put-parameter --name "/marp-editor/$KEY_NAME" --value "$AI_API_KEY" --type SecureString --overwrite --region "$REGION" > /dev/null
+  fi
+  echo ""
+fi
+
 # Step 1: CDK Deploy
 echo "[1/5] Deploying CDK stacks..."
 bun run cdk deploy --all --require-approval never \
   -c environment="$ENVIRONMENT" \
-  -c idleMinutes="$IDLE_MINUTES" \
-  -c aiProvider="$AI_PROVIDER" \
-  -c aiModel="$AI_MODEL"
+  -c idleMinutes="$IDLE_MINUTES"
 
 STATEFUL_STACK="MarpEditorStatefulStack"
 COMPUTE_STACK="MarpEditorComputeStack"
@@ -82,6 +100,20 @@ aws ssm send-command \
     "docker pull $ECR_URI:latest",
     "docker stop marp-editor || true",
     "docker rm marp-editor || true",
+    "get_ssm() { aws ssm get-parameter --name \"$1\" --with-decryption --region '"$REGION"' --query Parameter.Value --output text 2>/dev/null || echo \"\"; }",
+    "AI_PROVIDER=$(get_ssm /marp-editor/ai-provider)",
+    "AI_MODEL=$(get_ssm /marp-editor/ai-model)",
+    "OPENROUTER_API_KEY=$(get_ssm /marp-editor/OPENROUTER_API_KEY)",
+    "OPENAI_API_KEY=$(get_ssm /marp-editor/OPENAI_API_KEY)",
+    "ANTHROPIC_API_KEY=$(get_ssm /marp-editor/ANTHROPIC_API_KEY)",
+    "GOOGLE_GENERATIVE_AI_API_KEY=$(get_ssm /marp-editor/GOOGLE_GENERATIVE_AI_API_KEY)",
+    "DOCKER_ENV=\"$BASE_DOCKER_ENV\"",
+    "[ -n \"$AI_PROVIDER\" ] && DOCKER_ENV=\"$DOCKER_ENV -e AI_PROVIDER=$AI_PROVIDER\"",
+    "[ -n \"$AI_MODEL\" ] && DOCKER_ENV=\"$DOCKER_ENV -e AI_MODEL=$AI_MODEL\"",
+    "[ -n \"$OPENROUTER_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY\"",
+    "[ -n \"$OPENAI_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e OPENAI_API_KEY=$OPENAI_API_KEY\"",
+    "[ -n \"$ANTHROPIC_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY\"",
+    "[ -n \"$GOOGLE_GENERATIVE_AI_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e GOOGLE_GENERATIVE_AI_API_KEY=$GOOGLE_GENERATIVE_AI_API_KEY\"",
     "docker run -d --name marp-editor --restart=always --shm-size=512m --memory=1536m --user 1000:1000 --read-only --init -v /tmp:/tmp -p 3001:3001 --log-driver=awslogs --log-opt awslogs-region='"$REGION"' --log-opt awslogs-group=$LOG_GROUP --log-opt awslogs-stream=docker $DOCKER_ENV $ECR_URI:latest"
   ]' \
   --region "$REGION" > /dev/null
