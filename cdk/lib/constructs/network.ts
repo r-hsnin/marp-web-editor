@@ -19,9 +19,12 @@ export class NetworkConstruct extends Construct {
       description: 'ECS Security Group',
       allowAllOutbound: true,
     });
-    // CloudFront Managed Prefix List (us-east-1)
+
+    const cfPrefixList = ec2.PrefixList.fromLookup(this, 'CloudFrontPrefixList', {
+      prefixListName: 'com.amazonaws.global.cloudfront.origin-facing',
+    });
     this.securityGroup.addIngressRule(
-      ec2.Peer.prefixList('pl-3b927c52'),
+      cfPrefixList,
       ec2.Port.tcp(3001),
       'Allow from CloudFront only',
     );

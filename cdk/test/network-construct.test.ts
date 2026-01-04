@@ -5,7 +5,9 @@ import { NetworkConstruct } from '../lib/constructs/network.js';
 
 describe('NetworkConstruct', () => {
   const app = new cdk.App();
-  const stack = new cdk.Stack(app, 'TestStack');
+  const stack = new cdk.Stack(app, 'TestStack', {
+    env: { account: '123456789012', region: 'us-east-1' },
+  });
   new NetworkConstruct(stack, 'Network');
   const template = Template.fromStack(stack);
 
@@ -23,7 +25,6 @@ describe('NetworkConstruct', () => {
       IpProtocol: 'tcp',
       FromPort: 3001,
       ToPort: 3001,
-      SourcePrefixListId: 'pl-3b927c52',
     });
   });
 

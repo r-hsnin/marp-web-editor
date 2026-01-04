@@ -1,8 +1,9 @@
 #!/bin/bash
 set -euo pipefail
 
+REGION="us-east-1"  # Lambda@Edge requires us-east-1
 ENVIRONMENT="${ENVIRONMENT:-prod}"
-IDLE_MINUTES="${IDLE_MINUTES:-30}"
+IDLE_MINUTES="${IDLE_MINUTES:-15}"
 
 # AI settings (optional)
 AI_PROVIDER="${AI_PROVIDER:-}"
@@ -20,7 +21,7 @@ get_output() {
   local key="$2"
   aws cloudformation describe-stacks \
     --stack-name "$stack" \
-    --region us-east-1 \
+    --region "$REGION" \
     --query "Stacks[0].Outputs[?OutputKey=='$key'].OutputValue" \
     --output text 2>/dev/null || echo ""
 }
@@ -40,37 +41,52 @@ ECR_URI=$(get_output "$STATEFUL_STACK" "ECRRepositoryUri")
 FRONTEND_BUCKET=$(get_output "$COMPUTE_STACK" "FrontendBucketName")
 CLOUDFRONT_ID=$(get_output "$COMPUTE_STACK" "CloudFrontDistributionId")
 CLOUDFRONT_DOMAIN=$(get_output "$COMPUTE_STACK" "CloudFrontDomain")
-CLUSTER_NAME=$(get_output "$COMPUTE_STACK" "ECSClusterName")
+INSTANCE_ID=$(get_output "$COMPUTE_STACK" "InstanceId")
 
 echo "ECR: $ECR_URI"
 echo "Frontend: $FRONTEND_BUCKET"
 echo "CloudFront: $CLOUDFRONT_DOMAIN"
+echo "Instance: $INSTANCE_ID"
 echo ""
 
 # Step 2: Build and push backend image (ARM64)
 echo "[2/5] Building and pushing backend image (ARM64)..."
 cd ..
-aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${ECR_URI%/*}"
+aws ecr get-login-password --region "$REGION" | docker login --username AWS --password-stdin "${ECR_URI%/*}"
 docker build --platform linux/arm64 -t marp-editor -f backend/Dockerfile .
 docker tag marp-editor:latest "$ECR_URI:latest"
 docker push "$ECR_URI:latest"
-cd deploy-cdk
+cd cdk
 echo ""
 
-# Step 3: Update ECS service with real image
-echo "[3/5] Updating ECS service..."
-bun run cdk deploy "$COMPUTE_STACK" --require-approval never \
-  -c environment="$ENVIRONMENT" \
-  -c idleMinutes="$IDLE_MINUTES" \
-  -c containerImage="$ECR_URI:latest" \
-  -c aiProvider="$AI_PROVIDER" \
-  -c aiModel="$AI_MODEL"
+# Step 3: Update container on EC2 via SSM
+echo "[3/5] Updating container on EC2..."
+INSTANCE_STATE=$(aws ec2 describe-instances --instance-ids "$INSTANCE_ID" --region "$REGION" --query 'Reservations[0].Instances[0].State.Name' --output text)
 
-# Find ECS service name
-SERVICE_ARN=$(aws ecs list-services --cluster "$CLUSTER_NAME" --region us-east-1 --query 'serviceArns[0]' --output text)
-if [ -n "$SERVICE_ARN" ] && [ "$SERVICE_ARN" != "None" ]; then
-  aws ecs update-service --cluster "$CLUSTER_NAME" --service "$SERVICE_ARN" --force-new-deployment --region us-east-1 > /dev/null
+if [ "$INSTANCE_STATE" = "stopped" ]; then
+  echo "Instance is stopped. Starting..."
+  aws ec2 start-instances --instance-ids "$INSTANCE_ID" --region "$REGION" > /dev/null
+  aws ec2 wait instance-running --instance-ids "$INSTANCE_ID" --region "$REGION"
+  echo "Waiting for SSM agent to be ready..."
+  sleep 30
 fi
+
+# Update container via SSM Run Command
+echo "Pulling new image and restarting container..."
+aws ssm send-command \
+  --instance-ids "$INSTANCE_ID" \
+  --document-name "AWS-RunShellScript" \
+  --parameters 'commands=[
+    "source /etc/marp-editor.env",
+    "aws ecr get-login-password --region '"$REGION"' | docker login --username AWS --password-stdin '"${ECR_URI%/*}"'",
+    "docker pull $ECR_URI:latest",
+    "docker stop marp-editor || true",
+    "docker rm marp-editor || true",
+    "docker run -d --name marp-editor --restart=always --shm-size=512m --memory=1536m --user 1000:1000 --read-only --init -v /tmp:/tmp -p 3001:3001 --log-driver=awslogs --log-opt awslogs-region='"$REGION"' --log-opt awslogs-group=$LOG_GROUP --log-opt awslogs-stream=docker $DOCKER_ENV $ECR_URI:latest"
+  ]' \
+  --region "$REGION" > /dev/null
+
+echo "Container update initiated (runs in background)"
 echo ""
 
 # Step 4: Build and deploy frontend
@@ -78,8 +94,8 @@ echo "[4/5] Building and deploying frontend..."
 cd ../frontend
 bun install --frozen-lockfile
 VITE_API_URL="https://$CLOUDFRONT_DOMAIN" bun run build
-aws s3 sync dist/ "s3://$FRONTEND_BUCKET/" --delete --region us-east-1
-cd ../deploy-cdk
+aws s3 sync dist/ "s3://$FRONTEND_BUCKET/" --delete --region "$REGION"
+cd ../cdk
 echo ""
 
 # Step 5: Invalidate CloudFront cache
@@ -95,4 +111,4 @@ echo "Features:"
 echo "  - On-demand start: Access triggers auto-start"
 echo "  - Auto-stop: After ${IDLE_MINUTES} minutes of inactivity"
 echo ""
-echo "Wait 2-3 minutes for ECS task to start."
+echo "Wait 2-3 minutes for EC2 to start and container to run."

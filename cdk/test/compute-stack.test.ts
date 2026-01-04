@@ -55,7 +55,6 @@ describe('ComputeStack (synth-based)', () => {
     const outputs = template.Outputs as Record<string, unknown>;
     expect(outputs).toHaveProperty('CloudFrontDomain');
     expect(outputs).toHaveProperty('CloudFrontDistributionId');
-    expect(outputs).toHaveProperty('ECSClusterName');
     expect(outputs).toHaveProperty('InstanceId');
     expect(outputs).toHaveProperty('FrontendBucketName');
   });

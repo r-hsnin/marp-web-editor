@@ -5,12 +5,14 @@ import { StatefulStack } from '../lib/stateful-stack.js';
 
 const app = new cdk.App();
 
-const env = { region: 'us-east-1' }; // Lambda@Edge requires us-east-1
+const env = {
+  account: process.env.CDK_DEFAULT_ACCOUNT,
+  region: 'us-east-1', // Lambda@Edge requires us-east-1
+};
 
 // Context values from CLI or cdk.json
 const environment = app.node.tryGetContext('environment') ?? 'prod';
 const idleMinutes = Number(app.node.tryGetContext('idleMinutes')) || 30;
-const containerImage = app.node.tryGetContext('containerImage');
 const aiProvider = app.node.tryGetContext('aiProvider') ?? '';
 const aiModel = app.node.tryGetContext('aiModel') ?? '';
 
@@ -23,8 +25,8 @@ new ComputeStack(app, 'MarpEditorComputeStack', {
   env,
   environment,
   idleMinutes,
-  containerImage,
   aiProvider,
   aiModel,
   imageBucket: statefulStack.imageBucket,
+  ecrRepository: statefulStack.ecrRepository,
 });

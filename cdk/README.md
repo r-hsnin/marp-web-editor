@@ -1,8 +1,26 @@
 # Marp Web Editor - AWS CDK デプロイ
 
-ECS EC2 + S3/CloudFront によるデプロイ。オンデマンド起動・自動停止機能付き。
+EC2 + Docker + CloudFront によるデプロイ。オンデマンド起動・自動停止機能付き。
 
 > **設計思想・技術選定は [docs/DEPLOY.md](../docs/DEPLOY.md) を参照**
+
+---
+
+## アーキテクチャ
+
+```
+CloudFront
+    │
+    ├── / → S3 (Frontend)
+    │
+    └── /api/* → EC2 (Docker → Backend)
+                      │
+                      └── docker --restart=always で自動再起動
+```
+
+- **オンデマンド起動**: Lambda@Edge が停止中の EC2 を自動起動
+- **自動停止**: 15 分間アクセスがなければ EC2 を自動停止
+- **コスト最適化**: 停止中は EBS 料金のみ (~$0.64/月)
 
 ---
 
@@ -36,7 +54,7 @@ bun run cdk bootstrap
 | 変数 | デフォルト | 説明 |
 |------|-----------|------|
 | `ENVIRONMENT` | prod | 環境名 |
-| `IDLE_MINUTES` | 30 | 自動停止までのアイドル時間（分） |
+| `IDLE_MINUTES` | 15 | 自動停止までのアイドル時間（分） |
 | `AI_PROVIDER` | - | AI プロバイダー |
 | `AI_MODEL` | - | AI モデル |
 
@@ -48,7 +66,7 @@ export AI_MODEL=openai/gpt-4.1-mini
 ./deploy.sh
 ```
 
-**注意**: API キーは CDK でデプロイされません。AWS Console で ECS タスク定義の環境変数に手動追加してください。
+**注意**: API キーは CDK でデプロイされません。Secrets Manager または手動で EC2 環境変数に設定してください。
 
 ---
 
@@ -66,22 +84,28 @@ bun run deploy --all
 # ECR URI を取得
 ECR_URI=$(aws cloudformation describe-stacks \
   --stack-name MarpEditorStatefulStack \
+  --region us-east-1 \
   --query "Stacks[0].Outputs[?OutputKey=='ECRRepositoryUri'].OutputValue" \
   --output text)
 
 # ビルド & プッシュ
-aws ecr get-login-password | docker login --username AWS --password-stdin "${ECR_URI%/*}"
+aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin "${ECR_URI%/*}"
 docker build --platform linux/arm64 -t marp-editor -f ../backend/Dockerfile ..
 docker tag marp-editor:latest "$ECR_URI:latest"
 docker push "$ECR_URI:latest"
 
-# ECS サービス更新
-CLUSTER=$(aws cloudformation describe-stacks \
+# EC2 でコンテナ更新 (SSM 経由)
+INSTANCE_ID=$(aws cloudformation describe-stacks \
   --stack-name MarpEditorComputeStack \
-  --query "Stacks[0].Outputs[?OutputKey=='ECSClusterName'].OutputValue" \
+  --region us-east-1 \
+  --query "Stacks[0].Outputs[?OutputKey=='InstanceId'].OutputValue" \
   --output text)
-SERVICE_ARN=$(aws ecs list-services --cluster "$CLUSTER" --query 'serviceArns[0]' --output text)
-aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE_ARN" --force-new-deployment
+
+aws ssm send-command \
+  --instance-ids "$INSTANCE_ID" \
+  --document-name "AWS-RunShellScript" \
+  --parameters 'commands=["source /etc/marp-editor.env && docker pull $ECR_URI:latest && docker stop marp-editor && docker rm marp-editor && docker run -d --name marp-editor --restart=always -p 3001:3001 $DOCKER_ENV $ECR_URI:latest"]' \
+  --region us-east-1
 ```
 
 ### フロントエンド更新
@@ -89,16 +113,18 @@ aws ecs update-service --cluster "$CLUSTER" --service "$SERVICE_ARN" --force-new
 ```bash
 BUCKET=$(aws cloudformation describe-stacks \
   --stack-name MarpEditorComputeStack \
+  --region us-east-1 \
   --query "Stacks[0].Outputs[?OutputKey=='FrontendBucketName'].OutputValue" \
   --output text)
 DIST_ID=$(aws cloudformation describe-stacks \
   --stack-name MarpEditorComputeStack \
+  --region us-east-1 \
   --query "Stacks[0].Outputs[?OutputKey=='CloudFrontDistributionId'].OutputValue" \
   --output text)
 
 cd ../frontend
 bun run build
-aws s3 sync dist/ "s3://$BUCKET/" --delete
+aws s3 sync dist/ "s3://$BUCKET/" --delete --region us-east-1
 aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 ```
 
@@ -109,7 +135,14 @@ aws cloudfront create-invalidation --distribution-id "$DIST_ID" --paths "/*"
 | スタック | リソース | 削除ポリシー |
 |----------|----------|--------------|
 | StatefulStack | ECR, ImageBucket | RETAIN（データ保持） |
-| ComputeStack | VPC, ECS, EC2, Lambda, CloudFront, FrontendBucket | DESTROY |
+| ComputeStack | VPC, EC2, Lambda, CloudFront, FrontendBucket | DESTROY |
+
+### ComputeStack の主要リソース
+
+- **EC2**: t4g.small (ARM64), Amazon Linux 2023, 8GB EBS
+- **Lambda**: Origin Update (EC2 起動時に CloudFront オリジン更新), IdleCheck (15 分毎)
+- **Lambda@Edge**: API リクエスト時に停止中の EC2 を起動
+- **CloudFront**: Frontend (S3) + Backend (EC2) の統合配信
 
 ---
 
@@ -139,8 +172,8 @@ bun run destroy --all
 
 | 利用パターン | 月額 |
 |-------------|------|
-| 停止中 | ~$0.64 (EBS のみ) |
-| 月10時間利用 | ~$1 |
+| 停止中 | ~$0.64 (EBS 8GB のみ) |
+| 月 10 時間利用 | ~$1 |
 | 常時稼働 | ~$15-20 |
 
 詳細は [docs/DEPLOY.md](../docs/DEPLOY.md#コスト設計) を参照。
