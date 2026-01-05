@@ -155,6 +155,7 @@ export class Ec2Construct extends Construct {
       '  --read-only \\',
       '  --init \\',
       '  -v /tmp:/tmp \\',
+      '  --tmpfs /home/bun:rw,noexec,nosuid,uid=1000,gid=1000,size=64m \\',
       '  -p 3001:3001 \\',
       '  --log-driver=awslogs \\',
       `  --log-opt awslogs-region=${stack.region} \\`,

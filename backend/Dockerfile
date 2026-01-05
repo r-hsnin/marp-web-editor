@@ -23,9 +23,6 @@ RUN bun run build
 # Production stage
 FROM oven/bun:1-slim AS runner
 
-# Create non-root user
-RUN groupadd -r marp && useradd -r -g marp -m marp
-
 # Install Chromium, Node.js, Japanese fonts
 RUN apt-get update && apt-get install -y --no-install-recommends \
     chromium \
@@ -48,10 +45,10 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 WORKDIR /app
 
 # Copy workspace structure from builder
-COPY --from=builder --chown=marp:marp /app/package.json ./
-COPY --from=builder --chown=marp:marp /app/node_modules ./node_modules
-COPY --from=builder --chown=marp:marp /app/packages ./packages
-COPY --from=builder --chown=marp:marp /app/backend ./backend
+COPY --from=builder --chown=bun:bun /app/package.json ./
+COPY --from=builder --chown=bun:bun /app/node_modules ./node_modules
+COPY --from=builder --chown=bun:bun /app/packages ./packages
+COPY --from=builder --chown=bun:bun /app/backend ./backend
 
 WORKDIR /app/backend
 
@@ -64,7 +61,7 @@ ENV NODE_ENV=production \
 
 EXPOSE 3001
 
-USER marp
+USER bun
 
 ENTRYPOINT ["dumb-init", "--"]
 CMD ["bun", "run", "dist/index.js"]
