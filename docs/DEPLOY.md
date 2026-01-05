@@ -223,13 +223,16 @@ CloudFront
 
 ### Read-only Filesystem と Puppeteer
 
-コンテナは `--read-only` で実行。Puppeteer/Chromium が `HOME` ディレクトリに一時ファイルを書き込むため、環境変数で対応:
+コンテナは `--read-only` で実行。Puppeteer/Chromium が一時ファイルを書き込むため、以下の設定で対応:
 
 ```bash
 -e TMPDIR=/tmp \
 -e HOME=/tmp \
--v /tmp:/tmp
+-v /tmp:/tmp \
+--tmpfs /home/bun:rw,noexec,nosuid,uid=1000,gid=1000,size=64m
 ```
+
+`/home/bun` への tmpfs マウントは、Puppeteer が `/etc/passwd` からホームディレクトリを解決して書き込もうとするため必要。
 
 ### Security Group の CloudFront Prefix List
 
@@ -268,7 +271,7 @@ AI_PROVIDER=openrouter AI_MODEL=... AI_API_KEY=... ./deploy.sh
 | エラー | 原因 | 対処 |
 |--------|------|------|
 | `Exec format error` | アーキテクチャ不一致 | ARM64 でビルド |
-| `EROFS: read-only file system` | 書き込み先が read-only | `HOME=/tmp` 設定確認 |
+| `EROFS: read-only file system` | Puppeteer が /home/bun に書き込み | `--tmpfs /home/bun:...` 追加 |
 | `shm_open failed` | shm-size 不足 | `--shm-size=512m` 確認 |
 
 ### ログ確認
