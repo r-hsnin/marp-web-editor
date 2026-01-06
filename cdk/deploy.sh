@@ -89,33 +89,12 @@ if [ "$INSTANCE_STATE" = "stopped" ]; then
   sleep 30
 fi
 
-# Update container via SSM Run Command
-echo "Pulling new image and restarting container..."
+# Update container via SSM Run Command (restart systemd service)
+echo "Restarting marp-editor service..."
 aws ssm send-command \
   --instance-ids "$INSTANCE_ID" \
   --document-name "AWS-RunShellScript" \
-  --parameters 'commands=[
-    "source /etc/marp-editor.env",
-    "aws ecr get-login-password --region '"$REGION"' | docker login --username AWS --password-stdin '"${ECR_URI%/*}"'",
-    "docker pull $ECR_URI:latest",
-    "docker stop marp-editor || true",
-    "docker rm marp-editor || true",
-    "get_ssm() { aws ssm get-parameter --name \"$1\" --with-decryption --region '"$REGION"' --query Parameter.Value --output text 2>/dev/null || echo \"\"; }",
-    "AI_PROVIDER=$(get_ssm /marp-editor/ai-provider)",
-    "AI_MODEL=$(get_ssm /marp-editor/ai-model)",
-    "OPENROUTER_API_KEY=$(get_ssm /marp-editor/OPENROUTER_API_KEY)",
-    "OPENAI_API_KEY=$(get_ssm /marp-editor/OPENAI_API_KEY)",
-    "ANTHROPIC_API_KEY=$(get_ssm /marp-editor/ANTHROPIC_API_KEY)",
-    "GOOGLE_GENERATIVE_AI_API_KEY=$(get_ssm /marp-editor/GOOGLE_GENERATIVE_AI_API_KEY)",
-    "DOCKER_ENV=\"$BASE_DOCKER_ENV\"",
-    "[ -n \"$AI_PROVIDER\" ] && DOCKER_ENV=\"$DOCKER_ENV -e AI_PROVIDER=$AI_PROVIDER\"",
-    "[ -n \"$AI_MODEL\" ] && DOCKER_ENV=\"$DOCKER_ENV -e AI_MODEL=$AI_MODEL\"",
-    "[ -n \"$OPENROUTER_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e OPENROUTER_API_KEY=$OPENROUTER_API_KEY\"",
-    "[ -n \"$OPENAI_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e OPENAI_API_KEY=$OPENAI_API_KEY\"",
-    "[ -n \"$ANTHROPIC_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e ANTHROPIC_API_KEY=$ANTHROPIC_API_KEY\"",
-    "[ -n \"$GOOGLE_GENERATIVE_AI_API_KEY\" ] && DOCKER_ENV=\"$DOCKER_ENV -e GOOGLE_GENERATIVE_AI_API_KEY=$GOOGLE_GENERATIVE_AI_API_KEY\"",
-    "docker run -d --name marp-editor --restart=always --shm-size=512m --memory=1536m --user 1000:1000 --read-only --init -v /tmp:/tmp --tmpfs /home/bun:rw,noexec,nosuid,uid=1000,gid=1000,size=64m -p 3001:3001 --log-driver=awslogs --log-opt awslogs-region='"$REGION"' --log-opt awslogs-group=$LOG_GROUP --log-opt awslogs-stream=docker $DOCKER_ENV $ECR_URI:latest"
-  ]' \
+  --parameters 'commands=["systemctl restart marp-editor"]' \
   --region "$REGION" > /dev/null
 
 echo "Container update initiated (runs in background)"

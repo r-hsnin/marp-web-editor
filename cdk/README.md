@@ -15,7 +15,7 @@ CloudFront
     │
     └── /api/* → EC2 (Docker → Backend)
                       │
-                      └── docker --restart=always で自動再起動
+                      └── systemd で管理・自動再起動
 ```
 
 - **オンデマンド起動**: Lambda@Edge が停止中の EC2 を自動起動
