@@ -73,10 +73,7 @@ export const MainLayout: React.FC = () => {
 
         <div className="flex items-center gap-3">
           <TooltipProvider delayDuration={300}>
-            <div className="flex items-center gap-1 rounded-full border border-border/50 bg-secondary/30 p-1 backdrop-blur-sm">
-              <ModeToggle />
-            </div>
-
+            <ModeToggle />
             <ExportMenu />
           </TooltipProvider>
         </div>

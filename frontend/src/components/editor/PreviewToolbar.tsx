@@ -66,13 +66,13 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                 <Button
                   variant={viewMode === 'list' ? 'secondary' : 'ghost'}
                   size="icon"
-                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-primary hover:bg-background hover:shadow-sm"
                   onClick={() => setViewMode('list')}
                 >
                   <LayoutList className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>List View</TooltipContent>
+              <TooltipContent side="bottom">List View</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -80,13 +80,13 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                 <Button
                   variant={viewMode === 'slide' ? 'secondary' : 'ghost'}
                   size="icon"
-                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                  className="h-7 w-7 rounded-md text-muted-foreground hover:text-primary hover:bg-background hover:shadow-sm"
                   onClick={() => setViewMode('slide')}
                 >
                   <Presentation className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Slide View</TooltipContent>
+              <TooltipContent side="bottom">Slide View</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -131,7 +131,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
               <Button
                 variant="ghost"
                 size="icon"
-                className="h-7 w-7 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/50"
+                className="h-7 w-7 rounded-md text-muted-foreground hover:text-primary hover:bg-background hover:shadow-sm"
                 onClick={toggleFullscreen}
               >
                 {isFullscreen ? (
@@ -141,7 +141,9 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                 )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</TooltipContent>
+            <TooltipContent side="bottom">
+              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>

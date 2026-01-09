@@ -29,7 +29,7 @@ export const SlideList: React.FC<SlideListProps> = ({ slides, onSlideClick }) =>
             className="group/slide relative flex flex-col gap-3 transition-all duration-300 hover:scale-[1.02] cursor-pointer w-full text-left"
             onClick={() => onSlideClick(index)}
           >
-            <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-sm border border-border/40 bg-white transition-all duration-300 group-hover/slide:shadow-xl group-hover/slide:border-primary/20 group-hover/slide:ring-2 group-hover/slide:ring-primary/20">
+            <div className="relative aspect-video w-full overflow-hidden rounded-xl shadow-md border border-border/40 bg-white transition-all duration-300 group-hover/slide:shadow-xl group-hover/slide:border-primary/30 group-hover/slide:ring-2 group-hover/slide:ring-primary/30">
               <div
                 className="marp-content-isolated w-full h-full origin-top-left transform-gpu"
                 // biome-ignore lint/security/noDangerouslySetInnerHtml: Rendering Marp generated HTML
