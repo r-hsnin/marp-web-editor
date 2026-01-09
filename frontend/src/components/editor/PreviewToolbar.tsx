@@ -72,7 +72,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                   <LayoutList className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>List View</TooltipContent>
+              <TooltipContent side="bottom">List View</TooltipContent>
             </Tooltip>
 
             <Tooltip>
@@ -86,7 +86,7 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                   <Presentation className="h-3.5 w-3.5" />
                 </Button>
               </TooltipTrigger>
-              <TooltipContent>Slide View</TooltipContent>
+              <TooltipContent side="bottom">Slide View</TooltipContent>
             </Tooltip>
           </TooltipProvider>
         </div>
@@ -141,7 +141,9 @@ export const PreviewToolbar: React.FC<PreviewToolbarProps> = ({
                 )}
               </Button>
             </TooltipTrigger>
-            <TooltipContent>{isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}</TooltipContent>
+            <TooltipContent side="bottom">
+              {isFullscreen ? 'Exit Fullscreen' : 'Fullscreen'}
+            </TooltipContent>
           </Tooltip>
         </TooltipProvider>
       </div>

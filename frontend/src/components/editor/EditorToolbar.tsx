@@ -249,7 +249,7 @@ export const EditorToolbar: React.FC<EditorToolbarProps> = ({ view }) => {
                     {item.icon && <item.icon className="h-3.5 w-3.5" />}
                   </Button>
                 </TooltipTrigger>
-                <TooltipContent>{item.label}</TooltipContent>
+                <TooltipContent side="bottom">{item.label}</TooltipContent>
               </Tooltip>
             ),
           )}

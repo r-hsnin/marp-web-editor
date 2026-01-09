@@ -28,7 +28,9 @@ export const PaginationToggle: React.FC<PaginationToggleProps> = ({ enabled, onT
           <span className="sr-only">Toggle pagination</span>
         </Button>
       </TooltipTrigger>
-      <TooltipContent>{enabled ? 'Hide page numbers' : 'Show page numbers'}</TooltipContent>
+      <TooltipContent side="bottom">
+        {enabled ? 'Hide page numbers' : 'Show page numbers'}
+      </TooltipContent>
     </Tooltip>
   );
 };
