@@ -24,7 +24,7 @@ const proposeInsertSchema = z.object({
   newMarkdown: z
     .string()
     .describe(
-      'The markdown content for new slide(s). Use --- to separate multiple slides. Do NOT start with ---.',
+      'The markdown content for new slide(s). Use --- to separate multiple slides. Do NOT start with ---. Do NOT include frontmatter (marp: true, theme: xxx, etc.) - the editor handles this automatically.',
     ),
   reason: z.string().describe('Brief explanation for this insertion'),
 });
@@ -37,7 +37,7 @@ const proposeReplaceSchema = z.object({
   newMarkdown: z
     .string()
     .describe(
-      'The complete markdown content for the new presentation. Use --- to separate slides. Do NOT start with ---.',
+      'The complete markdown content for the new presentation. Use --- to separate slides. Do NOT start with ---. Do NOT include frontmatter (marp: true, theme: xxx, etc.) - the editor handles this automatically.',
     ),
   reason: z.string().describe('Brief explanation for this replacement'),
 });
