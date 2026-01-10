@@ -55,15 +55,13 @@ bun run cdk bootstrap
 |------|-----------|------|
 | `ENVIRONMENT` | prod | 環境名 |
 | `IDLE_MINUTES` | 15 | 自動停止までのアイドル時間（分） |
-| `AI_PROVIDER` | - | AI プロバイダー (openrouter/openai/anthropic/google/bedrock) |
-| `AI_MODEL` | - | AI モデル |
+| `AI_MODEL` | - | AI モデル (provider:model 形式、例: `openrouter:openai/gpt-4.1-mini`) |
 | `AI_API_KEY` | - | API キー |
 
 ### AI 機能を有効にする場合
 
 ```bash
-AI_PROVIDER=openrouter \
-AI_MODEL=openai/gpt-4.1-mini \
+AI_MODEL=openrouter:openai/gpt-4.1-mini \
 AI_API_KEY=sk-or-... \
 ./deploy.sh
 ```

@@ -104,7 +104,7 @@ marp-web-editor/
 ├── backend/            # Hono + Bun
 │   └── src/
 │       ├── routes/     # API endpoints (ai, export, themes, templates, images)
-│       ├── lib/ai/     # orchestrator, agents/, tools, config
+│       ├── lib/ai/     # registry, orchestrator, agents/, tools, config
 │       └── lib/marp.ts # Marp CLI wrapper (export)
 │   ├── themes/         # Custom theme CSS files
 │   ├── templates/      # Slide templates (.md + templates.json)

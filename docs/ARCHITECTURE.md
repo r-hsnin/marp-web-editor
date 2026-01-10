@@ -257,6 +257,7 @@ backend/
 │   │   │   ├── local.ts
 │   │   │   └── s3.ts
 │   │   └── ai/             # AI関連
+│   │       ├── registry.ts     # Provider Registry
 │   │       ├── config.ts       # モデル設定
 │   │       ├── orchestrator.ts # Intent分析・ルーティング
 │   │       ├── promptBuilder.ts # システムプロンプト構築
@@ -588,7 +589,8 @@ User Input → Orchestrator (Intent Analysis) → Specialist Agent → Tool Call
 
 ```
 backend/src/lib/ai/
-├── config.ts           # モデル設定 (gpt-4.1-mini)
+├── registry.ts         # Provider Registry (マルチプロバイダー対応)
+├── config.ts           # モデル設定
 ├── orchestrator.ts     # Intent分析・エージェントルーティング
 ├── tools.ts            # ツール定義
 └── agents/
@@ -631,8 +633,7 @@ cd backend && bun run dev
 ### Environment Variables
 
 Backend (`backend/.env`):
-- `AI_PROVIDER`: AIプロバイダー選択（openai / anthropic / google / bedrock / openrouter）
-- `AI_MODEL`: AIモデル（必須、例: `gpt-4.1-mini`, `openai/gpt-4.1-mini`）
+- `AI_MODEL`: AIモデル（provider:model 形式、例: `openrouter:openai/gpt-4.1-mini`）
 - `OPENROUTER_API_KEY`: OpenRouter API キー
 - `OPENAI_API_KEY`: OpenAI API キー
 - `ANTHROPIC_API_KEY`: Anthropic API キー

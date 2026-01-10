@@ -6,14 +6,14 @@ ENVIRONMENT="${ENVIRONMENT:-prod}"
 IDLE_MINUTES="${IDLE_MINUTES:-15}"
 
 # AI settings (optional)
-AI_PROVIDER="${AI_PROVIDER:-}"
+# AI_MODEL format: "provider:model" (e.g., "openrouter:openai/gpt-4.1-mini")
 AI_MODEL="${AI_MODEL:-}"
 AI_API_KEY="${AI_API_KEY:-}"
 
 cd "$(dirname "$0")"
 
 echo "=== Marp Editor - CDK Deploy ==="
-[ -n "$AI_PROVIDER" ] && echo "AI: $AI_PROVIDER / $AI_MODEL"
+[ -n "$AI_MODEL" ] && echo "AI: $AI_MODEL"
 echo ""
 
 # Helper function
@@ -28,11 +28,12 @@ get_output() {
 }
 
 # Register AI settings to Parameter Store (if provided)
-if [ -n "$AI_PROVIDER" ]; then
+if [ -n "$AI_MODEL" ]; then
   echo "Registering AI settings to Parameter Store..."
-  aws ssm put-parameter --name "/marp-editor/ai-provider" --value "$AI_PROVIDER" --type String --overwrite --region "$REGION" > /dev/null
   aws ssm put-parameter --name "/marp-editor/ai-model" --value "$AI_MODEL" --type String --overwrite --region "$REGION" > /dev/null
   if [ -n "$AI_API_KEY" ]; then
+    # Extract provider from AI_MODEL (e.g., "openrouter:openai/gpt-4.1-mini" -> "openrouter")
+    AI_PROVIDER="${AI_MODEL%%:*}"
     case "$AI_PROVIDER" in
       bedrock) ;; # No API key needed (uses IAM role)
       openrouter) KEY_NAME="OPENROUTER_API_KEY" ;;
