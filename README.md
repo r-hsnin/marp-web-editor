@@ -105,17 +105,14 @@ http://localhost:3000 を開く
 
 ### AI 機能
 
-`backend/.env` でプロバイダー、モデル、API キーを設定します。  
+`backend/.env` でモデルと API キーを設定します。  
 未設定の場合、AI ボタンは非表示になります。
 
 ```env
-# プロバイダー選択（必須）: openai / anthropic / google / bedrock / openrouter
-AI_PROVIDER=openrouter
+# モデル選択（provider:model 形式）
+AI_MODEL=openrouter:openai/gpt-4.1-mini
 
-# モデル選択（必須）
-AI_MODEL=openai/gpt-4.1-mini
-
-# 選択したプロバイダーの API キーを設定
+# 使用するプロバイダーの API キーを設定
 OPENROUTER_API_KEY=sk-or-...
 OPENAI_API_KEY=sk-...
 ANTHROPIC_API_KEY=sk-ant-...
@@ -125,6 +122,8 @@ GOOGLE_GENERATIVE_AI_API_KEY=...
 AWS_ACCESS_KEY_ID=...
 AWS_SECRET_ACCESS_KEY=...
 ```
+
+対応プロバイダー: `openai`, `anthropic`, `google`, `bedrock`, `openrouter`
 
 ### 画像ストレージ
 

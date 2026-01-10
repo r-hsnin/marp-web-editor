@@ -8,9 +8,10 @@ import { orchestrator } from '../lib/ai/orchestrator.js';
 import { chatSchema } from '../schemas/ai.js';
 
 function isAIAvailable(): boolean {
-  const provider = Bun.env.AI_PROVIDER || '';
-  const model = Bun.env.AI_MODEL || '';
-  if (!model) return false;
+  const modelId = Bun.env.AI_MODEL || '';
+  if (!modelId) return false;
+
+  const [provider] = modelId.split(':');
 
   switch (provider) {
     case 'openai':

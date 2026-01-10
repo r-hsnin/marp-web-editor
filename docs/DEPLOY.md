@@ -259,7 +259,7 @@ securityGroup.addIngressRule(cfPrefixList, ec2.Port.tcp(3001));
 ./deploy.sh
 
 # AI 設定を変更する場合
-AI_PROVIDER=openrouter AI_MODEL=... AI_API_KEY=... ./deploy.sh
+AI_MODEL=openrouter:openai/gpt-4.1-mini AI_API_KEY=... ./deploy.sh
 ```
 
 ---

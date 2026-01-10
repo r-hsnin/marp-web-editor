@@ -56,6 +56,7 @@ flowchart TD
 
 ```
 backend/src/lib/ai/
+├── registry.ts         # Provider Registry (multi-provider support)
 ├── config.ts           # Model configuration
 ├── orchestrator.ts     # Intent analysis & routing
 ├── promptBuilder.ts    # System prompt construction
@@ -70,17 +71,18 @@ backend/src/lib/ai/
 
 ## 3. Tech Stack
 
-AI SDK v5 を使用したマルチプロバイダー対応。
+AI SDK v5 の Provider Registry を使用したマルチプロバイダー対応。
 
-| Provider | Model Example |
-|----------|---------------|
-| openrouter | openai/gpt-4.1-mini, anthropic/claude-sonnet-4 |
-| openai | gpt-4.1-mini, gpt-4o |
-| anthropic | claude-sonnet-4-20250514 |
-| google | gemini-2.5-flash |
-| bedrock | anthropic.claude-sonnet-4-20250514-v1:0 |
+| AI_MODEL Example |
+|------------------|
+| `openrouter:openai/gpt-4.1-mini` |
+| `openrouter:anthropic/claude-sonnet-4` |
+| `openai:gpt-4.1-mini` |
+| `anthropic:claude-sonnet-4-20250514` |
+| `google:gemini-2.5-flash` |
+| `bedrock:anthropic.claude-sonnet-4-20250514-v1:0` |
 
-環境変数 `AI_PROVIDER` と `AI_MODEL` で設定。詳細は [ARCHITECTURE.md](./ARCHITECTURE.md#ai-integration) を参照。
+環境変数 `AI_MODEL` で設定（provider:model 形式）。詳細は [ARCHITECTURE.md](./ARCHITECTURE.md#ai-integration) を参照。
 
 ---
 

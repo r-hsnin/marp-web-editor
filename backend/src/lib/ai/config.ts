@@ -1,48 +1,29 @@
-import { bedrock } from '@ai-sdk/amazon-bedrock';
-import { anthropic } from '@ai-sdk/anthropic';
-import { google } from '@ai-sdk/google';
-import { openai } from '@ai-sdk/openai';
-import { openrouter } from '@openrouter/ai-sdk-provider';
 import type { LanguageModel } from 'ai';
+import { type ProviderModelId, registry } from './registry.js';
 
-export type ModelProvider = 'openai' | 'anthropic' | 'google' | 'bedrock' | 'openrouter' | '';
-
-const provider = (Bun.env.AI_PROVIDER || '') as ModelProvider;
-const modelId = Bun.env.AI_MODEL;
-const reasoningMaxTokens = Bun.env.AI_REASONING_MAX_TOKENS
-  ? Number.parseInt(Bun.env.AI_REASONING_MAX_TOKENS, 10)
-  : undefined;
+// Model ID format: "provider:model" (e.g., "openai:gpt-4o", "anthropic:claude-3-5-sonnet-20240620")
+const modelId = Bun.env.AI_MODEL as ProviderModelId | undefined;
 
 function getModel(): LanguageModel | null {
   if (!modelId) return null;
-
-  switch (provider) {
-    case 'openrouter':
-      return openrouter(modelId);
-    case 'openai':
-      return openai(modelId);
-    case 'anthropic':
-      return anthropic(modelId);
-    case 'google':
-      return google(modelId);
-    case 'bedrock':
-      return bedrock(modelId);
-    default:
-      return null;
-  }
+  return registry.languageModel(modelId);
 }
 
 export const aiModel = getModel();
 
 export function getRequiredModel(): LanguageModel {
   if (!aiModel) {
-    throw new Error('AI is not configured. Set AI_PROVIDER and AI_MODEL environment variables.');
+    throw new Error('AI is not configured. Set AI_MODEL environment variable.');
   }
   return aiModel;
 }
 
 // OpenRouter reasoning config (only applied when AI_REASONING_MAX_TOKENS is set)
+const reasoningMaxTokens = Bun.env.AI_REASONING_MAX_TOKENS
+  ? Number.parseInt(Bun.env.AI_REASONING_MAX_TOKENS, 10)
+  : undefined;
+
 export const providerOptions =
-  provider === 'openrouter' && reasoningMaxTokens
+  modelId?.startsWith('openrouter:') && reasoningMaxTokens
     ? { openrouter: { reasoning: { max_tokens: reasoningMaxTokens } } }
     : undefined;

@@ -29,8 +29,7 @@ cp backend/.env.example backend/.env
 ```
 
 主要な環境変数:
-- `AI_PROVIDER`: AIプロバイダー（openai / anthropic / google / bedrock / openrouter）
-- `AI_MODEL`: AIモデル（必須、例: `openai/gpt-4.1-mini`）
+- `AI_MODEL`: AIモデル（provider:model 形式、例: `openrouter:openai/gpt-4.1-mini`）
 - `IMAGE_STORAGE`: 画像ストレージ（local / s3）
 
 詳細は `backend/.env.example` を参照。
@@ -355,8 +354,7 @@ Error: OpenAI API key not found
 **API Key 未設定**:
 ```bash
 # .env ファイルを編集（OpenRouter の場合）
-AI_PROVIDER=openrouter
-AI_MODEL=openai/gpt-4.1-mini
+AI_MODEL=openrouter:openai/gpt-4.1-mini
 OPENROUTER_API_KEY=sk-or-...
 ```
 
