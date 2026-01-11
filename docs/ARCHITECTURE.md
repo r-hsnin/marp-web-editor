@@ -153,8 +153,8 @@ const client = hc<AppType>('/');
 
 | 技術 | バージョン | 用途 |
 |------|-----------|------|
-| **pino** | 9.7.0 | 構造化ログ、高速出力 |
-| **hono-pino** | 0.7.0 | Hono middleware統合 |
+| **pino** | 10.1.0 | 構造化ログ、高速出力 |
+| **hono-pino** | 0.10.3 | Hono middleware統合 |
 
 **ログレベル**: error / warn / info のみ（debug 不使用）
 
@@ -197,12 +197,13 @@ frontend/
 │   │   ├── ui/             # shadcn/ui コンポーネント
 │   │   ├── editor/         # エディタ関連
 │   │   │   ├── Editor.tsx
+│   │   │   ├── EditorPanel.tsx
+│   │   │   ├── PanelSwitcher.tsx
 │   │   │   ├── Preview.tsx
 │   │   │   ├── EditorToolbar.tsx
 │   │   │   ├── PreviewToolbar.tsx
 │   │   │   ├── ThemeSelector.tsx
 │   │   │   ├── TemplateSelector.tsx
-│   │   │   ├── AIFloatingButton.tsx
 │   │   │   ├── ImageUpload.tsx
 │   │   │   ├── SlideList.tsx
 │   │   │   ├── SlideView.tsx

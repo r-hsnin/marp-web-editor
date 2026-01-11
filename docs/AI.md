@@ -84,6 +84,13 @@ AI SDK v5 の Provider Registry を使用したマルチプロバイダー対応
 
 環境変数 `AI_MODEL` で設定（provider:model 形式）。詳細は [ARCHITECTURE.md](./ARCHITECTURE.md#ai-integration) を参照。
 
+### 環境変数
+
+| 変数 | 説明 |
+|------|------|
+| `AI_MODEL` | provider:model 形式（必須） |
+| `AI_REASONING_MAX_TOKENS` | OpenRouter reasoning モデル用の最大トークン数（オプション） |
+
 ---
 
 ## 4. Theme-Aware Generation

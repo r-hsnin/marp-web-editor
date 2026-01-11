@@ -120,7 +120,7 @@ bun run eval:view
 詳細は [AI-EVAL.md](./AI-EVAL.md) を参照。
 
 ---
-- `backend/tests/export.test.ts`: Marpエクスポート機能
+
 ## Troubleshooting
 
 ### Issue 1: Puppeteer "Browser is already running" (Windows)
