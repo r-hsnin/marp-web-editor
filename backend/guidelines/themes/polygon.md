@@ -1,5 +1,9 @@
 # Polygon Theme
 
+Modern geometric theme with clean layouts and flexible components.
+
+Best for: Business presentations, product demos, general purpose
+
 ## Available Classes
 
 ### cover
@@ -46,7 +50,7 @@ Right content
 </div>
 ```
 Use for: Comparisons, before/after, pros/cons
-CRITICAL: Empty lines required after opening `<div>` and before closing `</div>`
+Required: Empty lines after opening `<div>` and before closing `</div>`
 
 ### text-dense
 ```markdown
@@ -54,7 +58,8 @@ CRITICAL: Empty lines required after opening `<div>` and before closing `</div>`
 # Title
 Detailed text content...
 ```
-Use for: Reference material, detailed explanations (use sparingly)
+Use for: Reference material, detailed explanations
+Note: Best for supplementary content; balance with visual slides
 
 ### card
 ```markdown
@@ -81,5 +86,5 @@ Use for: Reference material, detailed explanations (use sparingly)
 
 </div>
 ```
-Use for: Multiple items, feature lists (1-3 cards)
-CRITICAL: Empty lines required after opening `<div>` and before closing `</div>`
+Use for: Multiple items, feature lists (1-3 cards recommended)
+Required: Empty lines after opening `<div>` and before closing `</div>`

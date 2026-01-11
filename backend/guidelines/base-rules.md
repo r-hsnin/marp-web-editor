@@ -12,9 +12,11 @@
 - Split complex concepts into multiple slides
 
 ### Title Rules
-- Use specific titles, not generic ones
-- BAD: "Results", "Summary", "Method"
-- GOOD: "Sales Increased 30%", "3 Key Takeaways"
+- Use specific titles that convey the main message
+- Examples:
+  - ✗ "Results" → ✓ "Sales Increased 30%"
+  - ✗ "Summary" → ✓ "3 Key Takeaways"
+  - ✗ "Method" → ✓ "How We Solved It"
 - Questions work well: "Why Do Projects Fail?"
 
 ### Heading Hierarchy
@@ -74,12 +76,12 @@ print("Hello")
 - Main points: Structured with bullets
 - Details: Smaller text or separate slides
 
-### Avoid These
-- More than 100 words per slide
-- Multiple messages in one slide
-- Generic titles ("Results", "Overview")
-- Too many emphasis (bold/italic)
-- Complex tables or dense data
+### Quality Checklist
+- Keep each slide under 100 words
+- Focus on ONE message per slide
+- Use specific, engaging titles
+- Limit bold/italic to key points only
+- Simplify tables; move dense data to separate slides
 
 ### Presentation Flow
 1. **Opening**: Cover slide with impact
@@ -87,7 +89,8 @@ print("Hello")
 3. **Closing**: Summary with clear takeaway
 
 ### Theme Class Usage
-- Special classes (cover, section, etc.): Max 20-30% of total slides
-- Don't use special classes consecutively
-- Default (no class) for regular content slides
+- Special classes (cover, section, etc.): Around 20-30% of slides as a guideline
+- Alternate special classes with default slides for visual rhythm
+- Use default (no class) for regular content slides
 - Match class to content purpose
+- Adjust ratio based on presentation content and style

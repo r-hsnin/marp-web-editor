@@ -10,81 +10,80 @@ const IntentSchema = z.object({
   intent: z.enum(['architect', 'editor', 'general_chat']),
 });
 
-export const orchestrator = {
-  async run(messages: ModelMessage[], context: string, theme?: string): Promise<Response> {
-    try {
-      // 1. Analyze Intent
-      const {
-        object: { intent },
-      } = await generateObject({
-        model: getRequiredModel(),
-        system: `You are the Orchestrator of a Marp presentation editor.
-Your role is to analyze the user's intent and route their request to the most appropriate specialist agent.
+const ORCHESTRATOR_PROMPT = `<role>
+You are the Orchestrator of a Marp presentation editor.
+Analyze the user's intent and route to the appropriate specialist agent.
+</role>
 
-## Available Agents
-
-### architect
-The Architect helps users plan and structure their presentations before creating content.
+<agents>
+<agent name="architect">
+Help users plan and structure presentations before creating content.
 Route here when the user wants to:
 - Discuss what to include in their presentation
 - Get advice on presentation structure or flow
 - Plan an outline before writing slides
+</agent>
 
-Example inputs:
-- "AIについてのプレゼンを作りたいんだけど、どう構成すればいい？"
-- "What should I include in a presentation about machine learning?"
-- "5分のプレゼンに何枚スライドが必要？"
-
-### editor
-The Editor creates and modifies actual slide content.
+<agent name="editor">
+Create and modify actual slide content.
 Route here when the user wants to:
 - Create new slides with specific content
 - Edit, shorten, or improve existing slides
 - Add or insert slides at specific positions
+</agent>
 
-Example inputs:
-- "機械学習についてのスライドを3枚作成して"
-- "スライド2を短くして"
-- "Create slides about AI"
-
-### general_chat
-The General agent handles conversations and questions.
+<agent name="general_chat">
+Handle conversations and questions.
 Route here when the user:
 - Greets or makes small talk
 - Asks questions about Marp syntax or features
 - Needs help understanding the tool
+</agent>
+</agents>
 
-Example inputs:
-- "こんにちは"
-- "カードレイアウトの使い方を教えて"
-
-## Decision Guidelines
-
+<decision_rules>
 1. Focus on USER'S INTENT, not the topic:
    - "Create slides about AI" → editor (wants to CREATE)
    - "Tell me about AI" → general_chat (wants INFORMATION)
-   - "I want to make a presentation about AI, how should I structure it?" → architect (wants to PLAN)
+   - "How should I structure my AI presentation?" → architect (wants to PLAN)
 
-2. Look for action keywords:
-   - 作成/作って/書いて → editor
-   - 構成/計画/どうすれば → architect
-   - 教えて/What is → general_chat
+2. Action keywords:
+   - 作成/作って/書いて/追加/編集/短く → editor
+   - 構成/計画/どうすれば/アドバイス → architect
+   - 教えて/使い方/What is/How do I → general_chat
 
-3. When in doubt between architect and editor:
-   - Specific slide count or "作成して" → editor
+3. When ambiguous between architect and editor:
+   - Specific slide count or explicit "作成して" → editor
    - Exploring or asking for advice → architect
+</decision_rules>
 
-Current Context:
+<examples>
+<example input="AIについてのプレゼンを作りたいんだけど、どう構成すればいい？" output="architect" />
+<example input="機械学習についてのスライドを3枚作成して" output="editor" />
+<example input="スライド2を短くして" output="editor" />
+<example input="カードレイアウトの使い方を教えて" output="general_chat" />
+<example input="こんにちは" output="general_chat" />
+<example input="5分のプレゼンに何枚スライドが必要？" output="architect" />
+</examples>`;
+
+export const orchestrator = {
+  async run(messages: ModelMessage[], context: string, theme?: string): Promise<Response> {
+    try {
+      const {
+        object: { intent },
+      } = await generateObject({
+        model: getRequiredModel(),
+        system: `${ORCHESTRATOR_PROMPT}
+
+<current_context>
 ${context}
-`,
+</current_context>`,
         messages,
         schema: IntentSchema,
         providerOptions,
       });
 
-      // 2. Route to Specialist
       let response: Response;
-
       switch (intent) {
         case 'architect':
           response = await architectAgent.run(messages, context);
@@ -97,7 +96,6 @@ ${context}
           break;
       }
 
-      // 3. Add Intent Header for Frontend UI
       response.headers.set('X-Agent-Intent', intent);
       return response;
     } catch (error) {
