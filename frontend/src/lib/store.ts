@@ -2,7 +2,8 @@ import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import { API_BASE } from './config';
 
-type MobileView = 'editor' | 'preview';
+type MobileView = 'editor' | 'preview' | 'ai';
+type ActivePanel = 'editor' | 'ai';
 
 interface EditorState {
   markdown: string;
@@ -11,9 +12,8 @@ interface EditorState {
   setTheme: (theme: string) => void;
   fontSize: number;
   setFontSize: (fontSize: number) => void;
-  isChatOpen: boolean;
-  openChat: () => void;
-  closeChat: () => void;
+  activePanel: ActivePanel;
+  setActivePanel: (panel: ActivePanel) => void;
   isAIAvailable: boolean;
   checkAIStatus: () => Promise<void>;
   mobileView: MobileView;
@@ -90,9 +90,8 @@ export const useEditorStore = create<EditorState>()(
       setTheme: (theme) => set({ theme }),
       fontSize: 14,
       setFontSize: (fontSize) => set({ fontSize }),
-      isChatOpen: false,
-      openChat: () => set({ isChatOpen: true }),
-      closeChat: () => set({ isChatOpen: false }),
+      activePanel: 'editor',
+      setActivePanel: (activePanel) => set({ activePanel }),
       isAIAvailable: false,
       checkAIStatus: async () => {
         try {

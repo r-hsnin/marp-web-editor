@@ -1,11 +1,11 @@
 import { getToolName, isToolUIPart, type ToolUIPart, type UIMessage } from 'ai';
-import { Bot, History, Plus, Send, Trash2 } from 'lucide-react';
+import { History, Plus, Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import { useMarpChat } from '../../hooks/useMarpChat';
 import { useChatStore } from '../../lib/chatStore';
-import { useThemeStore } from '../../lib/marp/themeStore';
+import { PanelSwitcher } from '../editor/PanelSwitcher';
 import {
   AlertDialog,
   AlertDialogAction,
@@ -99,7 +99,6 @@ function ChatContent() {
   const [input, setInput] = useState('');
   const [showClearConfirm, setShowClearConfirm] = useState(false);
   const [historyOpen, setHistoryOpen] = useState(false);
-  const { activeThemeId } = useThemeStore();
   const { createSession, activeSessionId } = useChatStore();
 
   useEffect(() => {
@@ -136,16 +135,20 @@ function ChatContent() {
 
   return (
     <div className="flex flex-col h-full bg-background">
-      <div className="p-4 pr-12 border-b border-border flex items-center gap-2">
-        <Bot className="w-5 h-5" />
-        <h2 className="font-semibold">Marp AI</h2>
-        <Badge variant="outline" className="text-xs">
-          theme: {activeThemeId}
-        </Badge>
+      <div className="h-10 px-3 border-b border-border/40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 flex items-center gap-2">
+        <span className="hidden md:inline text-[10px] font-bold text-muted-foreground/50 uppercase tracking-widest">
+          AI
+        </span>
         <div className="flex-1" />
+        <PanelSwitcher />
         <Sheet open={historyOpen} onOpenChange={setHistoryOpen}>
           <SheetTrigger asChild>
-            <Button variant="ghost" size="sm" className="h-7" title="Chat history">
+            <Button
+              variant="ghost"
+              size="sm"
+              className="h-7 text-muted-foreground hover:text-foreground"
+              title="Chat history"
+            >
               <History className="w-4 h-4 mr-1" />
               History
             </Button>

@@ -5,7 +5,6 @@ import { EditorView } from '@codemirror/view';
 import { githubLight } from '@uiw/codemirror-theme-github';
 import CodeMirror from '@uiw/react-codemirror';
 import React from 'react';
-import { AIFloatingButton } from '@/components/editor/AIFloatingButton';
 
 import { EditorToolbar } from '@/components/editor/EditorToolbar';
 import { useTheme } from '@/components/theme-provider';
@@ -47,14 +46,7 @@ const basicSetupOptions = {
 } as const;
 
 export const Editor: React.FC = () => {
-  const {
-    markdown: content,
-    setMarkdown,
-    fontSize,
-    openChat,
-    isAIAvailable,
-    checkAIStatus,
-  } = useEditorStore();
+  const { markdown: content, setMarkdown, fontSize } = useEditorStore();
   const { resolvedTheme } = useTheme();
   const [view, setView] = React.useState<EditorView | null>(null);
 
@@ -63,11 +55,6 @@ export const Editor: React.FC = () => {
   React.useLayoutEffect(() => {
     contentRef.current = content;
   }, [content]);
-
-  // Check AI availability on mount
-  React.useEffect(() => {
-    checkAIStatus();
-  }, [checkAIStatus]);
 
   // Extract content for display
   const displayContent = React.useMemo(() => {
@@ -94,7 +81,7 @@ export const Editor: React.FC = () => {
   return (
     <div className="flex flex-col h-full w-full overflow-hidden bg-background/50">
       <EditorToolbar view={view} />
-      <div className="flex-1 overflow-hidden relative group">
+      <div className="flex-1 overflow-hidden relative">
         <CodeMirror
           value={displayContent}
           height="100%"
@@ -106,10 +93,6 @@ export const Editor: React.FC = () => {
           style={{ fontSize: `${fontSize}px` }}
           basicSetup={basicSetupOptions}
         />
-
-        <div className="absolute bottom-6 right-6 z-50 md:opacity-0 md:group-hover:opacity-100 transition-opacity duration-300">
-          {isAIAvailable && <AIFloatingButton onClick={openChat} />}
-        </div>
       </div>
     </div>
   );
