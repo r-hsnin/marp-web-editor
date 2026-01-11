@@ -66,7 +66,7 @@ Note: H1 becomes command with $ prefix (e.g., "# npm install" → "$ npm install
 </div>
 ```
 Use for: Code with explanation side-by-side, before/after comparisons
-CRITICAL: Empty lines required after opening `<div>` and before closing `</div>`
+Required: Empty lines after opening `<div>` and before closing `</div>`
 
 ### highlight
 ```markdown
