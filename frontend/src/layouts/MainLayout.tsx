@@ -3,11 +3,11 @@ import { useEffect } from 'react';
 import { useMediaQuery } from 'usehooks-ts';
 import { ChatView } from '@/components/ai/ChatView';
 import { Editor } from '@/components/editor/Editor';
+import { EditorPanel } from '@/components/editor/EditorPanel';
 import { Preview } from '@/components/editor/Preview';
 import { Footer } from '@/components/Footer';
 import { ExportMenu } from '@/components/header/ExportMenu';
 import { ModeToggle } from '@/components/mode-toggle';
-import { Dialog, DialogContent, DialogDescription, DialogTitle } from '@/components/ui/dialog';
 import { ResizableHandle, ResizablePanel, ResizablePanelGroup } from '@/components/ui/resizable';
 import { ToggleGroup, ToggleGroupItem } from '@/components/ui/toggle-group';
 import { TooltipProvider } from '@/components/ui/tooltip';
@@ -19,7 +19,7 @@ import { useEditorStore } from '@/lib/store';
 
 export const MainLayout: React.FC = () => {
   const { setAvailableThemes } = useThemeStore();
-  const { isChatOpen, closeChat, mobileView, setMobileView } = useEditorStore();
+  const { mobileView, setMobileView, isAIAvailable, checkAIStatus } = useEditorStore();
   const isMobile = useMediaQuery('(max-width: 767px)');
 
   useEffect(() => {
@@ -27,6 +27,10 @@ export const MainLayout: React.FC = () => {
       .then(setAvailableThemes)
       .catch((err) => logger.warn('Failed to fetch themes:', err));
   }, [setAvailableThemes]);
+
+  useEffect(() => {
+    checkAIStatus();
+  }, [checkAIStatus]);
 
   return (
     <div className="flex h-screen w-screen flex-col overflow-hidden bg-background text-foreground font-sans selection:bg-primary/20">
@@ -51,23 +55,32 @@ export const MainLayout: React.FC = () => {
           <ToggleGroup
             type="single"
             value={mobileView}
-            onValueChange={(v: string) => v && setMobileView(v as 'editor' | 'preview')}
+            onValueChange={(v: string) => v && setMobileView(v as 'editor' | 'preview' | 'ai')}
             className="bg-muted rounded-lg p-1"
           >
             <ToggleGroupItem
               value="editor"
               aria-label="Editor mode"
-              className="rounded-md px-4 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
+              className="rounded-md px-3 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
             >
               Editor
             </ToggleGroupItem>
             <ToggleGroupItem
               value="preview"
               aria-label="Preview mode"
-              className="rounded-md px-4 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
+              className="rounded-md px-3 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
             >
               Preview
             </ToggleGroupItem>
+            {isAIAvailable && (
+              <ToggleGroupItem
+                value="ai"
+                aria-label="AI mode"
+                className="rounded-md px-3 py-1.5 text-sm data-[state=on]:bg-background data-[state=on]:shadow-sm"
+              >
+                AI
+              </ToggleGroupItem>
+            )}
           </ToggleGroup>
         )}
 
@@ -84,14 +97,16 @@ export const MainLayout: React.FC = () => {
         {isMobile ? (
           mobileView === 'editor' ? (
             <Editor />
-          ) : (
+          ) : mobileView === 'preview' ? (
             <Preview />
+          ) : (
+            <ChatView />
           )
         ) : (
           <ResizablePanelGroup orientation="horizontal" className="h-full w-full">
             <ResizablePanel defaultSize={50} minSize={30} className="bg-background flex flex-col">
               <div className="flex-1 relative overflow-hidden">
-                <Editor />
+                <EditorPanel />
               </div>
             </ResizablePanel>
 
@@ -110,18 +125,6 @@ export const MainLayout: React.FC = () => {
       </div>
 
       <Footer />
-
-      <Dialog open={isChatOpen} onOpenChange={closeChat}>
-        <DialogContent className="sm:max-w-5xl h-[85vh] flex flex-col p-0 gap-0 overflow-hidden">
-          <DialogTitle className="sr-only">AI Assistant</DialogTitle>
-          <DialogDescription className="sr-only">
-            Chat with AI Assistant to generate slides
-          </DialogDescription>
-          <div className="flex-1 min-h-0 flex flex-col">
-            <ChatView />
-          </div>
-        </DialogContent>
-      </Dialog>
     </div>
   );
 };

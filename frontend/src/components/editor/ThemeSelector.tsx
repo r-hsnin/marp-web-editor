@@ -21,7 +21,11 @@ export const ThemeSelector: React.FC = () => {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="ghost" size="sm" className="h-8 w-[140px] justify-between text-xs">
+        <Button
+          variant="ghost"
+          size="sm"
+          className="h-8 w-[140px] justify-between text-xs text-muted-foreground hover:text-foreground"
+        >
           <span className="truncate">
             {activeThemeId.charAt(0).toUpperCase() + activeThemeId.slice(1)}
           </span>
