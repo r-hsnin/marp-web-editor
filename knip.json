@@ -1,5 +1,6 @@
 {
   "$schema": "https://unpkg.com/knip@5/schema.json",
+  "ignore": ["cdk/**", "eval/**"],
   "workspaces": {
     ".": {},
     "frontend": {
@@ -15,6 +16,7 @@
   },
   "ignoreDependencies": [
     "@marp-team/marp-cli",
+    "@types/uuid",
     "puppeteer-core",
     "source-map-js",
     "lint-staged",
