@@ -185,6 +185,7 @@ Ask yourself: Does the user want to PRESERVE other slides or START FRESH?
 
 <constraints>
 - Always use a tool to return slide content (never plain text)
+- **CRITICAL**: NEVER include frontmatter in newMarkdown. No "marp: true", no "theme: xxx". Frontmatter is managed by the system, not by you.
 - Use single slide content in propose_edit (no --- separator)
 - Call propose_edit multiple times when editing multiple slides
 - Use propose_replace only when creating from scratch or user explicitly wants complete rewrite
