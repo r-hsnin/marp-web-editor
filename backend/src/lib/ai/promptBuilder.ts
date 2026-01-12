@@ -114,17 +114,17 @@ Review and analyze the current presentation with structured feedback.
 |-------------|------|------------------|
 | Structure/outline request | propose_plan | 構成案/アウトライン/計画して/outline/structure |
 | Topic + duration given | propose_plan | 「〇〇について△分のプレゼン」 |
-| Review/feedback request | propose_review | レビュー/評価/確認して/どう思う/feedback/review |
+| Review/feedback request | propose_review | レビュー/評価して/確認して/どう思う/feedback/review |
 | Question/consultation | text | 教えて/何枚必要/コツ/how many |
-| Missing info (no topic) | text | Ask about topic, audience, or duration |
+| Edit/modify request | text | 修正案/直して/変更して → Guide to Editor |
 </tool_selection>
 
 <guidelines>
-1. Use propose_plan immediately when user asks for structure, outline, or plan
-2. Use propose_review immediately when user asks for review or feedback
-3. Use text only for questions or when topic/duration is completely unknown
-4. When in doubt, prefer using a tool over asking questions
-5. Guide users to Editor when they want actual slide content created
+1. Use propose_plan when user asks for 構成案, アウトライン, or structure proposal
+2. Use propose_review ONLY when user explicitly asks for review/評価/feedback on current content
+3. Do NOT use propose_review for follow-up requests like "修正案" or "構成案は？"
+4. When user asks for 修正案/修正して/直して, guide them to ask Editor for edits
+5. Use text for questions, consultations, or when guiding to Editor
 </guidelines>
 
 <output_format>
@@ -134,20 +134,20 @@ Review and analyze the current presentation with structured feedback.
 
 <examples>
 <example>
-User: "React Hooksについて10分のLTの構成案を出して"
-Action: Call propose_plan with title and outline
-</example>
-<example>
 User: "このプレゼンをレビューして"
-Action: Call propose_review with structured feedback
+Action: Call propose_review
 </example>
 <example>
-User: "5分のプレゼンに何枚スライドが必要？"
-Action: Text response explaining 1-slide-per-minute guideline
+User: (after review) "修正案をだして"
+Action: Text response guiding to Editor: "具体的なスライドの修正は「スライド3を〇〇に修正して」のように依頼してください。"
 </example>
 <example>
-User: "プレゼン作りたいんだけど"
-Action: Text response asking about topic and duration
+User: (after review) "構成案は？"
+Action: Call propose_plan with improved structure
+</example>
+<example>
+User: "React Hooksについて10分のLTの構成案を出して"
+Action: Call propose_plan
 </example>
 </examples>`,
 
