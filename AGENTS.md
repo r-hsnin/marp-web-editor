@@ -89,8 +89,8 @@ Frontend (React) → Hono RPC → Backend (Hono/Bun)
 
 - Orchestrator Pattern: Intent analysis → Agent routing → Tool calling
 - Human-in-the-loop: Tools have no `execute` function, frontend handles Apply/Discard
-- Tools: `propose_edit`, `propose_insert`, `propose_replace`, `propose_plan`
-- Agents: `architect` (planning), `editor` (content), `general` (conversation)
+- Tools: `propose_edit`, `propose_insert`, `propose_replace`, `propose_plan`, `propose_review`
+- Agents: `architect` (planning/review), `editor` (content), `general` (conversation)
 
 ## Structure
 

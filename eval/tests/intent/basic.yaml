@@ -42,3 +42,13 @@
     - type: contains-json
     - type: javascript
       value: JSON.parse(output).intent === 'general_chat'
+
+
+- description: Review request → architect
+  vars:
+    userMessage: "このプレゼンをレビューして"
+    context: "[0] # AI入門\n\n概要\n\n[1] # まとめ"
+  assert:
+    - type: contains-json
+    - type: javascript
+      value: JSON.parse(output).intent === 'architect'

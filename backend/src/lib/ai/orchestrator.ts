@@ -52,7 +52,10 @@ Route here when the user:
    - 構成/計画/どうすれば/アドバイス → architect
    - 教えて/使い方/What is/How do I → general_chat
 
-3. When ambiguous between architect and editor:
+3. Review/feedback requests:
+   - レビュー/フィードバック/確認して/見て/どう思う → architect
+
+4. When ambiguous between architect and editor:
    - Specific slide count or explicit "作成して" → editor
    - Exploring or asking for advice → architect
 </decision_rules>
@@ -64,6 +67,9 @@ Route here when the user:
 <example input="カードレイアウトの使い方を教えて" output="general_chat" />
 <example input="こんにちは" output="general_chat" />
 <example input="5分のプレゼンに何枚スライドが必要？" output="architect" />
+<example input="このプレゼンをレビューして" output="architect" />
+<example input="構成に問題ないか確認して" output="architect" />
+<example input="スライドの内容を見てフィードバックください" output="architect" />
 </examples>`;
 
 export const orchestrator = {

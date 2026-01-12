@@ -51,6 +51,7 @@ flowchart TD
 | `propose_insert` | スライドの挿入 | ✅ Apply/Discard |
 | `propose_replace` | 全スライドの置換 | ✅ Apply/Discard |
 | `propose_plan` | プレゼンテーション構成の提案 | 情報提示のみ |
+| `propose_review` | スライドのレビュー・評価 | 情報提示のみ |
 
 ### 2.3 Backend Structure
 
@@ -61,8 +62,9 @@ backend/src/lib/ai/
 ├── orchestrator.ts     # Intent analysis & routing
 ├── promptBuilder.ts    # System prompt construction
 ├── tools.ts            # Tool definitions
+├── toolFormatter.ts    # Tool output to Markdown converter
 └── agents/
-    ├── architect.ts    # Slide structure planning
+    ├── architect.ts    # Slide structure planning & review
     ├── editor.ts       # Content creation/editing
     └── general.ts      # General conversation
 ```
@@ -200,6 +202,7 @@ const result = streamText({
 | Intent | Input Example | Expected Output |
 |--------|---------------|-----------------|
 | Architect | "AIについてのプレゼンを作りたい" | propose_plan ツール呼び出し |
+| Architect | "このスライドをレビューして" | propose_review ツール呼び出し |
 | Editor | "スライド2を短くして" | propose_edit ツール呼び出し |
 | Editor | "スライド2の後にまとめを追加して" | propose_insert ツール呼び出し |
 | Editor | "機械学習のスライドを3枚で作成して" | propose_replace ツール呼び出し |

@@ -146,3 +146,24 @@ eval/
 
 - [Promptfoo Documentation](https://promptfoo.dev/docs/)
 - [AI 機能ドキュメント](./AI.md)
+
+---
+
+## 対話型検証ツール
+
+Promptfoo とは別に、手動での対話型検証ツールを `backend/ai-eval/` に用意。
+
+```bash
+cd backend
+
+# 会話をリセット（テーマ指定可）
+bun run ai-eval/chat.ts --reset [theme]
+
+# メッセージ送信
+bun run ai-eval/chat.ts "構成案を考えて"
+
+# propose_* を自動で context に適用
+bun run ai-eval/chat.ts --auto-apply "スライドを作成して"
+```
+
+詳細は `backend/ai-eval/README.md` を参照。

@@ -89,8 +89,8 @@ print("Hello")
 3. **Closing**: Summary with clear takeaway
 
 ### Theme Class Usage
-- Special classes (cover, section, etc.): Around 20-30% of slides as a guideline
+- Only use classes defined in the Theme section (if provided)
+- If no Theme section is provided, do not use any special classes
+- Special classes: Around 20-30% of slides as a guideline
 - Alternate special classes with default slides for visual rhythm
 - Use default (no class) for regular content slides
-- Match class to content purpose
-- Adjust ratio based on presentation content and style

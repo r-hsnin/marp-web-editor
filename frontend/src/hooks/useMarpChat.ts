@@ -5,11 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChatStore } from '../lib/chatStore';
 import { API_BASE } from '../lib/config';
 import { logger } from '../lib/logger';
+import { FrontmatterProcessor } from '../lib/marp/frontmatterProcessor';
 import { useThemeStore } from '../lib/marp/themeStore';
 import { useEditorStore } from '../lib/store';
 
 function formatContextWithIndices(markdown: string): string {
-  const slides = markdown.split(/\n---\n/);
+  const { content } = FrontmatterProcessor.extractFrontmatter(markdown);
+  const slides = content.split(/\n---\n/);
   return slides.map((slide, i) => `[${i}]\n${slide.trim()}`).join('\n\n---\n\n');
 }
 
@@ -78,6 +80,17 @@ export function useMarpChat() {
     id: activeSessionId ?? undefined,
     messages: initialMessages,
     transport,
+    onToolCall: ({ toolCall }) => {
+      // Auto-complete informational tools (propose_plan, propose_review)
+      // Include input in output so LLM can reference past tool results
+      if (toolCall.toolName === 'propose_plan' || toolCall.toolName === 'propose_review') {
+        addToolOutput({
+          tool: toolCall.toolName as 'propose_plan',
+          toolCallId: toolCall.toolCallId,
+          output: JSON.stringify(toolCall.input),
+        });
+      }
+    },
     onFinish: (result: { message?: UIMessage } | UIMessage) => {
       const message = ('message' in result ? result.message : result) as UIMessage;
       const intent = currentIntentRef.current;
@@ -110,7 +123,7 @@ export function useMarpChat() {
     },
   });
 
-  const isStreaming = status !== 'ready';
+  const isStreaming = status === 'submitted' || status === 'streaming';
 
   const lastMessage = messages[messages.length - 1];
   const lastMessageHasVisibleContent =
@@ -186,17 +199,11 @@ export function useMarpChat() {
     (toolCallId: string, insertAfter: number, newMarkdown: string) => {
       const existingSlides = markdown.split(/\n---\n/);
       const cleanedMarkdown = newMarkdown.trim().replace(/^---\n/, '');
-      const newSlides = cleanedMarkdown.split(/\n---\n/);
+      const newSlides = cleanedMarkdown.split(/\n---\n/).map((s) => s.trim());
       const insertIndex = insertAfter + 1;
 
-      const formattedNewSlides = newSlides.map((s, i) => {
-        const isFirst = insertIndex === 0 && i === 0;
-        const prefix = isFirst ? '' : '\n';
-        return `${prefix}${s.trim()}\n`;
-      });
-
-      existingSlides.splice(insertIndex, 0, ...formattedNewSlides);
-      setMarkdown(existingSlides.join('\n---\n'));
+      existingSlides.splice(insertIndex, 0, ...newSlides);
+      setMarkdown(existingSlides.map((s) => s.trim()).join('\n\n---\n\n'));
 
       addToolOutput({
         tool: 'propose_insert',
