@@ -593,9 +593,11 @@ backend/src/lib/ai/
 ├── registry.ts         # Provider Registry (マルチプロバイダー対応)
 ├── config.ts           # モデル設定
 ├── orchestrator.ts     # Intent分析・エージェントルーティング
+├── promptBuilder.ts    # システムプロンプト構築
 ├── tools.ts            # ツール定義
+├── toolFormatter.ts    # ツール出力を Markdown 形式に変換
 └── agents/
-    ├── architect.ts    # 構成設計 (propose_plan)
+    ├── architect.ts    # 構成設計・レビュー (propose_plan, propose_review)
     ├── editor.ts       # 編集 (propose_edit, propose_insert, propose_replace)
     └── general.ts      # 会話・質問応答
 ```
@@ -608,6 +610,7 @@ backend/src/lib/ai/
 | `propose_insert` | スライドの挿入 | Frontend (Apply/Discard) |
 | `propose_replace` | 全スライドの置換 | Frontend (Apply/Discard) |
 | `propose_plan` | 構成提案 | Frontend (表示のみ) |
+| `propose_review` | スライドのレビュー・評価 | Frontend (表示のみ) |
 
 ### Frontend Integration
 
