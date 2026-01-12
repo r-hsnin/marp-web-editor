@@ -12,3 +12,18 @@
         const result = JSON.parse(output);
         const planCall = result.toolCalls?.find(t => t.name === 'propose_plan');
         return planCall && planCall.args?.title && planCall.args?.outline?.length > 0;
+
+
+- description: Review has score and improvements
+  vars:
+    userMessage: "このプレゼンをレビューして"
+    context: "[0] # AI入門\n\n概要です\n\n[1] # まとめ\n\n以上"
+  assert:
+    - type: is-json
+    - type: javascript
+      value: |
+        const result = JSON.parse(output);
+        const reviewCall = result.toolCalls?.find(t => t.name === 'propose_review');
+        return reviewCall && 
+          typeof reviewCall.args?.score === 'number' &&
+          Array.isArray(reviewCall.args?.improvements);

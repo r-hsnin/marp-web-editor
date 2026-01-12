@@ -86,8 +86,21 @@ export default class BackendApiProvider implements ApiProvider {
     const theme = vars.theme as string | undefined;
     const history = vars.history as Array<{ role: string; content: string }> | undefined;
 
-    // Build messages array with optional history
-    const messages = [...(history || []), { role: 'user', content: userMessage }];
+    // Build messages array with optional history (UIMessage format)
+    const messages = [
+      ...(history || []).map((h) => ({
+        id: crypto.randomUUID(),
+        role: h.role,
+        parts: [{ type: 'text', text: h.content }],
+        createdAt: new Date().toISOString(),
+      })),
+      {
+        id: crypto.randomUUID(),
+        role: 'user',
+        parts: [{ type: 'text', text: userMessage }],
+        createdAt: new Date().toISOString(),
+      },
+    ];
 
     try {
       const response = await fetch(`${API_BASE_URL}/api/ai/chat`, {
