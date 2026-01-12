@@ -199,17 +199,11 @@ export function useMarpChat() {
     (toolCallId: string, insertAfter: number, newMarkdown: string) => {
       const existingSlides = markdown.split(/\n---\n/);
       const cleanedMarkdown = newMarkdown.trim().replace(/^---\n/, '');
-      const newSlides = cleanedMarkdown.split(/\n---\n/);
+      const newSlides = cleanedMarkdown.split(/\n---\n/).map((s) => s.trim());
       const insertIndex = insertAfter + 1;
 
-      const formattedNewSlides = newSlides.map((s, i) => {
-        const isFirst = insertIndex === 0 && i === 0;
-        const prefix = isFirst ? '' : '\n';
-        return `${prefix}${s.trim()}\n`;
-      });
-
-      existingSlides.splice(insertIndex, 0, ...formattedNewSlides);
-      setMarkdown(existingSlides.join('\n---\n'));
+      existingSlides.splice(insertIndex, 0, ...newSlides);
+      setMarkdown(existingSlides.map((s) => s.trim()).join('\n\n---\n\n'));
 
       addToolOutput({
         tool: 'propose_insert',
