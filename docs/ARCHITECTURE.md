@@ -80,6 +80,7 @@ marp-web-editor/
 | **Tailwind CSS** | 4.1.17 | ユーティリティファーストCSS |
 | **shadcn/ui** | - | Radix UIベースの高品質コンポーネント |
 | **Lucide React** | 0.554.0 | アイコン |
+| **Framer Motion** | 12.26.1 | アニメーション |
 
 **Tailwind CSS v4**: `@tailwindcss/vite` プラグイン使用
 
