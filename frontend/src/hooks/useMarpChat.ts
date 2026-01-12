@@ -123,7 +123,7 @@ export function useMarpChat() {
     },
   });
 
-  const isStreaming = status !== 'ready';
+  const isStreaming = status === 'submitted' || status === 'streaming';
 
   const lastMessage = messages[messages.length - 1];
   const lastMessageHasVisibleContent =
