@@ -22,6 +22,7 @@ import { Input } from '../ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { InteractiveComponent } from './InteractiveComponent';
 import { ProposalCarousel } from './ProposalCarousel';
+import { ReviewCard } from './ReviewCard';
 
 function ChatHistory({ onClose }: { onClose: () => void }) {
   const { sessions, activeSessionId, switchSession, deleteSession, createSession } = useChatStore();
@@ -265,6 +266,22 @@ function ChatContent() {
                                   )}
                                 </ul>
                               </div>
+                            ) : toolName === 'propose_review' && part.input ? (
+                              <ReviewCard
+                                input={
+                                  part.input as {
+                                    score: number;
+                                    overview: string;
+                                    good: string[];
+                                    improvements: Array<{
+                                      slideIndex: number;
+                                      title: string;
+                                      problem: string;
+                                      suggestion: string;
+                                    }>;
+                                  }
+                                }
+                              />
                             ) : (
                               <>
                                 <div className="text-xs opacity-70 mb-1">Tool: {toolName}</div>

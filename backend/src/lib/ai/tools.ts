@@ -27,6 +27,22 @@ const proposePlanSchema = z.object({
   outline: z.array(z.string()).describe('List of slide titles/topics'),
 });
 
+const proposeReviewSchema = z.object({
+  score: z.number().min(1).max(5).describe('Overall rating (1-5)'),
+  overview: z.string().describe('Overall impression (1-2 sentences)'),
+  good: z.array(z.string()).describe('List of positive points'),
+  improvements: z
+    .array(
+      z.object({
+        slideIndex: z.number().describe('0-based index'),
+        title: z.string().describe('Slide title or topic'),
+        problem: z.string().describe('What needs improvement'),
+        suggestion: z.string().describe('Specific improvement suggestion'),
+      }),
+    )
+    .describe('List of improvements (only for slides with issues)'),
+});
+
 export const proposeEditTool = tool({
   description: 'Edit a specific existing slide. Call once per slide when editing multiple slides.',
   inputSchema: proposeEditSchema,
@@ -49,5 +65,11 @@ export const proposeReplaceTool = tool({
 export const proposePlanTool = tool({
   description: 'Propose presentation structure with title and slide outline.',
   inputSchema: proposePlanSchema,
+  outputSchema: z.string(),
+});
+
+export const proposeReviewTool = tool({
+  description: 'Review and analyze the current presentation structure and content.',
+  inputSchema: proposeReviewSchema,
   outputSchema: z.string(),
 });
