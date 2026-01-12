@@ -6,6 +6,7 @@ import { convertToModelMessages, type ModelMessage } from 'ai';
 import { Hono } from 'hono';
 import type { Env } from 'hono-pino';
 import { orchestrator } from '../lib/ai/orchestrator.js';
+import { formatToolOutput } from '../lib/ai/toolFormatter.js';
 import { chatSchema } from '../schemas/ai.js';
 
 function isAIAvailable(): boolean {
@@ -32,7 +33,6 @@ function isAIAvailable(): boolean {
 
 /**
  * Convert tool-call/tool-result messages to text format for LLM compatibility.
- * Some models (e.g., Gemini via OpenRouter) don't handle tool history well.
  */
 function flattenToolHistory(messages: ModelMessage[]): ModelMessage[] {
   const result: ModelMessage[] = [];
@@ -51,17 +51,16 @@ function flattenToolHistory(messages: ModelMessage[]): ModelMessage[] {
             const toolResult = nextMsg.content.find(
               (tr) => tr.type === 'tool-result' && tr.toolCallId === tc.toolCallId,
             );
-            const output =
+            const rawOutput =
               toolResult?.output?.type === 'json'
-                ? JSON.stringify(toolResult.output.value)
+                ? toolResult.output.value
                 : toolResult?.output?.value || '';
-            // Format as past action, not as a template to follow
-            return `(Previously executed ${tc.toolName} with result: ${output})`;
+            return formatToolOutput(tc.toolName, rawOutput);
           });
 
           result.push({
             role: 'assistant',
-            content: [...textParts, { type: 'text', text: toolTexts.join('\n') }],
+            content: [...textParts, { type: 'text', text: toolTexts.join('\n\n') }],
           });
           i++;
           continue;
