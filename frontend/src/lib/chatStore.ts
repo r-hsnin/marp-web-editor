@@ -20,7 +20,9 @@ interface ChatStore {
   getActiveSession: () => ChatSession | null;
 }
 
-const generateId = () => crypto.randomUUID();
+import { v4 as uuidv4 } from 'uuid';
+
+const generateId = () => uuidv4();
 
 const generateTitle = (messages: UIMessage[]): string => {
   const firstUserMessage = messages.find((m) => m.role === 'user');
