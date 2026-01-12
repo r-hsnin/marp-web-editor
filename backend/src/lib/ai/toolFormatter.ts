@@ -34,11 +34,19 @@ type ReplaceOutput = {
 };
 
 function formatPlan(output: PlanOutput): string {
-  const lines = ['## 提案した構成', '', `タイトル: ${output.title}`, '', '### スライド構成'];
-  output.outline.forEach((item, i) => {
-    const desc = item.description ? ` - ${item.description}` : '';
-    lines.push(`${i + 1}. ${item.title}${desc}`);
-  });
+  const lines = [
+    '## 提案した構成',
+    '',
+    `タイトル: ${output.title || '(未設定)'}`,
+    '',
+    '### スライド構成',
+  ];
+  if (output.outline) {
+    for (const [i, item] of output.outline.entries()) {
+      const desc = item.description ? ` - ${item.description}` : '';
+      lines.push(`${i + 1}. ${item.title}${desc}`);
+    }
+  }
   if (output.rationale) {
     lines.push('', `理由: ${output.rationale}`);
   }
@@ -46,19 +54,20 @@ function formatPlan(output: PlanOutput): string {
 }
 
 function formatReview(output: ReviewOutput): string {
-  const stars = '★'.repeat(output.score) + '☆'.repeat(5 - output.score);
-  const lines = ['## レビュー結果', '', `評価: ${stars} (${output.score}/5)`, '', output.overview];
-  if (output.good.length > 0) {
+  const score = output.score ?? 0;
+  const stars = '★'.repeat(score) + '☆'.repeat(5 - score);
+  const lines = ['## レビュー結果', '', `評価: ${stars} (${score}/5)`, '', output.overview || ''];
+  if (output.good?.length > 0) {
     lines.push('', '### 良い点');
     for (const g of output.good) {
       lines.push(`- ${g}`);
     }
   }
-  if (output.improvements.length > 0) {
+  if (output.improvements?.length > 0) {
     lines.push('', '### 改善点');
-    output.improvements.forEach((imp) => {
+    for (const imp of output.improvements) {
       lines.push(`- スライド${imp.slideIndex}「${imp.title}」: ${imp.problem} → ${imp.suggestion}`);
-    });
+    }
   }
   return lines.join('\n');
 }

@@ -55,7 +55,15 @@ function flattenToolHistory(messages: ModelMessage[]): ModelMessage[] {
               toolResult?.output?.type === 'json'
                 ? toolResult.output.value
                 : toolResult?.output?.value || '';
-            return formatToolOutput(tc.toolName, rawOutput);
+            // JSON 文字列の場合はパース、そうでなければ tool-call の input を使用
+            let parsedOutput: unknown;
+            if (typeof rawOutput === 'string' && rawOutput.startsWith('{')) {
+              parsedOutput = JSON.parse(rawOutput);
+            } else {
+              // output が JSON でない場合（Apply/Discard 後）は input を使用
+              parsedOutput = tc.input;
+            }
+            return formatToolOutput(tc.toolName, parsedOutput);
           });
 
           result.push({
