@@ -2,6 +2,7 @@ import { existsSync } from 'node:fs';
 import { homedir } from 'node:os';
 import { join } from 'node:path';
 import { zValidator } from '@hono/zod-validator';
+import { convertToModelMessages, type ModelMessage } from 'ai';
 import { Hono } from 'hono';
 import type { Env } from 'hono-pino';
 import { orchestrator } from '../lib/ai/orchestrator.js';
@@ -29,15 +30,49 @@ function isAIAvailable(): boolean {
   }
 }
 
-interface MessagePart {
-  type: string;
-  text?: string;
-}
+/**
+ * Convert tool-call/tool-result messages to text format for LLM compatibility.
+ * Some models (e.g., Gemini via OpenRouter) don't handle tool history well.
+ */
+function flattenToolHistory(messages: ModelMessage[]): ModelMessage[] {
+  const result: ModelMessage[] = [];
 
-interface InputMessage {
-  role: string;
-  content?: string | unknown;
-  parts?: MessagePart[];
+  for (let i = 0; i < messages.length; i++) {
+    const msg = messages[i];
+
+    if (msg.role === 'assistant' && Array.isArray(msg.content)) {
+      const toolCalls = msg.content.filter((p) => p.type === 'tool-call');
+      const textParts = msg.content.filter((p) => p.type === 'text');
+
+      if (toolCalls.length > 0) {
+        const nextMsg = messages[i + 1];
+        if (nextMsg?.role === 'tool' && Array.isArray(nextMsg.content)) {
+          const toolTexts = toolCalls.map((tc) => {
+            const toolResult = nextMsg.content.find(
+              (tr) => tr.type === 'tool-result' && tr.toolCallId === tc.toolCallId,
+            );
+            const output =
+              toolResult?.output?.type === 'json'
+                ? JSON.stringify(toolResult.output.value)
+                : toolResult?.output?.value || '';
+            // Format as past action, not as a template to follow
+            return `(Previously executed ${tc.toolName} with result: ${output})`;
+          });
+
+          result.push({
+            role: 'assistant',
+            content: [...textParts, { type: 'text', text: toolTexts.join('\n') }],
+          });
+          i++;
+          continue;
+        }
+      }
+    }
+
+    result.push(msg);
+  }
+
+  return result;
 }
 
 const aiRoute = new Hono<Env>();
@@ -51,36 +86,9 @@ aiRoute.post('/chat', zValidator('json', chatSchema), async (c) => {
   const { messages, context, theme } = c.req.valid('json');
 
   try {
-    // Convert UIMessage format (parts array) to CoreMessage format (content string)
-    const coreMessages = (messages as InputMessage[]).map((m) => {
-      let content: string;
-
-      // Handle UIMessage format with parts array
-      if (m.parts && Array.isArray(m.parts)) {
-        content = m.parts
-          .filter(
-            (part): part is MessagePart & { text: string } =>
-              part.type === 'text' && typeof part.text === 'string',
-          )
-          .map((part) => part.text)
-          .join('');
-      }
-      // Handle legacy format with content string
-      else if (typeof m.content === 'string') {
-        content = m.content;
-      }
-      // Fallback
-      else {
-        content = JSON.stringify(m.content || m);
-      }
-
-      return {
-        role: m.role as 'user' | 'assistant' | 'system',
-        content: content,
-      };
-    });
-
-    return await orchestrator.run(coreMessages, context, theme);
+    const modelMessages = await convertToModelMessages(messages);
+    const flattenedMessages = flattenToolHistory(modelMessages);
+    return await orchestrator.run(flattenedMessages, context, theme);
   } catch (error) {
     c.var.logger.error({ err: error }, 'AI processing failed');
     const message = error instanceof Error ? error.message : String(error);

@@ -78,6 +78,17 @@ export function useMarpChat() {
     id: activeSessionId ?? undefined,
     messages: initialMessages,
     transport,
+    onToolCall: ({ toolCall }) => {
+      // Auto-complete informational tools (propose_plan, propose_review)
+      // Include input in output so LLM can reference past tool results
+      if (toolCall.toolName === 'propose_plan' || toolCall.toolName === 'propose_review') {
+        addToolOutput({
+          tool: toolCall.toolName as 'propose_plan',
+          toolCallId: toolCall.toolCallId,
+          output: JSON.stringify(toolCall.input),
+        });
+      }
+    },
     onFinish: (result: { message?: UIMessage } | UIMessage) => {
       const message = ('message' in result ? result.message : result) as UIMessage;
       const intent = currentIntentRef.current;
