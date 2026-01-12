@@ -33,6 +33,7 @@
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "embla-carousel-react": "^8.6.0",
+    "framer-motion": "^12.26.1",
     "hono": "^4.11.3",
     "loglevel": "^1.9.2",
     "lucide-react": "^0.562.0",

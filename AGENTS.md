@@ -58,6 +58,7 @@ Frontend (React) → Hono RPC → Backend (Hono/Bun)
 
 - Dark Mode by default
 - shadcn/ui components (Radix UI based)
+- Framer Motion for animations (GPU-accelerated: opacity, transform only)
 - Inter font family
 - Semantic color variables (`bg-background`, `text-foreground`)
 

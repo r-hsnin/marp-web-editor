@@ -1,4 +1,5 @@
 import browser from '@marp-team/marp-core/browser';
+import { motion } from 'framer-motion';
 import type React from 'react';
 import { useEffect, useRef } from 'react';
 import type { Slide } from '@/hooks/useSlides';
@@ -7,6 +8,19 @@ interface SlideListProps {
   slides: Slide[];
   onSlideClick: (index: number) => void;
 }
+
+const containerVariants = {
+  hidden: { opacity: 0 },
+  visible: {
+    opacity: 1,
+    transition: { staggerChildren: 0.05 },
+  },
+};
+
+const itemVariants = {
+  hidden: { opacity: 0, y: 12 },
+  visible: { opacity: 1, y: 0 },
+};
 
 export const SlideList: React.FC<SlideListProps> = ({ slides, onSlideClick }) => {
   const containerRef = useRef<HTMLDivElement>(null);
@@ -20,11 +34,17 @@ export const SlideList: React.FC<SlideListProps> = ({ slides, onSlideClick }) =>
 
   return (
     <div ref={containerRef} className="max-w-6xl mx-auto p-8">
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
+      <motion.div
+        className="grid grid-cols-1 md:grid-cols-2 gap-8"
+        variants={containerVariants}
+        initial="hidden"
+        animate="visible"
+      >
         {slides.map((slide, index) => (
-          <button
+          <motion.button
             // biome-ignore lint/suspicious/noArrayIndexKey: Index is stable enough for this list
             key={index}
+            variants={itemVariants}
             type="button"
             className="group/slide relative flex flex-col gap-3 transition-all duration-300 hover:scale-[1.02] cursor-pointer w-full text-left"
             onClick={() => onSlideClick(index)}
@@ -42,9 +62,9 @@ export const SlideList: React.FC<SlideListProps> = ({ slides, onSlideClick }) =>
                 Slide {index + 1}
               </span>
             </div>
-          </button>
+          </motion.button>
         ))}
-      </div>
+      </motion.div>
     </div>
   );
 };
