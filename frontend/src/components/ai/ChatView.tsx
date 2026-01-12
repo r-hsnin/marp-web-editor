@@ -1,4 +1,5 @@
 import { getToolName, isToolUIPart, type ToolUIPart, type UIMessage } from 'ai';
+import { AnimatePresence, motion } from 'framer-motion';
 import { History, Plus, Send, Trash2 } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import ReactMarkdown from 'react-markdown';
@@ -172,135 +173,160 @@ function ChatContent() {
             How can I help you with your presentation today?
           </div>
         )}
-        {messages.map((m: UIMessage) => {
-          const parts = m.parts ?? [];
-          const hasTextContent = parts.some((part) => part.type === 'text' && part.text);
-          const hasToolContent = parts.some((part) => isToolUIPart(part));
-          if (!hasTextContent && !hasToolContent && m.role === 'assistant') {
-            return null;
-          }
+        <AnimatePresence initial={false}>
+          {messages.map((m: UIMessage) => {
+            const parts = m.parts ?? [];
+            const hasTextContent = parts.some((part) => part.type === 'text' && part.text);
+            const hasToolContent = parts.some((part) => isToolUIPart(part));
+            if (!hasTextContent && !hasToolContent && m.role === 'assistant') {
+              return null;
+            }
 
-          return (
-            <div
-              key={m.id}
-              className={`flex flex-col gap-1 ${m.role === 'user' ? 'items-end' : 'items-start'}`}
-            >
-              <div
-                className={`p-3 rounded-lg max-w-[85%] text-sm ${
-                  m.role === 'user'
-                    ? 'bg-primary text-primary-foreground'
-                    : 'bg-muted text-foreground'
-                }`}
+            return (
+              <motion.div
+                key={m.id}
+                initial={{ opacity: 0, y: 10 }}
+                animate={{ opacity: 1, y: 0 }}
+                transition={{ duration: 0.2 }}
+                className={`flex flex-col gap-1 ${m.role === 'user' ? 'items-end' : 'items-start'}`}
               >
-                {m.role === 'assistant' && agentIntents[m.id] && (
-                  <div className="mb-2">
-                    <Badge
-                      variant="secondary"
-                      className="text-[10px] px-1.5 py-0 h-5 bg-background/50 hover:bg-background/60 border-0"
-                    >
-                      {agentIntents[m.id].charAt(0).toUpperCase() + agentIntents[m.id].slice(1)}
-                    </Badge>
-                  </div>
-                )}
-                {(() => {
-                  const textParts = parts.filter((p) => p.type === 'text');
-                  const toolParts = parts.filter((p) => isToolUIPart(p)) as ToolUIPart[];
-                  const proposalTools = toolParts.filter((p) => {
-                    const name = getToolName(p);
+                <div
+                  className={`p-3 rounded-lg max-w-[85%] text-sm ${
+                    m.role === 'user'
+                      ? 'bg-primary text-primary-foreground'
+                      : 'bg-muted text-foreground'
+                  }`}
+                >
+                  {m.role === 'assistant' && agentIntents[m.id] && (
+                    <div className="mb-2">
+                      <Badge
+                        variant="secondary"
+                        className="text-[10px] px-1.5 py-0 h-5 bg-background/50 hover:bg-background/60 border-0"
+                      >
+                        {agentIntents[m.id].charAt(0).toUpperCase() + agentIntents[m.id].slice(1)}
+                      </Badge>
+                    </div>
+                  )}
+                  {(() => {
+                    const textParts = parts.filter((p) => p.type === 'text');
+                    const toolParts = parts.filter((p) => isToolUIPart(p)) as ToolUIPart[];
+                    const proposalTools = toolParts.filter((p) => {
+                      const name = getToolName(p);
+                      return (
+                        name === 'propose_edit' ||
+                        name === 'propose_insert' ||
+                        name === 'propose_replace'
+                      );
+                    });
+                    const otherTools = toolParts.filter((p) => {
+                      const name = getToolName(p);
+                      return (
+                        name !== 'propose_edit' &&
+                        name !== 'propose_insert' &&
+                        name !== 'propose_replace'
+                      );
+                    });
+
                     return (
-                      name === 'propose_edit' ||
-                      name === 'propose_insert' ||
-                      name === 'propose_replace'
-                    );
-                  });
-                  const otherTools = toolParts.filter((p) => {
-                    const name = getToolName(p);
-                    return (
-                      name !== 'propose_edit' &&
-                      name !== 'propose_insert' &&
-                      name !== 'propose_replace'
-                    );
-                  });
-
-                  return (
-                    <>
-                      {textParts.map((part) => (
-                        <div
-                          key={`text-${part.type === 'text' ? part.text.slice(0, 20) : ''}`}
-                          className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]"
-                        >
-                          <ReactMarkdown remarkPlugins={[remarkGfm]}>
-                            {part.type === 'text' ? part.text : ''}
-                          </ReactMarkdown>
-                        </div>
-                      ))}
-
-                      {proposalTools.length > 0 && (
-                        <ProposalCarousel
-                          proposals={proposalTools}
-                          onApplyEdit={handleApplyProposal}
-                          onApplyInsert={handleApplyInsertProposal}
-                          onApplyReplace={handleApplyReplaceProposal}
-                          onApplyAll={handleApplyAllProposals}
-                          onDiscard={handleDiscardProposal}
-                          getSlideContent={getSlideContent}
-                        />
-                      )}
-
-                      {otherTools.map((part) => {
-                        const toolName = getToolName(part);
-                        return (
-                          <div key={part.toolCallId} className="mt-2 w-full">
-                            {toolName === 'propose_plan' && part.input ? (
-                              <PlanCard
-                                input={
-                                  part.input as {
-                                    title: string;
-                                    outline: Array<{ title: string; description?: string }>;
-                                    rationale?: string;
-                                  }
-                                }
-                              />
-                            ) : toolName === 'propose_review' && part.input ? (
-                              <ReviewCard
-                                input={
-                                  part.input as {
-                                    score: number;
-                                    overview: string;
-                                    good: string[];
-                                    improvements: Array<{
-                                      slideIndex: number;
-                                      title: string;
-                                      problem: string;
-                                      suggestion: string;
-                                    }>;
-                                  }
-                                }
-                              />
-                            ) : (
-                              <>
-                                <div className="text-xs opacity-70 mb-1">Tool: {toolName}</div>
-                                {part.state === 'output-available' ? (
-                                  <InteractiveComponent toolName={toolName} data={part.output} />
-                                ) : (
-                                  <div className="animate-pulse text-xs">Running...</div>
-                                )}
-                              </>
-                            )}
+                      <>
+                        {textParts.map((part) => (
+                          <div
+                            key={`text-${part.type === 'text' ? part.text.slice(0, 20) : ''}`}
+                            className="prose prose-sm max-w-none [--tw-prose-body:inherit] [--tw-prose-headings:inherit] [--tw-prose-bold:inherit] [--tw-prose-code:inherit]"
+                          >
+                            <ReactMarkdown remarkPlugins={[remarkGfm]}>
+                              {part.type === 'text' ? part.text : ''}
+                            </ReactMarkdown>
                           </div>
-                        );
-                      })}
-                    </>
-                  );
-                })()}
-              </div>
-            </div>
-          );
-        })}
+                        ))}
+
+                        {proposalTools.length > 0 && (
+                          <ProposalCarousel
+                            proposals={proposalTools}
+                            onApplyEdit={handleApplyProposal}
+                            onApplyInsert={handleApplyInsertProposal}
+                            onApplyReplace={handleApplyReplaceProposal}
+                            onApplyAll={handleApplyAllProposals}
+                            onDiscard={handleDiscardProposal}
+                            getSlideContent={getSlideContent}
+                          />
+                        )}
+
+                        {otherTools.map((part) => {
+                          const toolName = getToolName(part);
+                          return (
+                            <div key={part.toolCallId} className="mt-2 w-full">
+                              {toolName === 'propose_plan' && part.input ? (
+                                <PlanCard
+                                  input={
+                                    part.input as {
+                                      title: string;
+                                      outline: Array<{ title: string; description?: string }>;
+                                      rationale?: string;
+                                    }
+                                  }
+                                />
+                              ) : toolName === 'propose_review' && part.input ? (
+                                <ReviewCard
+                                  input={
+                                    part.input as {
+                                      score: number;
+                                      overview: string;
+                                      good: string[];
+                                      improvements: Array<{
+                                        slideIndex: number;
+                                        title: string;
+                                        problem: string;
+                                        suggestion: string;
+                                      }>;
+                                    }
+                                  }
+                                />
+                              ) : (
+                                <>
+                                  <div className="text-xs opacity-70 mb-1">Tool: {toolName}</div>
+                                  {part.state === 'output-available' ? (
+                                    <InteractiveComponent toolName={toolName} data={part.output} />
+                                  ) : (
+                                    <div className="animate-pulse text-xs">Running...</div>
+                                  )}
+                                </>
+                              )}
+                            </div>
+                          );
+                        })}
+                      </>
+                    );
+                  })()}
+                </div>
+              </motion.div>
+            );
+          })}
+        </AnimatePresence>
         {isThinking && (
-          <div className="flex items-start gap-2">
-            <div className="bg-muted p-3 rounded-lg text-sm animate-pulse">Thinking...</div>
-          </div>
+          <motion.div
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            className="flex items-start gap-2"
+          >
+            <div className="bg-muted p-3 rounded-lg text-sm flex items-center gap-1">
+              <span>Thinking</span>
+              <span className="flex gap-0.5">
+                {[0, 1, 2].map((i) => (
+                  <motion.span
+                    key={i}
+                    className="w-1 h-1 bg-current rounded-full"
+                    animate={{ y: [0, -3, 0] }}
+                    transition={{
+                      duration: 0.5,
+                      repeat: Infinity,
+                      delay: i * 0.15,
+                    }}
+                  />
+                ))}
+              </span>
+            </div>
+          </motion.div>
         )}
       </div>
 
