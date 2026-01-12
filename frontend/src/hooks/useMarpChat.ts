@@ -5,11 +5,13 @@ import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useChatStore } from '../lib/chatStore';
 import { API_BASE } from '../lib/config';
 import { logger } from '../lib/logger';
+import { FrontmatterProcessor } from '../lib/marp/frontmatterProcessor';
 import { useThemeStore } from '../lib/marp/themeStore';
 import { useEditorStore } from '../lib/store';
 
 function formatContextWithIndices(markdown: string): string {
-  const slides = markdown.split(/\n---\n/);
+  const { content } = FrontmatterProcessor.extractFrontmatter(markdown);
+  const slides = content.split(/\n---\n/);
   return slides.map((slide, i) => `[${i}]\n${slide.trim()}`).join('\n\n---\n\n');
 }
 
