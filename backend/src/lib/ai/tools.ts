@@ -11,20 +11,32 @@ const proposeInsertSchema = z.object({
   insertAfter: z.number().describe('Insert after this index. Use -1 for beginning.'),
   newMarkdown: z
     .string()
-    .describe('Markdown for new slides. Use --- between slides. Omit frontmatter.'),
+    .describe(
+      'Markdown for new slides. Use --- between slides. NEVER include frontmatter (marp/theme).',
+    ),
   reason: z.string().describe('Brief explanation for insertion'),
 });
 
 const proposeReplaceSchema = z.object({
   newMarkdown: z
     .string()
-    .describe('Complete presentation markdown. Use --- between slides. Omit frontmatter.'),
+    .describe(
+      'Complete presentation markdown. Use --- between slides. NEVER include frontmatter (marp/theme).',
+    ),
   reason: z.string().describe('Brief explanation for replacement'),
 });
 
 const proposePlanSchema = z.object({
   title: z.string().describe('Presentation title'),
-  outline: z.array(z.string()).describe('List of slide titles/topics'),
+  outline: z
+    .array(
+      z.object({
+        title: z.string().describe('Slide title'),
+        description: z.string().optional().describe('Brief description of slide content'),
+      }),
+    )
+    .describe('Slide outline'),
+  rationale: z.string().optional().describe('Brief explanation of why this structure works'),
 });
 
 const proposeReviewSchema = z.object({

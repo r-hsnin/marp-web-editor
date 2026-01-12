@@ -21,6 +21,7 @@ import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger } from '../ui/sheet';
 import { InteractiveComponent } from './InteractiveComponent';
+import { PlanCard } from './PlanCard';
 import { ProposalCarousel } from './ProposalCarousel';
 import { ReviewCard } from './ReviewCard';
 
@@ -251,21 +252,15 @@ function ChatContent() {
                         return (
                           <div key={part.toolCallId} className="mt-2 w-full">
                             {toolName === 'propose_plan' && part.input ? (
-                              <div className="p-3 border rounded-lg bg-muted/50">
-                                <div className="font-semibold text-sm mb-2">
-                                  {(part.input as { title?: string }).title ?? 'Planning...'}
-                                </div>
-                                <ul className="text-xs space-y-1">
-                                  {((part.input as { outline?: string[] }).outline ?? []).map(
-                                    (item, i) => (
-                                      // biome-ignore lint/suspicious/noArrayIndexKey: Outline order is stable
-                                      <li key={i} className="pl-2 border-l-2 border-primary/50">
-                                        {item}
-                                      </li>
-                                    ),
-                                  )}
-                                </ul>
-                              </div>
+                              <PlanCard
+                                input={
+                                  part.input as {
+                                    title: string;
+                                    outline: Array<{ title: string; description?: string }>;
+                                    rationale?: string;
+                                  }
+                                }
+                              />
                             ) : toolName === 'propose_review' && part.input ? (
                               <ReviewCard
                                 input={
